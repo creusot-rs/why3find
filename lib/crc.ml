@@ -222,7 +222,7 @@ let rec of_json (js : Json.t) : crc =
 (* -------------------------------------------------------------------------- *)
 
 let equivalent ~period t0 t1 =
-  Utils.scale ~period t0 = Utils.scale ~period t1
+  abs_float (t0 -. t1) <= 0.5 *. Utils.scale ~period (max t0 t1)
 
 let update ?(complete=true) ?(period=1.0) ?(hint=Stuck) result =
   let rec merge h r =
