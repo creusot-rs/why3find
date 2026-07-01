@@ -708,14 +708,19 @@ let () = register ~name:"doc" ~args:"[OPTIONS] PATH..."
 let () = register ~name:"print" ~args:"[OPTIONS] PATH..."
     begin fun argv ->
       let files = ref [] in
+      let modules = ref true in
       parse argv
-        (Wenv.options ~packages:true ())
+        begin
+          Wenv.options ~packages:true () @
+          [ "-t" , Arg.Clear modules , "print theories" ;
+            "-m" , Arg.Set modules , "print modules" ]
+        end
         (fun f -> files := f :: !files)
         "USAGE:\n\
          \n  why3find print [OPTIONS] PATH...\n\n\
          DESCRIPTION:\n\
          \n  Print Why3 theories and modules internal representation.\
-         \n\
+         \n\n\
          OPTIONS:\n" ;
       let files = if !files = [] then ["."] else !files in
       let files = Wenv.argfiles ~exts:[".md";".mlw"] @@ List.rev files in
@@ -734,9 +739,9 @@ let () = register ~name:"print" ~args:"[OPTIONS] PATH..."
                  (* -------------------------------------------- *)@\n@."
                 (String.concat "." fullpath) ;
               match Why3.Pmodule.restore_module thy with
-              | pm ->
+              | pm when !modules ->
                 Format.printf "%a@\n@." Wutil.pp_module pm
-              | exception Not_found ->
+              | _ | exception Not_found ->
                 Format.printf "%a@\n@." Wutil.pp_theory thy
             end
         end files
