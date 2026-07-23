@@ -81,6 +81,8 @@ type env = {
   mutable opened : string list ; (* opening keywords *)
   mutable scopes : string list ; (* opened scopes *)
   mutable section : int ; (* code foldable section depth *)
+  mutable active : bool ; (* code default active section*)
+  mutable context : bool list ; (* active section stack *)
 }
 
 let bsync ?wanted env =
@@ -765,7 +767,10 @@ let pp_active fmt b =
 
 let process_open_section env ~active title =
   text env ;
+  let active = if active then env.active else not env.active in
   env.section <- succ env.section ;
+  env.context <- env.active :: env.context ;
+  env.active <- active ;
   Pdoc.printf env.out
     "<span class=\"section level%d\">\
      <span class=\"comment\">{</span>\
@@ -777,6 +782,8 @@ let process_open_section env ~active title =
 
 let process_close_section env title =
   env.section <- pred env.section ;
+  env.active <- List.hd env.context ;
+  env.context <- List.tl env.context ;
   text env ;
   Pdoc.printf env.out
     "<span class=\"comment\">{</span>\
@@ -1137,7 +1144,7 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
       proof_href = 0 ;
       declared = Sid.empty ;
       opened = [] ; scopes = [] ;
-      section = 0 ;
+      section = 0 ; active = true ; context = [] ;
     } in
     chapter ~href ~title () ;
     Pdoc.printf env.out
@@ -1172,7 +1179,7 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
     cloning = Cloning.init ; cloned = 0 ;
     proof_href = 0 ;
     declared = Sid.empty ;
-    opened = [] ; scopes = [] ; section = 0 ;
+    opened = [] ; scopes = [] ; section = 0 ; active = true ; context = [] ;
   } in
   begin
     chapter ~src ~href ~title () ;
