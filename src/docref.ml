@@ -425,7 +425,8 @@ let find_decl wenv (src:source) (id : Id.id) =
     if id.id_lib = src.lib then
       (Mstr.find id.id_mod src.theories).theory
     else
-      Why3.Env.read_theory wenv id.id_lib id.id_mod
+      try Why3.Env.read_theory wenv id.id_lib id.id_mod
+      with _ -> raise Not_found
   in Id.find thy id.self
 
 let lookup ~scope ~theories kind m qid =
@@ -470,7 +471,7 @@ let reference ~wenv ~src ~current r =
   else
     let thy =
       try Why3.Env.read_theory wenv lp m
-      with Not_found ->
+      with _ ->
         Utils.failwith "unknown theory or module '%s.%s'"
           (String.concat "." lp) m
     in
