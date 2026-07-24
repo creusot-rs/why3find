@@ -237,12 +237,15 @@ let allfiles ?exts f path =
     ~ignored:(fun p -> ignored p && p <> path)
     path
 
-let argfiles ?exts files = move_to_root () ;
-  let paths = ref [] in
-  List.iter
-    (fun f -> allfiles ?exts (fun p -> paths := p :: !paths) (arg1 f))
-    files ;
-  List.rev !paths
+let argfiles ?exts files =
+  begin
+    move_to_root () ;
+    let paths = ref [] in
+    List.iter
+      (fun f -> allfiles ?exts (fun p -> paths := p :: !paths) (arg1 f))
+      files ;
+    List.rev !paths
+  end
 
 (* -------------------------------------------------------------------------- *)
 (* --- Saving Project Config                                              --- *)
