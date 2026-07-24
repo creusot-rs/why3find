@@ -2,6 +2,9 @@
 
 ## Unreleased
 ### Notable New Features
+
+ - New CSS style for documentation generator (!210)
+
 ### Command Line Interface
 
  - New option `--summary` to only print the final summary.
