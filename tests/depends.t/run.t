@@ -13,8 +13,8 @@
   </head>
   <body>
   <header>index — </header>
-  <h1>Development</h1>
   <div class="doc">
+  <h1>Development</h1>
   <ul>
   <li><a href="a.index.html">Library a</a><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>
   <li><a href="b.index.html">Library b</a><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>
