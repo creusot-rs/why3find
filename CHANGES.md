@@ -3,6 +3,7 @@
 ## Unreleased
 ### Notable New Features
 
+ - New command `why3find stats` to generate project JSON statistics (!209)
  - New CSS style for documentation generator (!210)
 
 ### Command Line Interface
