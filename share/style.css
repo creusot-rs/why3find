@@ -17,11 +17,12 @@ a:visited {
 }
 
 a:hover {
-    background: lightgreen;
+    cursor: default;
+    background: #cec;
 }
 
 a:target {
-    background: lightblue;
+    background: #bce2d9;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -29,6 +30,8 @@ a:target {
 /* -------------------------------------------------------------------------- */
 
 header {
+    margin-left: 1cm;
+    max-width: 15cm;
     padding: 4px ;
     color: darkgrey ;
     border-bottom: thin solid darkgray ;
@@ -46,8 +49,14 @@ nav { display: none; }
 /* --- Documentation Styling                                              --- */
 /* -------------------------------------------------------------------------- */
 
+h1, h2, h3, h4, h5, h6 { font-family: math }
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: inherit }
+
 div.doc {
-    /* Documentation block styling */
+  min-width: 6cm;
+  max-width: 12cm;
+  margin-left: 2cm;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -55,11 +64,13 @@ div.doc {
 /* -------------------------------------------------------------------------- */
 
 pre.src {
-    /* Source code block styling */
+  margin-left: 2cm;
+  padding-left: 0.5cm;
+  border-left: solid thin lightgrey;
 }
 
 .scope {
-    color: teal;
+    color: #3e7777;
 }
 
 .keyword {
