@@ -417,11 +417,11 @@ Typical usage is:
 The JSON output is an array of nodes, each node having the following (optional)
 properties:
 
-- `package : <string>` name of the Why3 package
+- `library : <string>` library name of the Why3 file
 - `theory : <string>` name of the Why3 theory
 - `goal : <string>` name of the Why3 goal
 - `file : <string>` related filename
-- `location : <location>` precise location (Cf. bellow)
+- `location : <location>` precise location (see bellow)
 - `status : <string>` synthetic proof status
 - `prover : <string>` name of the prover that solves the goal
 - `time : <number>` prover time
@@ -432,7 +432,7 @@ For instance, here is typical output of a JSON stats:
 
 ```json
   [{
-    "file": "lib.mlw", "package": "lib",
+    "file": "lib.mlw", "library": "lib",
     "children": [{
         "theory": "CompatibleOrder", "line": 14,
         "children": [{

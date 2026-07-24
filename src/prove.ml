@@ -611,7 +611,7 @@ let statistics ~env ~files =
            let theories = Session.theories session in
            Json.assoc [
              "file", `String file ;
-             "package", `String (String.concat "." lib) ;
+             "library", `String (String.concat "." lib) ;
              "children", Json.list_map (stats_theory env proofs) theories ;
            ]
         ) files in
