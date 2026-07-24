@@ -169,7 +169,7 @@ let print_stats allprovers alltactics fmt =
     List.iter
       (fun (prv : Prover.prover) ->
          try
-           let id = Prover.fullname prv in
+           let id = Prover.(if prv.relaxed then name prv else fullname prv) in
            let s = Hashtbl.find provers id in
            Format.fprintf fmt " - %a (%4d) (%a - %a - %a)@\n"
              (Utils.pp_left 20) id (Stats.count s)
