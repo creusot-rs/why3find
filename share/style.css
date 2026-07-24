@@ -31,7 +31,7 @@ a:target {
 
 header {
     margin-left: 1cm;
-    max-width: 15cm;
+    max-width: 24cm;
     padding: 4px ;
     color: darkgrey ;
     border-bottom: thin solid darkgray ;
@@ -55,7 +55,7 @@ h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: inherit }
 
 div.doc {
   min-width: 6cm;
-  max-width: 12cm;
+  max-width: 16cm;
   margin-left: 2cm;
 }
 
