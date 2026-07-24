@@ -1238,7 +1238,7 @@ let process_chapter_axioms out (senv : Soundness.env) (src : Docref.source) =
 let pp_chapters out ~senv ~title cs =
   if cs <> [] then
     begin
-      Pdoc.printf out "<h1>%s</h1>@\n<div class=\"doc\">@\n<ul>@\n" title ;
+      Pdoc.printf out "<div class=\"doc\">@\n<h1>%s</h1>@\n<ul>@\n" title ;
       List.iter
         (fun c ->
            Pdoc.printf out "<li><a href=\"%s\">%s</a>" c.href c.title ;
@@ -1256,7 +1256,7 @@ let index ~out:dir ~senv ~title =
       let ofile = Filename.concat dir href in
       let out = Pdoc.output ~file:ofile ~title in
       Pdoc.printf out
-        "<header>index — %s</header>@." title ;
+        "<header>index — %s</header>@\n" title ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
       Pdoc.flush out ;
