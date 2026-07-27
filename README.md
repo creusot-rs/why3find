@@ -12,10 +12,11 @@ package and install libraries or setup a distributed solver cloud.
 
 - [Quick Setup](#quick-setup)
 - [IDE Support](#ide-support)
-- [Why3 Packages](#packages)
+- [Packages](#packages)
 - [Package Development](#package-development)
 - [Package Configuration](#package-configuration)
 - [Package Proving](#package-proving)
+- [Package Statistics](#package-statistics)
 - [Package Documentation](#package-documentation)
 - [Package Soundness](#package-soundness)
 - [OCaml Code Extraction](#ocaml-code-extraction)
@@ -398,16 +399,67 @@ number of `why3find client` can dynamically connect to the server to offer their
 locally available provers for proving tasks, from the same machine or from the
 cloud. Any user can then connect to the server to obtain proof results, by using
 `why3find prove --server` options. Hence, proof results can be shared among
-different users during development. By launching a large number of clients, you
+different users during development. By launching many clients, you
 can build large proof clusters. Prover calibration of each contributing client
 is used by the server to ensure the consistency of the distributed proof
 results.
+
+## Package Statistics
+
+The `why3find stats` command can be used to generate a JSON file collecting
+all proofs paired with theories inside the package. This JSON file is suitable
+for further visualization, for instance via `d3` hierarchies.
+
+Typical usage is:
+
+    $ why3find stats -o FILE.JSON PATH...
+
+The JSON output is an array of nodes, each node having the following (optional)
+properties:
+
+- `library : <string>` library name of the Why3 file
+- `theory : <string>` name of the Why3 theory
+- `goal : <string>` name of the Why3 goal
+- `file : <string>` related filename
+- `location : <location>` precise location (see bellow)
+- `status : <string>` synthetic proof status
+- `prover : <string>` name of the prover that solves the goal
+- `time : <number>` prover time
+- `tactic : <string>` tactic applied to the goal
+- `children : NODE[]` associated sub-nodes
+
+For instance, here is typical output of a JSON stats:
+
+```json
+  [{
+    "file": "lib.mlw", "library": "lib",
+    "children": [{
+        "theory": "CompatibleOrder", "line": 14,
+        "children": [{
+            "goal": "ordered_inv",
+            "status": "Valid (35ms) (alt-ergo)",
+            "location": { "line": 163, "end_line": 165, "column": 21, "end_column": 46 },
+            "tactic": "split_vc",
+            "children": [
+              {
+                "location": { "line": 163, "column": 25, "end_column": 51 },
+                "prover": "alt-ergo", "time": 0.035
+              },
+              {
+                "location": { "line": 164, "column": 65, "end_column": 79 },
+                "prover": "alt-ergo", "time": 0.05
+              }
+            ]
+          }]
+      }]
+  }, …]
+```
 
 ## Package Documentation
 
 The `why3find doc` command is used to build HTML documentation for the package.
 It can be used for the entire package or only a selection of source files or
-directories. Unless specified, generated files go to the `html` sub-directory
+directories. Unless specified, generated files go to the `html` subdirectory
 of the root package directory:
 
     $ why3find doc PATH...

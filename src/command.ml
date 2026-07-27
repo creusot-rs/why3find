@@ -661,6 +661,28 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
     end
 
 (* -------------------------------------------------------------------------- *)
+(* --- STATS                                                              --- *)
+(* -------------------------------------------------------------------------- *)
+
+let () = register ~name:"stats" ~args:"[OPTIONS] PATH..."
+    begin fun argv ->
+      let files = ref [] in
+      let out = ref ".why3find/stats.json" in
+      let add r p = r := p :: !r in
+      parse argv
+        begin
+          Wenv.options () @
+          [ "-o", Arg.Set_string out, "output file (default is .why3find/stats.json)" ]
+        end (add files) "generate JSON statistics" ;
+      let config = Wenv.load_config () in
+      let env = (Wenv.init config).why3.env in
+      let files = if !files = [] then ["."] else !files in
+      let files = Wenv.argfiles @@ List.rev files in
+      Json.to_file ~pretty_floats:true !out @@ Prove.statistics ~env ~files ;
+      Log.message "Saved to %s" !out ;
+    end
+
+(* -------------------------------------------------------------------------- *)
 (* --- DOC                                                                --- *)
 (* -------------------------------------------------------------------------- *)
 
