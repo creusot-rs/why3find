@@ -13,9 +13,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css" integrity="sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js" integrity="sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7" crossorigin="anonymous"></script>
-     <title>Module foo.A</title>
+  <title>Module foo.A</title>
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>module A</code></header>
@@ -35,9 +33,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css" integrity="sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js" integrity="sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7" crossorigin="anonymous"></script>
-     <title>Library foo</title>
+  <title>Library foo</title>
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library foo</code></header>
@@ -51,9 +47,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css" integrity="sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js" integrity="sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7" crossorigin="anonymous"></script>
-     <title>Library foo</title>
+  <title>Library foo</title>
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
@@ -75,9 +69,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css" integrity="sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js" integrity="sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7" crossorigin="anonymous"></script>
-     <title>Module bar.B</title>
+  <title>Module bar.B</title>
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>module B</code></header>
@@ -107,9 +99,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css" integrity="sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js" integrity="sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7" crossorigin="anonymous"></script>
-     <title>Library bar</title>
+  <title>Library bar</title>
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library bar</code></header>
@@ -123,9 +113,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css" integrity="sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js" integrity="sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7" crossorigin="anonymous"></script>
-     <title>Library bar</title>
+  <title>Library bar</title>
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
@@ -144,9 +132,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css" integrity="sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js" integrity="sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7" crossorigin="anonymous"></script>
-     <title>Library bar</title>
+  <title>Library bar</title>
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
@@ -165,9 +151,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css" integrity="sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js" integrity="sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7" crossorigin="anonymous"></script>
-     <title>Library foo</title>
+  <title>Library foo</title>
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
