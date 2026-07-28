@@ -36,6 +36,7 @@ type token =
   | Ref of string
   | Verb of string
   | Math of string
+  | Equation of string
 
 type context = Src | Doc | End
 
@@ -155,5 +156,6 @@ let pp fmt = function
   | Ref s -> Format.fprintf fmt "Ref %S" s
   | Verb s -> Format.fprintf fmt "Verb %S" s
   | Math s -> Format.fprintf fmt "Math %S" s
+  | Equation s -> Format.fprintf fmt "Equation %S" s
 
 (* -------------------------------------------------------------------------- *)

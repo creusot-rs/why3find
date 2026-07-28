@@ -1040,7 +1040,16 @@ let parse env =
       text env ;
       let id = Pdoc.matheq out in
       Pdoc.printf out "<span id=\"math%d\">…</span>" id ;
-      Pdoc.printf out "<script>katex.render(%S, math%d);</script>" s id
+      Pdoc.printf out "<script>katex.render(%S, math%d,\
+                       { throwOnError: false });\
+                       </script>" s id
+    | Equation s ->
+      text env ;
+      let id = Pdoc.matheq out in
+      Pdoc.printf out "<div class=\"maths\" id=\"math%d\">…</div>" id ;
+      Pdoc.printf out "<script>katex.render(%S, math%d,\
+                       { throwOnError: false, displayMode: true });\
+                       </script>" s id
     | Ref s -> process_reference ~wenv ~env s
     | Style(Emph,_) -> process_style env Emph
     | Style(Bold,_) -> process_style env Bold

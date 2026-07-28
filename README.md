@@ -511,6 +511,8 @@ documentation comments. The following documentation snippets show examples:
     Can also use _emphasis_ or __bold__.
     Source `code`.
     Maths $e=mc^2$ (via online KaTeX).
+    Equations:
+    $$ \int_a^b f$$
 
     Itemized lists:
       - item A

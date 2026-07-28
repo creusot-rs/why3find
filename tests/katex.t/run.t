@@ -19,7 +19,9 @@
          </header>
   <div class="doc">
   <h1><a id="_1">Test for Maths</a></h1>
-  <p>Einstein says <span id="math1">…</span><script>katex.render("e = mc^2", math1);</script>.</p>
+  <p>Einstein says <span id="math1">…</span><script>katex.render("e = mc^2", math1,{ throwOnError: false });</script>.</p>
+  <p>Equations:</p>
+  <p><div class="maths" id="math2">…</div><script>katex.render(" \\int_a^b \\frac{\\partial f}{\\partial x} = f(b) - f(a)", math2,{ throwOnError: false, displayMode: true });</script></p>
   </div>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -60,10 +62,10 @@
     <span class="keyword">constant</span> <a id="c">c</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : real
   </pre>
   <div class="doc">
-  <p>Enstein&#39;s famous <span id="math1">…</span><script>katex.render("e = mc^2", math1);</script>.</p>
+  <p>Enstein&#39;s famous <span id="math1">…</span><script>katex.render("e = mc^2", math1,{ throwOnError: false });</script>.</p>
   <ul>
-  <li><code class="src">m</code> is the mass <span id="math2">…</span><script>katex.render("m\\ge 0", math2);</script></li>
-  <li><code class="src">c</code> is light celerity <span id="math3">…</span><script>katex.render("c>0", math3);</script></li>
+  <li><code class="src">m</code> is the mass <span id="math2">…</span><script>katex.render("m\\ge 0", math2,{ throwOnError: false });</script></li>
+  <li><code class="src">c</code> is light celerity <span id="math3">…</span><script>katex.render("c>0", math3,{ throwOnError: false });</script></li>
   </ul>
   </div>
   <pre class="src">
@@ -74,3 +76,4 @@
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+

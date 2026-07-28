@@ -276,7 +276,7 @@ let process_block env = function
   | Token.Newline ->
     env.blanklines <- succ env.blanklines
 
-  | Token.Infix _ | Token.Ident _ | Token.Ref _ ->
+  | Infix _ | Ident _ | Ref _ ->
     let here = Token.position env.input in
     if env.blanklines > 0 then
       begin
@@ -286,11 +286,11 @@ let process_block env = function
       end ;
     env.last <- here
 
-  | Token.Comment _ | Token.Space | Token.Eof
-  | Token.Char _ | Token.Text _ | Token.Style _
-  | Token.OpenDoc | Token.CloseDoc
-  | Token.OpenSection _ | Token.CloseSection _
-  | Token.Verb _ | Token.Math _ -> ()
+  | Comment _ | Space | Eof
+  | Char _ | Text _ | Style _
+  | OpenDoc | CloseDoc
+  | OpenSection _ | CloseSection _
+  | Verb _ | Math _ | Equation _ -> ()
 
 let parse ?doc ?filename ~env ~src file =
   let input = Token.input ?doc ?filename file in
@@ -316,7 +316,7 @@ let parse ?doc ?filename ~env ~src file =
       | Eof
       | Char _ | Text _
       | OpenDoc | CloseDoc
-      | Space | Style (_, _) | Verb _ | Math _ -> ()
+      | Space | Style (_, _) | Verb _ | Math _ | Equation _ -> ()
 
     done ;
     Token.close input ;

@@ -89,7 +89,14 @@ and document = parse
  | '{' ([^ '}' '\n']* as rf) '}' { Ref rf }
  | '`' ([^ '`' '\n']* as tt) '`' { Verb tt }
  | '$' ([^ '$' '\n']+ as tx) '$' { Math tx }
+ | "$$" { Equation (equation (Buffer.create 80) lexbuf) }
  | _ as c { Char c }
+
+ and equation buffer = parse
+ | "$$" { Buffer.contents buffer }
+ | eof { failwith "Unexpected <eof> in math equation" }
+ | '\n' { newline lexbuf ; equation buffer lexbuf }
+ | _ as c { Buffer.add_char buffer c ; equation buffer lexbuf }
 
 (* -------------------------------------------------------------------------- *)
 (* --- Bootstrap                                                          --- *)
