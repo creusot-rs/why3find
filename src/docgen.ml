@@ -65,6 +65,7 @@ type env = {
   wenv : Why3.Env.env ; (* why3 env. *)
   henv : Axioms.henv ; (* axioms *)
   senv : Soundness.env ; (* instances *)
+  mutable matheq : int ; (* maths equations *)
   mutable proof_href : int ; (* proof href *)
   mutable cloning : Cloning.state ; (* clone substitution *)
   mutable declared : Sid.t ; (* locally declared *)
@@ -1036,6 +1037,12 @@ let parse env =
         end
     | Verb s ->
       text env ; Pdoc.printf out "<code class=\"src\">%a</code>" Pdoc.pp_html s
+    | Math s ->
+      text env ;
+      let id = env.matheq in
+      env.matheq <- succ id ;
+      Pdoc.printf out "<span id=\"math%d\">…</span>" id ;
+      Pdoc.printf out "<script>katex.render(\"%a\", math%d);</script>" Pdoc.pp_html s id
     | Ref s -> process_reference ~wenv ~env s
     | Style(Emph,_) -> process_style env Emph
     | Style(Bold,_) -> process_style env Bold
@@ -1144,7 +1151,7 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
       proof_href = 0 ;
       declared = Sid.empty ;
       opened = [] ; scopes = [] ;
-      section = 0 ; active = true ; context = [] ;
+      section = 0 ; active = true ; context = [] ; matheq = 0 ;
     } in
     chapter ~href ~title () ;
     Pdoc.printf env.out
@@ -1180,6 +1187,7 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
     proof_href = 0 ;
     declared = Sid.empty ;
     opened = [] ; scopes = [] ; section = 0 ; active = true ; context = [] ;
+    matheq = 0 ;
   } in
   begin
     chapter ~src ~href ~title () ;

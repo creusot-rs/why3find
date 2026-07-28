@@ -35,6 +35,7 @@ type token =
   | Style of style * string
   | Ref of string
   | Verb of string
+  | Math of string
 
 type context = Src | Doc | End
 
@@ -153,5 +154,6 @@ let pp fmt = function
   | Style (_sty, s) -> Format.fprintf fmt "Styled %S" s
   | Ref s -> Format.fprintf fmt "Ref %S" s
   | Verb s -> Format.fprintf fmt "Verb %S" s
+  | Math s -> Format.fprintf fmt "Math %S" s
 
 (* -------------------------------------------------------------------------- *)

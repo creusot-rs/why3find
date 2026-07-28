@@ -290,7 +290,7 @@ let process_block env = function
   | Token.Char _ | Token.Text _ | Token.Style _
   | Token.OpenDoc | Token.CloseDoc
   | Token.OpenSection _ | Token.CloseSection _
-  | Token.Verb _ -> ()
+  | Token.Verb _ | Token.Math _ -> ()
 
 let parse ?doc ?filename ~env ~src file =
   let input = Token.input ?doc ?filename file in
@@ -302,21 +302,21 @@ let parse ?doc ?filename ~env ~src file =
       match tok with
 
       (* scanned *)
-      | Token.Ident s -> process_word env s
-      | Token.Infix s -> process_identifier ~infix:true env s
-      | Token.Ref s -> process_reference env s
-      | Token.Newline -> process_clone_token env `Newline
-      | Token.Comment _ -> process_clone_token env `Comment
+      | Ident s -> process_word env s
+      | Infix s -> process_identifier ~infix:true env s
+      | Ref s -> process_reference env s
+      | Newline -> process_clone_token env `Newline
+      | Comment _ -> process_clone_token env `Comment
 
       (* folding *)
-      | Token.OpenSection (_, s) -> process_open_section env input s
-      | Token.CloseSection _ -> process_close_section env input
+      | OpenSection (_, s) -> process_open_section env input s
+      | CloseSection _ -> process_close_section env input
 
       (* skipped *)
-      | Token.Eof
-      | Token.Char _ | Token.Text _
-      | Token.OpenDoc | Token.CloseDoc
-      | Token.Space | Token.Style (_, _) | Token.Verb _ -> ()
+      | Eof
+      | Char _ | Text _
+      | OpenDoc | CloseDoc
+      | Space | Style (_, _) | Verb _ | Math _ -> ()
 
     done ;
     Token.close input ;

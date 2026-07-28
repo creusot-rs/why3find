@@ -170,11 +170,14 @@ let header out ~level ~title ?(toc=title) () =
     level name title level
 
 let head =
-  "<html>\n\
+  "<!DOCTYPE html>\n\
+   <html>\n\
    <head>\n\
    <meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n\
    <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n\
    <link rel=\"stylesheet\" type=\"text/css\" href=\"icofont.min.css\">\n\
+   <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css\" integrity=\"sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1\" crossorigin=\"anonymous\">\n\
+   <script src=\"https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js\" integrity=\"sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7\" crossorigin=\"anonymous\"></script>
    <title>"
 
 let body =
