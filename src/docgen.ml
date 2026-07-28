@@ -1040,7 +1040,7 @@ let parse env =
       text env ;
       let id = Pdoc.matheq out in
       Pdoc.printf out "<span id=\"math%d\">…</span>" id ;
-      Pdoc.printf out "<script>katex.render(\"%a\", math%d);</script>" Pdoc.pp_html s id
+      Pdoc.printf out "<script>katex.render(%S, math%d);</script>" s id
     | Ref s -> process_reference ~wenv ~env s
     | Style(Emph,_) -> process_style env Emph
     | Style(Bold,_) -> process_style env Bold

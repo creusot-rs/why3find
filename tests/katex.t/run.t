@@ -62,8 +62,8 @@
   <div class="doc">
   <p>Enstein&#39;s famous <span id="math1">…</span><script>katex.render("e = mc^2", math1);</script>.</p>
   <ul>
-  <li><code class="src">m</code> is the mass <span id="math2">…</span><script>katex.render("m", math2);</script></li>
-  <li><code class="src">c</code> is light celerity <span id="math3">…</span><script>katex.render("c", math3);</script></li>
+  <li><code class="src">m</code> is the mass <span id="math2">…</span><script>katex.render("m\\ge 0", math2);</script></li>
+  <li><code class="src">c</code> is light celerity <span id="math3">…</span><script>katex.render("c>0", math3);</script></li>
   </ul>
   </div>
   <pre class="src">

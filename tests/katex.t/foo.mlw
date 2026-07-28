@@ -5,8 +5,8 @@ module Foo
   constant c : real
 
   (** Enstein's famous $e = mc^2$.
-      - `m` is the mass $m$
-      - `c` is light celerity $c$ *)
+      - `m` is the mass $m\ge 0$
+      - `c` is light celerity $c>0$ *)
   function e : real = m * sqr c
 
 end
