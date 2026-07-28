@@ -127,6 +127,7 @@
   $ why3find doc refine.mlw
   Generated $TESTCASE_ROOT/html/index.html
   $ cat html/refine.Interface.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">

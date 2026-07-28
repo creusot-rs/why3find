@@ -7,6 +7,7 @@
 --- Module a.A
 --------------------------------------------------------------------------
   $ cat html/a.A.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -38,6 +39,7 @@
 --- Module a.B
 --------------------------------------------------------------------------
   $ cat html/a.B.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -72,6 +74,7 @@
 --- Module a.E
 --------------------------------------------------------------------------
   $ cat html/a.E.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -95,6 +98,7 @@
 --- Module b.C
 --------------------------------------------------------------------------
   $ cat html/b.C.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">

@@ -22,6 +22,7 @@
 --- Document
 --------------------------------------------------------------------------
   $ cat html/main.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -51,6 +52,7 @@
 --- Library
 --------------------------------------------------------------------------
   $ cat html/a.index.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -77,6 +79,7 @@
 --- Theory A
 --------------------------------------------------------------------------
   $ cat html/a.A.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -99,6 +102,7 @@
 --- Module B
 --------------------------------------------------------------------------
   $ cat html/a.B.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -127,6 +131,7 @@
 --- Module C
 --------------------------------------------------------------------------
   $ cat html/a.C.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">

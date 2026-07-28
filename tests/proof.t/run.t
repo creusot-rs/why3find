@@ -1,6 +1,7 @@
   $ why3find doc clones.mlw certif.mlw
   Generated $TESTCASE_ROOT/html/index.html
   $ cat html/clones.A.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -26,6 +27,7 @@
   </body>
   </html>
   $ cat html/clones.B.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -56,6 +58,7 @@
   </body>
   </html>
   $ cat html/certif.S.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -107,6 +110,7 @@
   </body>
   </html>
   $ cat html/clones.proof.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -142,6 +146,7 @@
   </body>
   </html>
   $ cat html/certif.proof.html | sed s/569ms/570ms/ # x86-32
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">

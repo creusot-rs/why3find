@@ -35,6 +35,8 @@ type token =
   | Style of style * string
   | Ref of string
   | Verb of string
+  | Math of string
+  | Equation of string
 
 val src_lexer : (Lexing.lexbuf -> token) ref
 val doc_lexer : (Lexing.lexbuf -> token) ref

@@ -5,6 +5,7 @@
 
  - New command `why3find stats` to generate project JSON statistics (!209)
  - New CSS style for documentation generator (!210)
+ - Support for Markdown maths equations with KaTeX (!211)
 
 ### Command Line Interface
 

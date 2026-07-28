@@ -96,6 +96,7 @@ type target = {
   htitle: string;
   mutable hbase: int; (* base level *)
   mutable headers: header list; (* in reverse order *)
+  mutable matheq: int ;
   contents: Buffer.t;
   forked: target option;
 }
@@ -110,7 +111,7 @@ let output ~file ~title =
     target = {
       file ; htitle = title ; hbase = 0 ; headers = [] ;
       contents = Buffer.create 80 ;
-      forked = None ;
+      forked = None ; matheq = 0 ;
     } ;
     current = buffer () ;
   }
@@ -147,7 +148,12 @@ let fork out ~file ~title =
     file ; htitle = title ; hbase = 0 ; headers = [] ;
     contents = Buffer.create 80 ;
     forked = Some out.target ;
+    matheq = 0 ;
   }
+
+let matheq out =
+  let k = succ out.target.matheq in
+  out.target.matheq <- k ; k
 
 let printf out msg = Format.fprintf out.current.fmt msg
 let pp out p v = p out.current.fmt v
@@ -170,12 +176,21 @@ let header out ~level ~title ?(toc=title) () =
     level name title level
 
 let head =
-  "<html>\n\
+  "<!DOCTYPE html>\n\
+   <html>\n\
    <head>\n\
    <meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n\
-   <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n\
+  "
+
+let css =
+  "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n\
    <link rel=\"stylesheet\" type=\"text/css\" href=\"icofont.min.css\">\n\
-   <title>"
+  "
+
+let katex =
+   "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css\" integrity=\"sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1\" crossorigin=\"anonymous\">\n\
+    <script src=\"https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js\" integrity=\"sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7\" crossorigin=\"anonymous\"></script>\n\
+   "
 
 let body =
   "</title>\n\
@@ -206,6 +221,9 @@ let close output =
   let target = output.target in
   Utils.outputfile ~file:target.file begin fun cout ->
     output_string cout head ;
+    output_string cout css ;
+    if target.matheq > 0 then output_string cout katex ;
+    output_string cout "<title>" ;
     output_string cout target.htitle ;
     output_string cout body ;
     table_of_contents cout (List.rev target.headers) ;

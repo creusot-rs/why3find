@@ -1,6 +1,7 @@
   $ why3find doc -D drivers.drv drivers.mlw
   Generated $TESTCASE_ROOT/html/index.html
   $ cat html/drivers.A.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -22,6 +23,7 @@
   </body>
   </html>
   $ cat html/drivers.proof.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">

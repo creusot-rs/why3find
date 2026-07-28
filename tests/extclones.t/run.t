@@ -7,6 +7,7 @@
 --- Generated Files
 --------------------------------------------------------------------------
   $ cat html/foo.*.html html/bar.*.html html/*.proof.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -26,6 +27,7 @@
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -39,6 +41,7 @@
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -60,6 +63,7 @@
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -89,6 +93,7 @@
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -102,6 +107,7 @@
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -120,6 +126,7 @@
     <span class="keyword">goal</span> <a id="B.A.refl" href="bar.B.html#A.refl">A.refl</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -138,6 +145,7 @@
     <span class="keyword">goal</span> <a id="B.A.refl" href="bar.B.html#A.refl">A.refl</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">

@@ -23,6 +23,7 @@
 --- Generated index
 --------------------------------------------------------------------------
   $ cat html/index.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -45,6 +46,7 @@
 --- Generated File p.a.html
 --------------------------------------------------------------------------
   $ cat html/p.a.index.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -72,6 +74,7 @@
 --- Generated File p.a.A.html
 --------------------------------------------------------------------------
   $ cat html/p.a.A.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -108,6 +111,7 @@
 --- Generated File p.a.B.html
 --------------------------------------------------------------------------
   $ cat html/p.a.B.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">

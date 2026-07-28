@@ -69,6 +69,15 @@ pre.src {
   border-left: solid thin lightgrey;
 }
 
+span.katex {
+  font-size: 0.9em ;
+}
+
+div.maths {
+  width: 0pt;
+  margin-left: 1cm;
+}
+
 .scope {
     color: #3e7777;
 }

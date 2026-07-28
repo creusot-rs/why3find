@@ -1,6 +1,7 @@
   $ why3find doc foo.mlw bar.mlw
   Generated $TESTCASE_ROOT/html/index.html
   $ cat html/bar.A.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">

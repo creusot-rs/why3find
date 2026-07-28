@@ -4,6 +4,7 @@
   $ why3find doc b.mlw a.mlw d.mlw c.mlw
   Generated $TESTCASE_ROOT/html/index.html
   $ cat html/index.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
