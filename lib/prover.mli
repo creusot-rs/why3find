@@ -56,6 +56,10 @@ val pattern_version : string -> string option
 val pattern_of_string : string -> string * string option
 (** @raise Invalid_pattern when the pattern is invalid *)
 
+(** {1 Why3 Config} *)
+
+val config : ?autodetect:bool -> unit -> Why3.Whyconf.config
+
 (** {1 Provers} *)
 
 type prover = private {

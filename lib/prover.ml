@@ -82,6 +82,28 @@ module Mdesc = Why3.Extmap.Make (struct
   end)
 
 (* -------------------------------------------------------------------------- *)
+(* --- Prover Scanning                                                    --- *)
+(* -------------------------------------------------------------------------- *)
+
+let rc_prover_section (path,name,version) =
+  let s = Why3.Rc.empty_section in
+  let s = Why3.Rc.set_string s "name" name in
+  let s = Why3.Rc.set_string s "path" path in
+  let s = Why3.Rc.set_string s "version" version in s
+
+let config ?(autodetect=false) () =
+  (* load the Why3 user's config first, if any *)
+  let config = Why3.Whyconf.init_config ~extra_config:[] None in
+  (* prover autodetection *)
+  if autodetect then
+    !Why3.Whyconf.provers_from_detected_provers config @@
+    Why3.Rc.set_simple_family Why3.Rc.empty "partial_prover" @@
+    List.map rc_prover_section @@
+    Why3.Autodetection.find_provers @@
+    Why3.Autodetection.read_auto_detection_data config
+  else config
+
+(* -------------------------------------------------------------------------- *)
 (* --- Full Featured Prover                                               --- *)
 (* -------------------------------------------------------------------------- *)
 

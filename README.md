@@ -226,9 +226,10 @@ You can also get the list of available provers and tactics:
     why3find config --list-provers
     why3find config --list-tactics
 
-Available provers are searched from global user's Why3 configuration (in
-`~/.why3.conf`, if any) and from the current `PATH` environment variable (just
-like `why3 config detect`).
+Available provers are searched from global Why3 user's configuration and from
+the current `PATH` environment variable. The global Why3 user's configuration is
+taken from `~/.why3.conf` (if any) or `WHY3CONFIG` environment variable (if
+defined).
 
 ## Package Proving
 
