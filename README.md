@@ -152,16 +152,16 @@ created. The package directory shall be structured as follows:
         ├── **/*/why3session.xml  # Why3 internal files   (*not* versioned)
         └── **/*/why3shapes.gz    # Why3 internal files   (*not* versioned)
 
-You shall put your Why3 source files in this sub-directory in order
+You shall put your Why3 source files in this subdirectory in order
 to be compliant with Why3 global naming policy. Consider for instance
 a package `foo` with a source file `foo/bar.mlw` declaring a module `Jazz`,
 this module will be named `foo.bar.Jazz` in every place, either from
 the package `foo` or from another package depending on `foo`.
 
 Strictly speaking, if your package is _not_ intended to be used as a package
-dependency of another Why3 project, you might omit the `PKG` sub-directory and
+dependency of another Why3 project, you might omit the `PKG` subdirectory and
 put your source files directly at the root directory. However, the `why3find
-install` command will not work as expected and you will have to manage
+install` command will not work as expected. You will have to manage
 installation by your own means. Other `why3find` commands will work as expected,
 typically for proving, extracted OCaml code and generating documentation.
 
@@ -225,6 +225,10 @@ You can also get the list of available provers and tactics:
 
     why3find config --list-provers
     why3find config --list-tactics
+
+Available provers are searched from global user's Why3 configuration (in
+`~/.why3.conf`, if any) and from the current `PATH` environment variable (just
+like `why3 config detect`).
 
 ## Package Proving
 

@@ -560,7 +560,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
         Format.printf " - @[<hov 2>drivers: %a@]@." pp_list drivers ;
       (* --- Updating -------------- *)
       if !reset || modified then Wenv.save newconfig;
-      Wenv.update_why3_config env.why3.config ;
+      Wenv.update_why3_jobs env.why3.config ;
       exit (!retval)
     end
 

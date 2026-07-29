@@ -257,7 +257,7 @@ let save conf =
   Format.printf "Why3find config saved to %s@."
     (Filename.concat root Config.conf_file)
 
-let update_why3_config config =
+let update_why3_jobs config =
   if !jobs then
     begin
       let open Why3 in
@@ -269,7 +269,7 @@ let update_why3_config config =
         let mem = Whyconf.memlimit main in
         let config = Whyconf.User.set_limits ~time ~mem ~j:jobs config in
         Whyconf.save_config config ;
-        Format.printf "Why3 config saved to %s@." file
+        Format.printf "Why3 config updated with -j %d (%s)@." jobs file
     end
 
 (* -------------------------------------------------------------------------- *)
