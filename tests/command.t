@@ -213,7 +213,6 @@
     --quiet do not list final configuration
     --reset configure from scratch
     --default import available provers
-    --detect detect and import available provers
     --list-provers list available provers
     --list-tactics list available tactics
     --strict commit prover versions

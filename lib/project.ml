@@ -28,11 +28,12 @@ let to_rc provers =
 
 (* brittle but the best we can do with the current API *)
 let add_autodetected_provers =
-  Timer.timed ~name:"Prover autodetection" (fun config ->
+  Timer.timed ~name:"Prover autodetection"
+    begin fun config ->
       let data = Why3.Autodetection.read_auto_detection_data config in
       let provers = Why3.Autodetection.find_provers data in
       !WConf.provers_from_detected_provers config (to_rc provers)
-    )
+    end
 
 let why3_config autodetect =
   let config = WConf.init_config ~extra_config:[] None in

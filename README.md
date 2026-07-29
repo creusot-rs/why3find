@@ -215,16 +215,13 @@ Typical examples are:
     why3find config […]           # Update packages, provers, etc.
     why3find config --reset   […] # Configure from scratch (ignore current config)
     why3find config --default […] # Use all available "default" provers
-    why3find config --detect  […] # Run `why3 config detect` before using all "default" provers
     why3find config --check       # Check consistency between proof certificates and configuration
 
-When using `--default` or `--detect` why3find will select the highest available
+When using `--default` why3find will select the highest available
 versions of provers `alt-ergo`, `z3`, `cvc4` and `cvc5`, provided they are
-accessible from `PATH` or listed in the global why3 configuration. Additionally,
-`--detect` will update the global why3 configuration by running
-`why3 config detect`.
+accessible from `PATH` or listed in the global why3 configuration.
 
-You can also gets the list of available provers and tactics:
+You can also get the list of available provers and tactics:
 
     why3find config --list-provers
     why3find config --list-tactics

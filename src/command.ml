@@ -394,7 +394,6 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       let velocity = ref false in
       let reset = ref false in
       let default = ref false in
-      let detect = ref false in
       let strict = ref false in
       let relax = ref false in
       let check = ref false in
@@ -411,7 +410,6 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             "--quiet", Arg.Clear list, "do not list final configuration";
             "--reset", Arg.Set reset, "configure from scratch";
             "--default", Arg.Set default, "import available provers";
-            "--detect", Arg.Set detect, "detect and import available provers";
             "--list-provers", Arg.Set list_provers, "list available provers";
             "--list-tactics", Arg.Set list_tactics, "list available tactics";
             "--strict", Arg.Set strict, "commit prover versions";
@@ -430,7 +428,6 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
          \n\n\
          OPTIONS:\n" ;
       (* --- Why3 Config --- *)
-      if !detect then ignore @@ Sys.command "why3 config detect" ;
       let rawconfig = Wenv.load_raw_config () in
       let config =
         if !reset
@@ -478,7 +475,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
            This may lead to performance loss."
           Utils.pp_time fast Utils.pp_time time ;
       let patterns, provers =
-        if !default || !detect then
+        if !default then
           let provers = Prover.default env.why3 in
           if !relax
           then List.map Prover.name provers, List.map Prover.relaxed provers
