@@ -10,13 +10,10 @@ module Whyconf = Why3.Whyconf
 module Driver = Why3.Driver
 
 (* -------------------------------------------------------------------------- *)
-(* --- Provers                                                            --- *)
+(* --- Provers Patterns                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-type desc = {
-  name : string ;
-  version : string ;
-}
+exception Invalid_pattern of string
 
 let pattern_of_string s =
   match String.split_on_char '@' s with
@@ -24,17 +21,28 @@ let pattern_of_string s =
   | [ name ; version ] -> String.lowercase_ascii name, Some version
   | _  -> raise (Invalid_argument "Prover.split_pattern")
 
-let desc_to_string p =
-  Format.sprintf "%s@%s" p.name p.version
+let pattern_name s = try fst @@ pattern_of_string s with Invalid_pattern _ -> s
+let pattern_version s = try snd @@ pattern_of_string s with Invalid_pattern _ -> None
 
-exception Invalid_pattern of string
+let pattern ~name ?version () =
+  match version with None -> name | Some v -> Printf.sprintf "%s@%s" name v
+
+(* -------------------------------------------------------------------------- *)
+(* --- Provers Description                                                --- *)
+(* -------------------------------------------------------------------------- *)
+
+type desc = {
+  name : string ;
+  version : string ;
+}
+
+let desc_to_string p = Format.sprintf "%s@%s" p.name p.version
 
 let desc_of_string s =
   try
     let (name, version) = pattern_of_string s in
     { name ; version = Option.get version }
   with Invalid_argument _ -> raise (Invalid_pattern s)
-
 
 let desc_of_config_prover (cfgprover : Whyconf.config_prover) =
   if not cfgprover.interactive && cfgprover.prover.prover_altern = "" then
@@ -45,6 +53,10 @@ let desc_of_config_prover (cfgprover : Whyconf.config_prover) =
   else None
 
 let pp_desc fmt p = Format.fprintf fmt "%s@%s" p.name p.version
+
+(* -------------------------------------------------------------------------- *)
+(* --- Semantic Versioning                                                --- *)
+(* -------------------------------------------------------------------------- *)
 
 type sem = V of int | S of string
 let sem s = try V (int_of_string s) with Failure _ -> S s
@@ -60,14 +72,18 @@ let compare_version p q =
   List.compare cmp (String.split_on_char '.' p) (String.split_on_char '.' q)
 
 let compare_desc p q =
-  let c = String.compare p.name q.name in
-  if c <> 0 then c else
+  let cmp = String.compare p.name q.name in
+  if cmp <> 0 then cmp else
     compare_version p.version q.version
 
 module Mdesc = Why3.Extmap.Make (struct
     type t = desc
     let compare = compare_desc
   end)
+
+(* -------------------------------------------------------------------------- *)
+(* --- Full Featured Prover                                               --- *)
+(* -------------------------------------------------------------------------- *)
 
 type prover = {
   desc : desc ;
@@ -118,12 +134,6 @@ let digest_config main Whyconf.{
     ) extra_drivers;
   Digest.(to_hex (string (Buffer.contents buf)))
 [@@ocaml.warning "+9"] (* missing name in record **)
-
-let pattern_name s = try fst @@ pattern_of_string s with Invalid_pattern _ -> s
-let pattern_version s = try snd @@ pattern_of_string s with Invalid_pattern _ -> None
-
-let pattern ~name ?version () =
-  match version with None -> name | Some v -> Printf.sprintf "%s@%s" name v
 
 let all (wenv : Config.why3env) =
   Whyconf.Mprover.fold

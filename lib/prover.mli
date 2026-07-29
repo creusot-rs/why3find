@@ -28,14 +28,33 @@ val desc_of_config_prover : Why3.Whyconf.config_prover -> desc option
 
 val pp_desc : Format.formatter -> desc -> unit
 
+val compare_version : string -> string -> int
+(** Compare version in descending order (most recent comes first). *)
+
 val compare_desc : desc -> desc -> int
-(** Prover descriptions comparison function. Different provers are ordered
-    alphabetically by names, and different version of a same prover by
-    {b reverse} version order. Thus, when sorting, the latest version come
-    {b before} older ones. *)
+(** Compare by prover name, then prover version (most recent comes first). *)
 
 module Mdesc : Why3.Extmap.S with type key = desc
 (** Using compare_desc *)
+
+(** {1 Patterns} *)
+
+(** Patterns identify provers. The syntax is [prover-name@prover-version].
+    The [prover-name] match the prover name case-insensitively. (eg [alt-ergo]
+    match the prover of Why3 name [Alt-Ergo])
+    The version part, starting from the '@', is optional. If omitted, it
+    generally means the last available version. *)
+
+val pattern : name:string -> ?version:string -> unit -> string
+
+val pattern_name : string -> string
+(** @raise Invalid_pattern when the pattern is invalid *)
+
+val pattern_version : string -> string option
+(** @raise Invalid_pattern when the pattern is invalid *)
+
+val pattern_of_string : string -> string * string option
+(** @raise Invalid_pattern when the pattern is invalid *)
 
 (** {1 Provers} *)
 
@@ -63,25 +82,6 @@ val relaxed : prover -> prover
 
 val pp_prover : Format.formatter -> prover -> unit
 (** Prints prover fullname. *)
-
-(** {1 Patterns} *)
-
-(** Patterns identify provers. The syntax is [prover-name@prover-version].
-    The [prover-name] match the prover name case-insensitively. (eg [alt-ergo]
-    match the prover of Why3 name [Alt-Ergo])
-    The version part, starting from the '@', is optional. If omitted, it
-    generally means the last available version. *)
-
-val pattern : name:string -> ?version:string -> unit -> string
-
-val pattern_name : string -> string
-(** @raise Invalid_pattern when the pattern is invalid *)
-
-val pattern_version : string -> string option
-(** @raise Invalid_pattern when the pattern is invalid *)
-
-val pattern_of_string : string -> string * string option
-(** @raise Invalid_pattern when the pattern is invalid *)
 
 (** {1 Retrieving available provers} *)
 
