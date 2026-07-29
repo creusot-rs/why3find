@@ -443,7 +443,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
               Format.printf "Available Provers:@." ;
               let allprovers = Prover.all env.why3 in
               if Prover.Mdesc.is_empty allprovers then
-                Format.printf "  (none, use --detect)@." ;
+                Format.printf "  (none)@." ;
               Prover.Mdesc.iter (fun dp _ ->
                   Format.printf " - %a@." Prover.pp_desc dp
                 ) allprovers ;

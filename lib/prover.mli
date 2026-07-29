@@ -10,7 +10,7 @@
 
 (** {1 Prover descriptions} *)
 
-type desc
+type desc = { name : string ; version : string }
 (** The type of prover descriptions, identifying a unique prover version. *)
 
 exception Invalid_pattern of string
@@ -23,9 +23,8 @@ val desc_of_string : string -> desc
     patterns below, but the version part is mandatory.
     @raise Invalid_pattern when the string description is invalid. *)
 
-val desc_name : desc -> string
-val desc_version : desc -> string
-val desc : name:string -> ?version:string -> unit -> string
+val desc_of_config_prover : Why3.Whyconf.config_prover -> desc option
+(** Returns None for alternative or interactive provers *)
 
 val pp_desc : Format.formatter -> desc -> unit
 
@@ -36,6 +35,7 @@ val compare_desc : desc -> desc -> int
     {b before} older ones. *)
 
 module Mdesc : Why3.Extmap.S with type key = desc
+(** Using compare_desc *)
 
 (** {1 Provers} *)
 
@@ -72,8 +72,14 @@ val pp_prover : Format.formatter -> prover -> unit
     The version part, starting from the '@', is optional. If omitted, it
     generally means the last available version. *)
 
+val pattern : name:string -> ?version:string -> unit -> string
+
 val pattern_name : string -> string
+(** @raise Invalid_pattern when the pattern is invalid *)
+
 val pattern_version : string -> string option
+(** @raise Invalid_pattern when the pattern is invalid *)
+
 val pattern_of_string : string -> string * string option
 (** @raise Invalid_pattern when the pattern is invalid *)
 

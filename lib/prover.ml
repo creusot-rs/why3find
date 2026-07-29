@@ -18,7 +18,7 @@ type desc = {
   version : string ;
 }
 
-let split_pattern s =
+let pattern_of_string s =
   match String.split_on_char '@' s with
   | [ name ] -> String.lowercase_ascii name, None
   | [ name ; version ] -> String.lowercase_ascii name, Some version
@@ -31,15 +31,18 @@ exception Invalid_pattern of string
 
 let desc_of_string s =
   try
-    let (name, version) = split_pattern s in
+    let (name, version) = pattern_of_string s in
     { name ; version = Option.get version }
   with Invalid_argument _ -> raise (Invalid_pattern s)
 
-let desc ~name ?version () =
-  match version with None -> name | Some v -> Printf.sprintf "%s@%s" name v
 
-let desc_name p = p.name
-let desc_version p = p.version
+let desc_of_config_prover (cfgprover : Whyconf.config_prover) =
+  if not cfgprover.interactive && cfgprover.prover.prover_altern = "" then
+    Some {
+      name = String.lowercase_ascii cfgprover.prover.prover_name ;
+      version = cfgprover.prover.prover_version ;
+    }
+  else None
 
 let pp_desc fmt p = Format.fprintf fmt "%s@%s" p.name p.version
 
@@ -116,46 +119,25 @@ let digest_config main Whyconf.{
   Digest.(to_hex (string (Buffer.contents buf)))
 [@@ocaml.warning "+9"] (* missing name in record **)
 
-let pattern_name s =
-  try
-    let (name, _) = split_pattern s in
-    name
-  with Invalid_pattern _ -> s
+let pattern_name s = try fst @@ pattern_of_string s with Invalid_pattern _ -> s
+let pattern_version s = try snd @@ pattern_of_string s with Invalid_pattern _ -> None
 
-let pattern_version s =
-  try
-    let (_, version) = split_pattern s in
-    version
-  with Invalid_pattern _ -> None
+let pattern ~name ?version () =
+  match version with None -> name | Some v -> Printf.sprintf "%s@%s" name v
 
-let pattern_of_string = split_pattern
-
-let desc_of_config config = {
-  name = String.lowercase_ascii config.Whyconf.prover.prover_name ;
-  version = config.Whyconf.prover.prover_version ;
-}
-
-let digest_config = Timer.timed2 ~name:"Digest prover" digest_config
-
-let load_driver_for_prover =
-  Timer.timed3 ~name:"Load driver" Driver.load_driver_for_prover
-
-let load (wenv : Config.why3env) (pconfig : Whyconf.config_prover) =
-  let main = Whyconf.get_main wenv.config in
-  {
-    desc = desc_of_config pconfig ; relaxed = false ;
-    config = pconfig ;
-    driver = load_driver_for_prover main wenv.env pconfig ;
-    digest = digest_config main pconfig;
-  }
-
-let all wenv =
-  let folder _ c m =
-    if c.Whyconf.prover.prover_altern = "" && not c.Whyconf.interactive
-    then let p = load wenv c in Mdesc.add p.desc p m
-    else m in
-  let configs = Whyconf.get_provers wenv.config in
-  Whyconf.Mprover.fold folder configs Mdesc.empty
+let all (wenv : Config.why3env) =
+  Whyconf.Mprover.fold
+    begin fun _ config m ->
+      match desc_of_config_prover config with
+      | None -> m
+      | Some desc ->
+        let main = Whyconf.get_main wenv.config in
+        Mdesc.add desc {
+          desc ; config ; relaxed = false ;
+          driver = Driver.load_driver_for_prover main wenv.env config ;
+          digest = digest_config main config ;
+        } m
+    end (Whyconf.get_provers wenv.config) Mdesc.empty
 
 let all = Config.Whtbl.memoize 5 all
 
@@ -166,7 +148,7 @@ let filter_prover ~name ?version p =
   && (version = None || p.desc.version = Option.get version)
 
 let find_exn wenv ~pattern =
-  let (name, version) = split_pattern pattern in
+  let (name, version) = pattern_of_string pattern in
   let filter _ p = filter_prover ~name ?version p in
   let prv = snd @@ Mdesc.min_binding @@ Mdesc.filter filter @@ all wenv in
   if version = None then relaxed prv else prv
@@ -187,7 +169,7 @@ let warn_prover_not_found =
 let select_from_map ~patterns all =
   let find pattern =
     try
-      match split_pattern pattern with
+      match pattern_of_string pattern with
       | name, Some version -> `Ok (Mdesc.find { name ; version } all)
       | name, None ->
         let filter { name = s ; _ } _ = String.equal name s in
@@ -213,5 +195,5 @@ let fit prover ~name ~version =
 let find provers ~name ?version () =
   let result = List.find_opt (fit ~name ~version) provers in
   begin
-    if result = None then warn_prover_not_found @@ desc ~name ?version () ;
+    if result = None then warn_prover_not_found @@ pattern ~name ?version () ;
   end ; result

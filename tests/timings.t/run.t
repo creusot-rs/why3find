@@ -3,8 +3,6 @@
   Theory foo.S: ✔ (-)
   Theory foo.T: ✔ (XX)
   Proved (foo.mlw) ✔
-  Digest prover          XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
-  Load driver            XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
   Split theories         XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
   Transformation         XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
   Proofs dump            XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
