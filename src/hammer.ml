@@ -369,7 +369,7 @@ let create
     (env : Project.env) : hammer =
   let provers =
     match provers with Some ps -> ps | None ->
-      Prover.select env.why3 ~patterns:env.config.provers in
+      Prover.select_all env.why3 ~patterns:env.config.provers in
   let tactics =
     match tactics with Some ts -> ts | None ->
       Tactic.select env.why3.env env.config.tactics in
@@ -467,7 +467,7 @@ let hammer =
 let period (h : hammer) = h.env.config.time
 
 let try_prover p v t : strategy = fun n ->
-  match Prover.find n.hammer.provers ~name:p ?version:v () with
+  match Prover.retrieve ~name:p ?version:v n.hammer.provers with
   | None -> notfound ()
   | Some p ->
     let period = period n.hammer in

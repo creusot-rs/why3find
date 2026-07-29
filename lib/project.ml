@@ -14,11 +14,19 @@ type env = {
   pkgs : Meta.pkg list ;
 }
 
-let create ?(root=".") ?(usecache=true) ?(config=Config.default)
-    ?(autodetect=true) () =
+let create
+    ?(root=".")
+    ?(usecache=true)
+    ?(autodetect=true)
+    ?(why3:Why3.Whyconf.config option)
+    ?(config=Config.default)
+    () =
   let pkgs = Meta.find_all config.Config.packages in
   let pkg_path = List.map (fun m -> m.Meta.path) pkgs in
-  let wconfig = Prover.config ~autodetect () in
+  let wconfig =
+    match why3 with
+    | Some config -> config
+    | None -> Prover.config ~autodetect () in
   let why3 = Config.why3env ~loadpath:(root :: pkg_path) wconfig in
   let cdir = Filename.concat root ".why3find" in
   let cache = Cache.create ~cdir ~usecache () in

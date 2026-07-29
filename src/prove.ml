@@ -497,7 +497,7 @@ let prove_files ~(env:Project.env)
         if List.length files > 10 then `Summary else
         if List.length files > 1 then `Modules else `Theories
       | _ -> results in
-    let provers = Prover.select env.why3 ~patterns:env.config.provers in
+    let provers = Prover.select_all env.why3 ~patterns:env.config.provers in
     let tactics = Tactic.select env.why3.env env.config.tactics in
     on_failed results ;
     List.iter

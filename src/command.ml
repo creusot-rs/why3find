@@ -442,9 +442,9 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             begin
               Format.printf "Available Provers:@." ;
               let allprovers = Prover.all env.why3 in
-              if Prover.Mdesc.is_empty allprovers then
+              if Prover.is_empty allprovers then
                 Format.printf "  (none)@." ;
-              Prover.Mdesc.iter (fun dp _ ->
+              Prover.iter (fun dp _ ->
                   Format.printf " - %a@." Prover.pp_desc dp
                 ) allprovers ;
             end ;
@@ -485,7 +485,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
           let patterns =
             if !relax then
               List.map Prover.pattern_name pconfig else pconfig in
-          let provers = Prover.select env.why3 ~patterns in
+          let provers = Prover.select_all env.why3 ~patterns in
           let patterns =
             if !strict then List.map Prover.fullname provers else
             if !relax then List.map Prover.name provers else pconfig
@@ -516,7 +516,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             | Crc.Stuck -> ()
             | Tactic { children; _ } -> List.iter check_crc children
             | Prover(name,version,_) ->
-              if Prover.find provers ~name ?version () = None then retval := 1 ;
+              if Prover.retrieve ~name ?version provers = None then retval := 1 ;
           in
           let check f =
             let iter = Why3.Wstdlib.Mstr.iter in

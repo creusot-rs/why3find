@@ -21,8 +21,9 @@ type env = private {
 val create :
   ?root:string ->
   ?usecache:bool ->
-  ?config:Config.config ->
   ?autodetect:bool ->
+  ?why3:Why3.Whyconf.config ->
+  ?config:Config.config ->
   unit -> env
 (** Create an environment with configuration [config] for the project
     located in [root] (which default to ".") *)

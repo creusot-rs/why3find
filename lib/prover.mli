@@ -34,8 +34,18 @@ val compare_version : string -> string -> int
 val compare_desc : desc -> desc -> int
 (** Compare by prover name, then prover version (most recent comes first). *)
 
-module Mdesc : Why3.Extmap.S with type key = desc
-(** Using compare_desc *)
+(** {1 Portfolios} *)
+
+type 'a portfolio
+val empty : 'a portfolio
+val add : desc -> 'a -> 'a portfolio -> 'a portfolio
+val mem : desc -> 'a portfolio -> bool
+val find : desc -> 'a portfolio -> 'a
+val select : name:string -> ?version:string -> 'a portfolio -> 'a
+(** Returns the most recent one if no version is provided. *)
+
+val is_empty : 'a portfolio -> bool
+val iter : (desc -> 'a -> unit) -> 'a portfolio -> unit
 
 (** {1 Patterns} *)
 
@@ -56,9 +66,13 @@ val pattern_version : string -> string option
 val pattern_of_string : string -> string * string option
 (** @raise Invalid_pattern when the pattern is invalid *)
 
+val pmatch : string -> (desc -> bool)
+(** Compiled from pattern. *)
+
 (** {1 Why3 Config} *)
 
 val config : ?autodetect:bool -> unit -> Why3.Whyconf.config
+val available : Why3.Whyconf.config -> desc portfolio
 
 (** {1 Provers} *)
 
@@ -87,24 +101,22 @@ val relaxed : prover -> prover
 val pp_prover : Format.formatter -> prover -> unit
 (** Prints prover fullname. *)
 
+val load : Config.why3env -> desc -> Why3.Whyconf.config_prover -> prover
+
 (** {1 Retrieving available provers} *)
 
-val all : Config.why3env -> prover Mdesc.t
+val all : Config.why3env -> prover portfolio
 (** Returns the set of all available provers for the given Why3 environment. *)
 
-val select : Config.why3env -> patterns:string list -> prover list
+val default : Config.why3env -> prover list
+(** Returns the set of available "default" provers. *)
+
+val select_all : Config.why3env -> patterns:string list -> prover list
 (** Selects the provers that match one of the [patterns].
     For each [pattern] in order, if the pattern is invalid or the prover is not
     in the map, a warning is emitted, otherwise one prover is appended to the
     return list, either the one specified or the latest available version in
     case of a version-less pattern. *)
 
-val default : Config.why3env -> prover list
-(** Returns the set of available "default" provers. *)
-
-val find :
-  prover list ->
-  name:string -> ?version:string ->
-  unit -> prover option
-(** Find some corresponding prover in the list.
-    Emits a warning if not found. *)
+val retrieve : name:string -> ?version:string -> prover list -> prover option
+(** Find some corresponding prover in the list. Emits a warning if not found. *)
