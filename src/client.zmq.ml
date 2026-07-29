@@ -212,7 +212,7 @@ let handler client msg =
       let prover = Prover.desc_of_string prover in
       do_download client { prover ; digest }
     | _ -> ()
-  with Not_found | Invalid_argument _ | Prover.InvalidProverDescription _ -> ()
+  with Not_found | Invalid_argument _ | Prover.Invalid_pattern _ -> ()
 
 (* -------------------------------------------------------------------------- *)
 (* --- Running                                                            --- *)

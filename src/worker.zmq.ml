@@ -142,7 +142,7 @@ let handler worker msg =
       let prover = Prover.desc_of_string prover in
       do_prove worker { prover ; digest } (float_of_string timeout) data
     | _ -> ()
-  with Invalid_argument _ | Prover.InvalidProverDescription _ -> ()
+  with Invalid_argument _ | Prover.Invalid_pattern _ -> ()
 
 (* -------------------------------------------------------------------------- *)
 (* --- Worker Lifecycle                                                   --- *)

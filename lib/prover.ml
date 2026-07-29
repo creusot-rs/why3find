@@ -18,26 +18,22 @@ type desc = {
   version : string ;
 }
 
-exception InvalidPattern of string
-exception InvalidProverDescription of string
-
 let split_pattern s =
   match String.split_on_char '@' s with
-  | [] -> assert false
   | [ name ] -> String.lowercase_ascii name, None
   | [ name ; version ] -> String.lowercase_ascii name, Some version
-  | _  -> raise (InvalidPattern s)
+  | _  -> raise (Invalid_argument "Prover.split_pattern")
 
 let desc_to_string p =
   Format.sprintf "%s@%s" p.name p.version
+
+exception Invalid_pattern of string
 
 let desc_of_string s =
   try
     let (name, version) = split_pattern s in
     { name ; version = Option.get version }
-  with
-  | Invalid_argument _ | InvalidPattern _ ->
-    raise (InvalidProverDescription s)
+  with Invalid_argument _ -> raise (Invalid_pattern s)
 
 let desc ~name ?version () =
   match version with None -> name | Some v -> Printf.sprintf "%s@%s" name v
@@ -118,19 +114,19 @@ let digest_config main Whyconf.{
       List.iter (fun f -> add_string buf (digest_driver main (Some d, f))) l
     ) extra_drivers;
   Digest.(to_hex (string (Buffer.contents buf)))
-[@@ocaml.warning "+9"]
+[@@ocaml.warning "+9"] (* missing name in record **)
 
 let pattern_name s =
   try
     let (name, _) = split_pattern s in
     name
-  with InvalidPattern _ -> s
+  with Invalid_pattern _ -> s
 
 let pattern_version s =
   try
     let (_, version) = split_pattern s in
     version
-  with InvalidPattern _ -> None
+  with Invalid_pattern _ -> None
 
 let pattern_of_string = split_pattern
 
@@ -197,14 +193,14 @@ let select_from_map ~patterns all =
         let filter { name = s ; _ } _ = String.equal name s in
         `Ok (relaxed @@ snd @@ Mdesc.min_binding @@ Mdesc.filter filter all)
     with
-    | InvalidPattern s -> `InvalidPattern s
+    | Invalid_pattern s -> `Invalid_pattern s
     | Not_found -> `PatternNotFound pattern in
   List.map find patterns
 
 let select wenv ~patterns =
   let filter = function
     | `Ok p -> Some p
-    | `InvalidPattern s -> Log.warning "invalid prover pattern %s" s; None
+    | `Invalid_pattern s -> Log.warning "invalid prover pattern %s" s; None
     | `PatternNotFound s -> warn_prover_not_found s; None in
   List.filter_map filter @@ select_from_map ~patterns @@ all wenv
 

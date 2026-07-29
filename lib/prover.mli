@@ -13,8 +13,7 @@
 type desc
 (** The type of prover descriptions, identifying a unique prover version. *)
 
-exception InvalidPattern of string
-exception InvalidProverDescription of string
+exception Invalid_pattern of string
 (** Raised on invalid pattern or prover description, see below. The argument
     is the erroneous string. *)
 
@@ -22,7 +21,7 @@ val desc_to_string : desc -> string
 val desc_of_string : string -> desc
 (** Converts prover descriptions to and from string. The syntax is the same as
     patterns below, but the version part is mandatory.
-    @raise InvalidProverDescription when the string description is invalid. *)
+    @raise Invalid_pattern when the string description is invalid. *)
 
 val desc_name : desc -> string
 val desc_version : desc -> string
@@ -76,7 +75,7 @@ val pp_prover : Format.formatter -> prover -> unit
 val pattern_name : string -> string
 val pattern_version : string -> string option
 val pattern_of_string : string -> string * string option
-(** @raise InvalidPattern when the pattern is invalid *)
+(** @raise Invalid_pattern when the pattern is invalid *)
 
 (** {1 Retrieving available provers} *)
 

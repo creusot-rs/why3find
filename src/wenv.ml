@@ -311,8 +311,10 @@ let autodetect () =
 
 let init ?root ?(loadplugins=true) config =
   begin
-    let wenv = Project.create ?root ~config ~usecache:!usecache
-        ~autodetect_provers:(autodetect ()) () in
+    let wenv = Project.create
+        ?root ~config
+        ~usecache:!usecache
+        ~autodetect:(autodetect ()) () in
     if loadplugins then
       Why3.Whyconf.load_plugins @@
       Why3.Whyconf.get_main wenv.why3.config;

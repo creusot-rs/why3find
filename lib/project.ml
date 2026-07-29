@@ -6,8 +6,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module WConf = Why3.Whyconf
-
 type env = {
   root : string ;
   cache : Cache.t ;
@@ -27,26 +25,20 @@ let to_rc provers =
   Why3.Rc.set_simple_family Why3.Rc.empty "partial_prover" sections
 
 (* brittle but the best we can do with the current API *)
-let add_autodetected_provers =
+let autodetected_provers =
   Timer.timed ~name:"Prover autodetection"
     begin fun config ->
       let data = Why3.Autodetection.read_auto_detection_data config in
       let provers = Why3.Autodetection.find_provers data in
-      !WConf.provers_from_detected_provers config (to_rc provers)
+      !Why3.Whyconf.provers_from_detected_provers config (to_rc provers)
     end
 
-let why3_config autodetect =
-  let config = WConf.init_config ~extra_config:[] None in
-  if autodetect then
-    add_autodetected_provers config
-  else
-    config
-
 let create ?(root=".") ?(usecache=true) ?(config=Config.default)
-    ?(autodetect_provers=true) () =
+    ?(autodetect=true) () =
   let pkgs = Meta.find_all config.Config.packages in
   let pkg_path = List.map (fun m -> m.Meta.path) pkgs in
-  let wconfig = why3_config autodetect_provers in
+  let wconfig = Why3.Whyconf.init_config ~extra_config:[] None in
+  let wconfig = if autodetect then autodetected_provers wconfig else wconfig in
   let why3 = Config.why3env ~loadpath:(root :: pkg_path) wconfig in
   let cdir = Filename.concat root ".why3find" in
   let cache = Cache.create ~cdir ~usecache () in
