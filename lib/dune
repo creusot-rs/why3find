@@ -10,7 +10,10 @@
   (target version.ml)
   (action
     (write-file %{target}
-      "let version = \"%{version:why3find}\"")))
+      "let version = \"%{version:why3find}\"\n\
+       let system = \"%{system}\"\n\
+       let architecture = \"%{architecture}\"\n\
+       ")))
 
 (generate_sites_module
   (module global)
