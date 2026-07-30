@@ -37,6 +37,10 @@
   
     Prints installation site(s).
   
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find shared
 --------------------------------------------------------------------------
@@ -49,6 +53,10 @@
   
     Prints shared resources site(s).
   
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find init
 --------------------------------------------------------------------------
@@ -62,6 +70,10 @@
     Create templates for dune-project and git-ignore for package PKG.
     Files are created in directory DIR (default ./PKG).
   
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find list
 --------------------------------------------------------------------------
@@ -74,6 +86,10 @@
   
     Prints all installed packages.
   
+
+
+
+
   $ why3find query --help
   USAGE:
   
@@ -94,6 +110,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find compile
 --------------------------------------------------------------------------
@@ -111,6 +133,12 @@
     -v|--verbose print why3 command
     -p|--package PKG package dependency
   
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find ide
 --------------------------------------------------------------------------
@@ -128,6 +156,12 @@
     -v|--verbose print why3 command
     -p|--package PKG package dependency
   
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find replay
 --------------------------------------------------------------------------
@@ -145,6 +179,12 @@
     -v|--verbose print why3 command
     -p|--package PKG package dependency
   
+
+
+
+
+
+
   $ why3find extract --help
   USAGE:
   
@@ -158,7 +198,9 @@
   
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
-    --no-autodetect-provers  disable prover autodetection
+    --no-autodetect  disable prover autodetection
+    --no-downloaded  disable downloaded provers
+    --no-download  disable downloading of missing provers
     --package ±PKG,… add package dependency
     --driver ±DRV,… configure drivers
     -p  same as --package
@@ -173,6 +215,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find config
 --------------------------------------------------------------------------
@@ -190,7 +238,9 @@
   
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
-    --no-autodetect-provers  disable prover autodetection
+    --no-autodetect  disable prover autodetection
+    --no-downloaded  disable downloaded provers
+    --no-download  disable downloading of missing provers
     --package ±PKG,… add package dependency
     --fast TIME fast proof time (default 200ms)
     --time TIME median proof time (default 1s)
@@ -225,6 +275,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find prove
 --------------------------------------------------------------------------
@@ -241,7 +297,9 @@
   
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
-    --no-autodetect-provers  disable prover autodetection
+    --no-autodetect  disable prover autodetection
+    --no-downloaded  disable downloaded provers
+    --no-download  disable downloading of missing provers
     --package ±PKG,… add package dependency
     --fast TIME fast proof time (default 200ms)
     --time TIME median proof time (default 1s)
@@ -291,6 +349,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find doc
 --------------------------------------------------------------------------
@@ -311,7 +375,9 @@
   
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
-    --no-autodetect-provers  disable prover autodetection
+    --no-autodetect  disable prover autodetection
+    --no-downloaded  disable downloaded provers
+    --no-download  disable downloading of missing provers
     --package ±PKG,… add package dependency
     --driver ±DRV,… configure drivers
     -p  same as --package
@@ -326,6 +392,14 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find server
 --------------------------------------------------------------------------
@@ -352,6 +426,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find worker
 --------------------------------------------------------------------------
@@ -379,6 +459,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find install
 --------------------------------------------------------------------------
@@ -418,6 +504,17 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find uninstall
 --------------------------------------------------------------------------
@@ -430,6 +527,10 @@
   
     Remove all specified packages from topmost installation site.
   
+
+
+
+
 --------------------------------------------------------------------------
 --- Generic Command
 --------------------------------------------------------------------------
@@ -447,4 +548,10 @@
     --p|--package PKG : pass --library=<path> for the package
     --drivers : pass also --driver=<DRV> options
   
+
+
+
+
+
+
 --------------------------------------------------------------------------

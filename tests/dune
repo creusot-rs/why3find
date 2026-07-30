@@ -25,4 +25,7 @@
  (_
   (env-vars
    (WHY3CONFIG ../why3.conf)
-   (WHY3FIND_AUTODETECT_PROVERS no))))
+   (WHY3FIND_DOWNLOADED no)
+   (WHY3FIND_AUTODETECT no)
+   (WHY3FIND_AUTOLOAD no)
+   )))

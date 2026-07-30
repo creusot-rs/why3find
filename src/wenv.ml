@@ -41,6 +41,8 @@ let warn = ref []
 let prep = ref None
 let jobs = ref false
 let autodetect = ref true
+let downloaded = ref true
+let download = ref true
 let usecache = ref true
 
 (* -------------------------------------------------------------------------- *)
@@ -169,7 +171,9 @@ let settime prm s =
 let alloptions : (opt * string * Arg.spec * string) list = [
   `All, "--root", Arg.Set_string chdir, "DIR change to directory";
   `All, "--why3-warn-off", Arg.String (add warn), "WRN,… disable why3 warnings";
-  `All, "--no-autodetect-provers", Arg.Clear autodetect, " disable prover autodetection";
+  `All, "--no-autodetect", Arg.Clear autodetect, " disable prover autodetection";
+  `All, "--no-downloaded", Arg.Clear downloaded, " disable downloaded provers";
+  `All, "--no-download", Arg.Clear download, " disable downloading of missing provers";
   `Package, "--package", Arg.String (add pkgs), "±PKG,… add package dependency";
   `Prover,  "--fast", Arg.String (settime fast), "TIME fast proof time (default 200ms)";
   `Prover,  "--time", Arg.String (settime time), "TIME median proof time (default 1s)";
@@ -305,16 +309,24 @@ let disable_warning s =
   Why3.Loc.register_warning s Why3.Pp.empty_formatted
 
 let autodetect () =
-  let env = try Sys.getenv "WHY3FIND_AUTODETECT_PROVERS" <> "no" with
-    | Not_found -> true in
-  !autodetect && env
+  try Sys.getenv "WHY3FIND_AUTODETECT" <> "no" with Not_found -> !autodetect
+
+let downloaded () =
+  try Sys.getenv "WHY3FIND_DOWNLOADED" <> "no" with Not_found -> !downloaded
+
+let download () =
+  downloaded () &&
+  try Sys.getenv "WHY3FIND_DOWNLOAD" <> "no" with Not_found -> !download
+[@@ warning "-32"]
 
 let init ?root ?(loadplugins=true) config =
   begin
     let wenv = Project.create
         ?root ~config
         ~usecache:!usecache
-        ~autodetect:(autodetect ()) () in
+        ~autodetect:(autodetect ())
+        ~downloaded:(downloaded ())
+        () in
     if loadplugins then
       Why3.Whyconf.load_plugins @@
       Why3.Whyconf.get_main wenv.why3.config;

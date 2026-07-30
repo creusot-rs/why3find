@@ -71,7 +71,7 @@ val pmatch : string -> (desc -> bool)
 
 (** {1 Why3 Config} *)
 
-val config : ?autodetect:bool -> unit -> Why3.Whyconf.config
+val config : ?autodetect:bool -> ?downloaded:bool -> unit -> Why3.Whyconf.config
 val available : Why3.Whyconf.config -> desc portfolio
 
 (** {1 Provers} *)

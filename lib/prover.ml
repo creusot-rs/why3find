@@ -132,6 +132,38 @@ let pmatch pattern =
   with Invalid_pattern s -> warn_invalid_pattern s ; fun _ -> false
 
 (* -------------------------------------------------------------------------- *)
+(* --- Downloaded Provers                                                 --- *)
+(* -------------------------------------------------------------------------- *)
+
+let binarycache = lazy
+  begin
+    try Sys.getenv "WHY3FIND_PROVERS" with Not_found ->
+    try Filename.concat (Sys.getenv "HOME") ".why3find.provers" with Not_found ->
+      Log.warning "Binary cache not found (use 'WHY3FIND_PROVERS')." ; ""
+  end
+
+let find_downloaded_provers data =
+  let cache = Lazy.force binarycache in
+  let files = try Sys.readdir cache with _ -> [| |] in
+  let provers = ref [] in
+  Array.iter
+    (fun file ->
+       match String.split_on_char '@' file with
+       | [ name ; version_exec ] ->
+         let path = Filename.concat cache file in
+         begin
+           match Why3.Autodetection.find_prover data name path with
+           | None ->
+             Log.warning "Binary %S no more recognized" path
+           | Some version ->
+             if not (String.starts_with ~prefix:version version_exec) then
+               Log.warning "Binary %S is %s@%s" path name version ;
+             provers := (path,name,version) :: !provers
+         end
+       | _ -> ()
+    ) files ; !provers
+
+(* -------------------------------------------------------------------------- *)
 (* --- Prover Scanning                                                    --- *)
 (* -------------------------------------------------------------------------- *)
 
@@ -141,16 +173,20 @@ let rc_prover_section (path,name,version) =
   let s = Why3.Rc.set_string s "path" path in
   let s = Why3.Rc.set_string s "version" version in s
 
-let config ?(autodetect=false) () =
+let config ?(autodetect=false) ?(downloaded=false) () =
   (* load the Why3 user's config first, if any *)
   let config = Why3.Whyconf.init_config ~extra_config:[] None in
+  let data = Why3.Autodetection.read_auto_detection_data config in
+  (* downloaded provers *)
+  let ps = if downloaded then find_downloaded_provers data else [] in
   (* prover autodetection *)
-  if autodetect then
+  let qs = if autodetect then Why3.Autodetection.find_provers data else [] in
+  (* consolidation *)
+  let provers = ps @ qs in
+  if provers <> [] then
     !Why3.Whyconf.provers_from_detected_provers config @@
     Why3.Rc.set_simple_family Why3.Rc.empty "partial_prover" @@
-    List.map rc_prover_section @@
-    Why3.Autodetection.find_provers @@
-    Why3.Autodetection.read_auto_detection_data config
+    List.map rc_prover_section provers
   else config
 
 let available config =
