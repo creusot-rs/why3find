@@ -164,6 +164,56 @@ let find_downloaded_provers data =
     ) files ; !provers
 
 (* -------------------------------------------------------------------------- *)
+(* --- Download Provers                                                   --- *)
+(* -------------------------------------------------------------------------- *)
+
+let command ~prover ~step msg =
+  Format.kasprintf
+    (begin fun cmd ->
+       Format.printf "[%s] %s@\n> %s@." prover step cmd ;
+       if Sys.command cmd <> 0 then
+         Utils.failwith "[%s] %s failed" prover step
+     end)
+    msg
+
+let download ~name ~version ~spec =
+  let prover = Printf.sprintf "%s@%s" name version in
+  let tmp = Filename.temp_dir "why3find" "download" in
+  let url, path =
+    match String.split_on_char '#' spec with
+    | [ url ] -> url , None
+    | [ url ; path ] -> url , Some path
+    | _ -> Utils.failwith "[%s] Invalid prover URL %S" prover spec in
+  let file = Filename.basename url in
+  begin
+    command ~prover ~step:"Download"
+      "wget -t 5 -q --show-progress %S -O %s/%s" url tmp file ;
+    let binary =
+      match path with
+      | None -> file
+      | Some path ->
+        let pwd = Sys.getcwd () in
+        try
+          Sys.chdir tmp ;
+          command ~prover ~step:"Unpack" "tar zxf %s %s" file path ;
+          Sys.chdir pwd ; path
+        with err ->
+          Sys.chdir pwd ; raise err
+    in
+    command ~prover ~step:"Permissions" "chmod a+x %s" binary ;
+    if Version.version = "macosx" then
+      begin
+        command ~prover ~step:"Quanrantine"
+          "xattr -dr com.apple.quarantine %s" binary ;
+        command ~prover ~step:"Autosign"
+          "codesign -s - --deep --force %s" binary ;
+      end ;
+    let cache = Lazy.force binarycache in
+    command ~prover ~step:"Installation"
+      "mv %s/%s %s/%s" tmp binary cache prover
+  end
+
+(* -------------------------------------------------------------------------- *)
 (* --- Prover Scanning                                                    --- *)
 (* -------------------------------------------------------------------------- *)
 

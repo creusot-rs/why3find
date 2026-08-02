@@ -120,3 +120,6 @@ val select_all : Config.why3env -> patterns:string list -> prover list
 
 val retrieve : name:string -> ?version:string -> prover list -> prover option
 (** Find some corresponding prover in the list. Emits a warning if not found. *)
+
+val download : name:string -> version:string -> spec:string -> unit
+(** Download and install the given prover in binary cache. *)
