@@ -565,6 +565,34 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
     end
 
 (* -------------------------------------------------------------------------- *)
+(* --- DOWNLOAD PROVER                                                    --- *)
+(* -------------------------------------------------------------------------- *)
+
+let () = register ~name:"download" ~args:"NAME VERSION SPEC"
+    begin fun argv ->
+      let name = ref "" in
+      let version = ref "" in
+      let spec = ref "" in
+      parse argv
+        []
+        begin fun a ->
+          if  !name = "" then name := a else
+          if !version = "" then version := a else
+          if !spec = "" then spec := a else
+            Utils.failwith "Unexpected argument (%S)" a
+        end
+        "USAGE:\n\
+         \n  why3find config NAME VERSION SPEC\n\n\
+         DESCRIPTION:\n\
+         \n  Download prover NAME with version VERSION from URL SPEC.\n
+         \n" ;
+      if !name = ""  then failwith "Missing NAME" ;
+      if !version = ""  then failwith "Missing VERSION" ;
+      if !spec = ""  then failwith "Missing SPEC" ;
+      Prover.download ~name:!name ~version:!version ~spec:!spec ;
+    end
+
+(* -------------------------------------------------------------------------- *)
 (* --- PROVE                                                              --- *)
 (* -------------------------------------------------------------------------- *)
 

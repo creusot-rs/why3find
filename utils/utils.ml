@@ -58,6 +58,11 @@ let progress msg =
            String.sub msg 0 (max 0 (width - 3))
     ) (Format.formatter_of_buffer buffer) msg
 
+let killline () =
+  Format.pp_print_flush Format.std_formatter () ;
+  Format.pp_print_flush Format.err_formatter () ;
+  if escape_codes Unix.stdout then Printf.printf "\r\027[F\027[K%!"
+
 let flush () =
   Format.pp_print_flush Format.std_formatter () ;
   Format.pp_print_flush Format.err_formatter () ;

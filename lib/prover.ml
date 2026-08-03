@@ -170,38 +170,37 @@ let find_downloaded_provers data =
 let command ~prover ~step msg =
   Format.kasprintf
     (begin fun cmd ->
-       Format.printf "[%s] %s@\n> %s@." prover step cmd ;
        if Sys.command cmd <> 0 then
-         Utils.failwith "[%s] %s failed" prover step
+         begin
+           Utils.flush () ;
+           Utils.failwith "[%s] %s failed" prover step ;
+         end
      end)
     msg
 
 let download ~name ~version ~spec =
   let prover = Printf.sprintf "%s@%s" name version in
   let tmp = Filename.temp_dir "why3find" "download" in
-  let url, path =
-    match String.split_on_char '#' spec with
-    | [ url ] -> url , None
-    | [ url ; path ] -> url , Some path
-    | _ -> Utils.failwith "[%s] Invalid prover URL %S" prover spec in
-  let file = Filename.basename url in
-  begin
+  let pwd = Sys.getcwd () in
+  try
+    Sys.chdir tmp ;
+    let url, path =
+      match String.split_on_char '#' spec with
+      | [ url ] -> url , None
+      | [ url ; path ] -> url , Some path
+      | _ -> Utils.failwith "[%s] Invalid prover URL %S" prover spec in
+    let file = Filename.basename url in
     command ~prover ~step:"Download"
-      "wget -t 5 -q --show-progress %S -O %s/%s" url tmp file ;
+      "wget -t 5 -q --show-progress %S -O %s" url file ;
+    Utils.killline () ;
     let binary =
       match path with
       | None -> file
       | Some path ->
-        let pwd = Sys.getcwd () in
-        try
-          Sys.chdir tmp ;
-          command ~prover ~step:"Unpack" "tar zxf %s %s" file path ;
-          Sys.chdir pwd ; path
-        with err ->
-          Sys.chdir pwd ; raise err
+        command ~prover ~step:"Unpack" "tar zxf %s %s" file path ; path
     in
     command ~prover ~step:"Permissions" "chmod a+x %s" binary ;
-    if Version.version = "macosx" then
+    if Version.system = "macosx" then
       begin
         command ~prover ~step:"Quanrantine"
           "xattr -dr com.apple.quarantine %s" binary ;
@@ -209,9 +208,18 @@ let download ~name ~version ~spec =
           "codesign -s - --deep --force %s" binary ;
       end ;
     let cache = Lazy.force binarycache in
+    Utils.mkdirs cache ;
     command ~prover ~step:"Installation"
-      "mv %s/%s %s/%s" tmp binary cache prover
-  end
+      "mv -f %s %s/%s" binary cache prover ;
+    Utils.flush () ;
+    Sys.chdir pwd ;
+    command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
+    Utils.flush () ;
+    Format.printf "Installed prover %s@." prover
+  with err ->
+    Sys.chdir pwd ;
+    command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
+    raise err
 
 (* -------------------------------------------------------------------------- *)
 (* --- Prover Scanning                                                    --- *)

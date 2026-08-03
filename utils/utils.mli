@@ -67,6 +67,7 @@ val show_progress_opt : string * Arg.spec * string
 val tty : bool
 val set_ansi_tags : Format.formatter -> unit
 
+val killline : unit -> unit
 val flush : unit -> unit
 val overflows : unit -> bool
 val progress : ('a,Format.formatter,unit) format -> 'a
