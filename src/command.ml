@@ -573,8 +573,9 @@ let () = register ~name:"download" ~args:"NAME VERSION SPEC"
       let name = ref "" in
       let version = ref "" in
       let spec = ref "" in
+      let list = ref false in
       parse argv
-        []
+        [ "--list" , Arg.Set list , "List available versions for NAME" ]
         begin fun a ->
           if  !name = "" then name := a else
           if !version = "" then version := a else
@@ -586,10 +587,26 @@ let () = register ~name:"download" ~args:"NAME VERSION SPEC"
          DESCRIPTION:\n\
          \n  Download prover NAME with version VERSION from URL SPEC.\n
          \n" ;
-      if !name = ""  then failwith "Missing NAME" ;
-      if !version = ""  then failwith "Missing VERSION" ;
-      if !spec = ""  then failwith "Missing SPEC" ;
-      Prover.download ~name:!name ~version:!version ~spec:!spec ;
+
+      let name = !name in
+      if name = ""  then failwith "Missing NAME" ;
+      let data = lazy (Prover.shared ~name) in
+      if !list then
+        List.iter
+          (fun (version,_) -> Format.printf " - %s@%s@." name version)
+          (Lazy.force data)
+      else
+        let version = !version in
+        let version = if version <> "" then version else
+            let provers = Lazy.force data in
+            try fst @@ List.hd provers with _ ->
+              Utils.failwith "No specification for prover %s" name in
+        let spec = !spec in
+        let spec =
+          if spec <> "" then spec else
+            try List.assoc version (Lazy.force data) with Not_found ->
+              Utils.failwith "Specification not found for %s@%s" name version
+        in Prover.download ~name ~version ~spec ;
     end
 
 (* -------------------------------------------------------------------------- *)

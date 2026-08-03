@@ -86,6 +86,14 @@ let jmem fd = function
   | `Assoc fds -> List.mem_assoc fd fds
   | _ -> false
 
+let jassoc fd = function
+  | `Assoc fds -> List.map (fun (k,j) -> k, fd j) fds
+  | _ -> []
+
+let jassoc_map fd = function
+  | `Assoc fds -> List.map (fun (k,j) -> fd k j) fds
+  | _ -> []
+
 let mfield fd = function
   | `Assoc fds -> List.mem_assoc fd fds
   | _ -> false
