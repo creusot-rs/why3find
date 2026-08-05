@@ -221,6 +221,8 @@ let async f =
       | Some v -> set r v ; false
     with exn ->
       Format.eprintf "[Fibers] yield error (%s)@." @@ Printexc.to_string exn ;
+      if Printexc.backtrace_status () then
+        Printexc.print_backtrace stderr;
       false
   in Queue.push queue yd ; r
 
