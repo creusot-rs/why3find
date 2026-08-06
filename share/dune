@@ -13,4 +13,8 @@
     (provers/alt-ergo.linux.amd64.json as provers/alt-ergo.linux.amd64.json)
     (provers/alt-ergo.macosx.amd64.json as provers/alt-ergo.macosx.amd64.json)
     (provers/alt-ergo.macosx.arm64.json as provers/alt-ergo.macosx.arm64.json)
+    (provers/cvc5.linux.amd64.json as provers/cvc5.linux.amd64.json)
+    (provers/cvc5.linux.arm64.json as provers/cvc5.linux.arm64.json)
+    (provers/cvc5.macosx.amd64.json as provers/cvc5.macosx.amd64.json)
+    (provers/cvc5.macosx.arm64.json as provers/cvc5.macosx.arm64.json)
   ))
