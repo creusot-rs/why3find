@@ -23,6 +23,7 @@ val create :
   ?usecache:bool ->
   ?autodetect:bool ->
   ?downloaded:bool ->
+  ?patterns:string list ->
   ?why3:Why3.Whyconf.config ->
   ?config:Config.config ->
   unit -> env
