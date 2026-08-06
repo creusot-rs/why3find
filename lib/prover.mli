@@ -73,6 +73,7 @@ val pmatch : string -> (desc -> bool)
 
 val config : ?autodetect:bool -> ?downloaded:bool -> unit -> Why3.Whyconf.config
 val available : Why3.Whyconf.config -> desc portfolio
+val shared : name:string -> (string * string) list (* [VERSION,URL;…] sorted *)
 
 (** {1 Provers} *)
 

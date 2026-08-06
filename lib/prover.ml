@@ -76,6 +76,8 @@ let compare_desc p q =
   if cmp <> 0 then cmp else
     compare_version p.version q.version
 
+let by_version u v = compare_version (fst u) (fst v)
+
 (* -------------------------------------------------------------------------- *)
 (* --- Prover Description Portfolios                                      --- *)
 (* -------------------------------------------------------------------------- *)
@@ -142,24 +144,16 @@ let binarycache = lazy
       Log.warning "Binary cache not found (use 'WHY3FIND_PROVERS')." ; ""
   end
 
-let find_downloaded_provers data =
+let find_downloaded_provers () =
   let cache = Lazy.force binarycache in
   let files = try Sys.readdir cache with _ -> [| |] in
   let provers = ref [] in
   Array.iter
     (fun file ->
        match String.split_on_char '@' file with
-       | [ name ; version_exec ] ->
+       | [ name ; version ] ->
          let path = Filename.concat cache file in
-         begin
-           match Why3.Autodetection.find_prover data name path with
-           | None ->
-             Log.warning "Binary %S no more recognized" path
-           | Some version ->
-             if not (String.starts_with ~prefix:version version_exec) then
-               Log.warning "Binary %S is %s@%s" path name version ;
-             provers := (path,name,version) :: !provers
-         end
+         provers := (path,name,version) :: !provers
        | _ -> ()
     ) files ; !provers
 
@@ -197,7 +191,12 @@ let download ~name ~version ~spec =
       match path with
       | None -> file
       | Some path ->
-        command ~prover ~step:"Unpack" "tar zxf %s %s" file path ; path
+        begin
+          if Filename.check_suffix file ".zip" then
+            command ~prover ~step:"Unpack" "unzip %s %s" file path
+          else
+            command ~prover ~step:"Unpack" "tar zxf %s %s" file path
+        end ; path
     in
     command ~prover ~step:"Permissions" "chmod a+x %s" binary ;
     if Version.system = "macosx" then
@@ -215,11 +214,29 @@ let download ~name ~version ~spec =
     Sys.chdir pwd ;
     command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
     Utils.flush () ;
+    begin
+      let config = Why3.Whyconf.init_config ~extra_config:[] None in
+      let data = Why3.Autodetection.read_auto_detection_data config in
+      match Why3.Autodetection.find_prover data name binary with
+      | None | Some "" ->
+        Log.warning "Unrecognized version for %s (use %s)" name version
+      | Some vp ->
+        if vp <> version then
+          Log.error "Incorrect version for %s (use %s)" name version
+    end ;
     Format.printf "Installed prover %s@." prover
   with err ->
     Sys.chdir pwd ;
     command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
     raise err
+
+let shared ~name =
+  (* try *)
+  List.sort by_version @@
+  Json.jassoc Json.jstring @@ Json.of_file @@ Meta.shared @@
+  let open Version in
+  Printf.sprintf "provers/%s.%s.%s.json" name system architecture
+(* with _err -> [] *)
 
 (* -------------------------------------------------------------------------- *)
 (* --- Prover Scanning                                                    --- *)
@@ -236,7 +253,7 @@ let config ?(autodetect=false) ?(downloaded=false) () =
   let config = Why3.Whyconf.init_config ~extra_config:[] None in
   let data = Why3.Autodetection.read_auto_detection_data config in
   (* downloaded provers *)
-  let ps = if downloaded then find_downloaded_provers data else [] in
+  let ps = if downloaded then find_downloaded_provers () else [] in
   (* prover autodetection *)
   let qs = if autodetect then Why3.Autodetection.find_provers data else [] in
   (* consolidation *)
