@@ -42,6 +42,10 @@
 
 
 
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find shared
 --------------------------------------------------------------------------
@@ -54,6 +58,10 @@
   
     Prints shared resources site(s).
   
+
+
+
+
 
 
 
@@ -75,6 +83,10 @@
 
 
 
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find list
 --------------------------------------------------------------------------
@@ -87,6 +99,10 @@
   
     Prints all installed packages.
   
+
+
+
+
 
 
 
@@ -117,6 +133,12 @@
 
 
 
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find compile
 --------------------------------------------------------------------------
@@ -134,6 +156,12 @@
     -v|--verbose print why3 command
     -p|--package PKG package dependency
   
+
+
+
+
+
+
 
 
 
@@ -163,6 +191,12 @@
 
 
 
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find replay
 --------------------------------------------------------------------------
@@ -180,6 +214,12 @@
     -v|--verbose print why3 command
     -p|--package PKG package dependency
   
+
+
+
+
+
+
 
 
 
@@ -216,6 +256,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 
 
 
@@ -281,6 +327,27 @@
 
 
 
+
+--------------------------------------------------------------------------
+--- why3find download
+--------------------------------------------------------------------------
+  $ why3find download --help
+  USAGE:
+  
+    why3find download [--list] [NAME [VERSION [SPEC]]]
+  
+  DESCRIPTION:
+  
+    Download or list available provers from the given parameters.
+    If VERSION is missing, download the most recent version.
+  
+    --list List available versions for NAME
+    --debug FLAG Activate the given debug flag (eg default)
+    --why3-debug FLAG Activate the given Why3 debug flag
+    --show-progress {never|auto|always} When to show progress
+    -help  Display this list of options
+    --help  Display this list of options
+  
 
 --------------------------------------------------------------------------
 --- why3find prove
@@ -356,6 +423,12 @@
 
 
 
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find doc
 --------------------------------------------------------------------------
@@ -401,6 +474,14 @@
 
 
 
+
+
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find server
 --------------------------------------------------------------------------
@@ -427,6 +508,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 
 
 
@@ -460,6 +547,12 @@
     -help  Display this list of options
     --help  Display this list of options
   
+
+
+
+
+
+
 
 
 
@@ -516,6 +609,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 --------------------------------------------------------------------------
 --- why3find uninstall
 --------------------------------------------------------------------------
@@ -528,6 +632,10 @@
   
     Remove all specified packages from topmost installation site.
   
+
+
+
+
 
 
 
@@ -549,6 +657,12 @@
     --p|--package PKG : pass --library=<path> for the package
     --drivers : pass also --driver=<DRV> options
   
+
+
+
+
+
+
 
 
 

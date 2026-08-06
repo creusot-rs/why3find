@@ -583,30 +583,41 @@ let () = register ~name:"download" ~args:"NAME VERSION SPEC"
             Utils.failwith "Unexpected argument (%S)" a
         end
         "USAGE:\n\
-         \n  why3find config NAME VERSION SPEC\n\n\
+         \n  why3find download [--list] [NAME [VERSION [SPEC]]]\n\n\
          DESCRIPTION:\n\
-         \n  Download prover NAME with version VERSION from URL SPEC.\n
+         \n  Download or list available provers from the given parameters.\
+         \n  If VERSION is missing, download the most recent version.\
          \n" ;
-
       let name = !name in
-      if name = ""  then failwith "Missing NAME" ;
-      let data = lazy (Prover.shared ~name) in
-      if !list then
-        List.iter
-          (fun (version,_) -> Format.printf " - %s@%s@." name version)
-          (Lazy.force data)
+      if name = ""  then
+        begin
+          let open Version in
+          Format.printf "Available provers for %s (%s):@." system architecture ;
+          List.iter
+            (fun name ->
+               List.iter
+                 (fun (version,_) -> Format.printf " - %s@%s@." name version)
+                 (try Prover.shared ~name with _ -> [])
+            ) [ "alt-ergo"; "cvc5"; "z3"]
+        end
       else
-        let version = !version in
-        let version = if version <> "" then version else
-            let provers = Lazy.force data in
-            try fst @@ List.hd provers with _ ->
-              Utils.failwith "No specification for prover %s" name in
-        let spec = !spec in
-        let spec =
-          if spec <> "" then spec else
-            try List.assoc version (Lazy.force data) with Not_found ->
-              Utils.failwith "Specification not found for %s@%s" name version
-        in Prover.download ~name ~version ~spec ;
+        let data = lazy (Prover.shared ~name) in
+        if !list then
+          List.iter
+            (fun (version,_) -> Format.printf " - %s@%s@." name version)
+            (Lazy.force data)
+        else
+          let version = !version in
+          let version = if version <> "" then version else
+              let provers = Lazy.force data in
+              try fst @@ List.hd provers with _ ->
+                Utils.failwith "No specification for prover %s" name in
+          let spec = !spec in
+          let spec =
+            if spec <> "" then spec else
+              try List.assoc version (Lazy.force data) with Not_found ->
+                Utils.failwith "Specification not found for %s@%s" name version
+          in Prover.download ~name ~version ~spec ;
     end
 
 (* -------------------------------------------------------------------------- *)
