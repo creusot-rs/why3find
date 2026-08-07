@@ -16,7 +16,7 @@
    (#143, !199).
  - Renamed option `--no-autodetect-provers` into `--no-autodetect` (!212)
  - New option `--no-downloaded` to not use downloaded provers (!212)
- - New option `--no-download` to not download missing provers (!212)
+ - New option `--no-autoload` to not download missing provers (!212)
 
 ### IDE Integration
 

@@ -31,13 +31,13 @@
 --------------------------------------------------------------------------
   $ why3find where --help
   USAGE:
-  
+
     why3find where [-a|--all]
-  
+
   DESCRIPTION:
-  
+
     Prints installation site(s).
-  
+
 
 
 
@@ -51,13 +51,13 @@
 --------------------------------------------------------------------------
   $ why3find shared --help
   USAGE:
-  
+
     why3find shared [-a|--all]
-  
+
   DESCRIPTION:
-  
+
     Prints shared resources site(s).
-  
+
 
 
 
@@ -71,14 +71,14 @@
 --------------------------------------------------------------------------
   $ why3find init --help
   USAGE:
-  
+
     why3find init PKG [DIR]
-  
+
   DESCRIPTION:
-  
+
     Create templates for dune-project and git-ignore for package PKG.
     Files are created in directory DIR (default ./PKG).
-  
+
 
 
 
@@ -92,13 +92,13 @@
 --------------------------------------------------------------------------
   $ why3find list --help
   USAGE:
-  
+
     why3find list
-  
+
   DESCRIPTION:
-  
+
     Prints all installed packages.
-  
+
 
 
 
@@ -109,15 +109,15 @@
 
   $ why3find query --help
   USAGE:
-  
+
     why3find query [PKG...]
-  
+
   DESCRIPTION:
-  
+
     Query why3 package location.
-  
+
   OPTIONS:
-  
+
     -p print package paths only
     -L prints -L <path> for all dependencies
     -r recursive mode, query also dependencies
@@ -126,7 +126,7 @@
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 
 
@@ -144,18 +144,18 @@
 --------------------------------------------------------------------------
   $ why3find compile --help
   USAGE:
-  
+
     why3find compile [OPTIONS] FILE
-  
+
   DESCRIPTION:
-  
+
     Compile the given file(s) using why3 prove command.
-  
+
   OPTIONS:
-  
+
     -v|--verbose print why3 command
     -p|--package PKG package dependency
-  
+
 
 
 
@@ -173,18 +173,18 @@
 --------------------------------------------------------------------------
   $ why3find ide --help
   USAGE:
-  
+
     why3find ide [OPTIONS] FILE
-  
+
   DESCRIPTION:
-  
+
     Run why3 ide on the given file.
-  
+
   OPTIONS:
-  
+
     -v|--verbose print why3 command
     -p|--package PKG package dependency
-  
+
 
 
 
@@ -202,18 +202,18 @@
 --------------------------------------------------------------------------
   $ why3find replay --help
   USAGE:
-  
+
     why3find replay [OPTIONS] MODULE...
-  
+
   DESCRIPTION:
-  
+
     Executes why3 replay with the specified arguments.
-  
+
   OPTIONS:
-  
+
     -v|--verbose print why3 command
     -p|--package PKG package dependency
-  
+
 
 
 
@@ -228,20 +228,20 @@
 
   $ why3find extract --help
   USAGE:
-  
+
     why3find extract [OPTIONS] MODULE...
-  
+
   DESCRIPTION:
-  
+
     Extract OCaml and generate Dune file.
-  
+
   OPTIONS:
-  
+
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
     --no-autodetect  disable prover autodetection
     --no-downloaded  disable downloaded provers
-    --no-download  disable downloading of missing provers
+    --no-autoload  disable downloading of missing provers
     --package ±PKG,… add package dependency
     --driver ±DRV,… configure drivers
     -p  same as --package
@@ -255,7 +255,7 @@
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 
 
@@ -273,21 +273,21 @@
 --------------------------------------------------------------------------
   $ why3find config --help
   USAGE:
-  
+
     why3find config [OPTIONS]
-  
+
   DESCRIPTION:
-  
+
     Configuration of the local package.
     By default, report on the current configuration.
-  
+
   OPTIONS:
-  
+
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
     --no-autodetect  disable prover autodetection
     --no-downloaded  disable downloaded provers
-    --no-download  disable downloading of missing provers
+    --no-autoload  disable downloading of missing provers
     --package ±PKG,… add package dependency
     --fast TIME fast proof time (default 200ms)
     --time TIME median proof time (default 1s)
@@ -321,7 +321,7 @@
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 
 
@@ -333,41 +333,41 @@
 --------------------------------------------------------------------------
   $ why3find download --help
   USAGE:
-  
+
     why3find download [--list] [NAME [VERSION [SPEC]]]
-  
+
   DESCRIPTION:
-  
+
     Download or list available provers from the given parameters.
     If VERSION is missing, download the most recent version.
-  
+
     --list List available versions for NAME
     --debug FLAG Activate the given debug flag (eg default)
     --why3-debug FLAG Activate the given Why3 debug flag
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 --------------------------------------------------------------------------
 --- why3find prove
 --------------------------------------------------------------------------
   $ why3find prove --help
   USAGE:
-  
+
     why3find prove [OPTIONS] PATH...
-  
+
   DESCRIPTION:
-  
+
     Prove all why3 files and directories accessible from PATH.
-  
+
   OPTIONS:
-  
+
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
     --no-autodetect  disable prover autodetection
     --no-downloaded  disable downloaded provers
-    --no-download  disable downloading of missing provers
+    --no-autoload  disable downloading of missing provers
     --package ±PKG,… add package dependency
     --fast TIME fast proof time (default 200ms)
     --time TIME median proof time (default 1s)
@@ -416,7 +416,7 @@
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 
 
@@ -434,24 +434,24 @@
 --------------------------------------------------------------------------
   $ why3find doc --help
   USAGE:
-  
+
     why3find doc [OPTIONS] PATH...
-  
+
   DESCRIPTION:
-  
+
     Generate HTML documentation.
-  
+
     Includes all why3 sources and markdown pages
     accessible from PATH.
-  
-  
+
+
   OPTIONS:
-  
+
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
     --no-autodetect  disable prover autodetection
     --no-downloaded  disable downloaded provers
-    --no-download  disable downloading of missing provers
+    --no-autoload  disable downloading of missing provers
     --package ±PKG,… add package dependency
     --driver ±DRV,… configure drivers
     -p  same as --package
@@ -465,7 +465,7 @@
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 
 
@@ -487,15 +487,15 @@
 --------------------------------------------------------------------------
   $ why3find server --help
   USAGE:
-  
+
     why3find server [OPTIONS]
-  
+
   DESCRIPTION:
-  
+
     Establishes a proof server.
-  
+
   OPTIONS:
-  
+
     --stats Print cache disk usage
     --prune AGE Prune cache generations older than AGE
     --address URL server address (default "tcp://*:5555")
@@ -507,7 +507,7 @@
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 
 
@@ -525,15 +525,15 @@
 --------------------------------------------------------------------------
   $ why3find worker --help
   USAGE:
-  
+
     why3find worker [OPTIONS]
-  
+
   DESCRIPTION:
-  
+
     Provides a worker for the specified proof server.
-  
+
   OPTIONS:
-  
+
     -j JOBS max parallel provers
     --server URL proof server address (default "tcp://localhost:5555")
     --polling TIME server polling interval (default 1.0s)
@@ -546,7 +546,7 @@
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 
 
@@ -564,29 +564,29 @@
 --------------------------------------------------------------------------
   $ why3find install --help
   USAGE:
-  
+
     why3find install [OPTIONS] PKG PATH...
-  
+
   DESCRIPTION:
-  
-  
+
+
     Install the package PKG at the topmost installation site.
-  
+
     Package dependencies and configuration are taken from the
     local project, or from the command line:
-  
+
       PKG/**         all why3 source files
       PKG/**/*.mlw   specified why3 source files
       **/*.drv       OCaml extraction drivers
-  
+
     If no source file is given, all why3 source files
     in directory PKG will be installed.
-  
+
     Unless --no-doc is specified, documentation in './html'
     directory is also installed.
-  
+
   OPTIONS:
-  
+
     --dune Generate dune installer (default)
     --global Install in global repository (why3find where)
     --lib DIR extraction directory (why3find extract -o DIR)
@@ -597,7 +597,7 @@
     --show-progress {never|auto|always} When to show progress
     -help  Display this list of options
     --help  Display this list of options
-  
+
 
 
 
@@ -625,13 +625,13 @@
 --------------------------------------------------------------------------
   $ why3find uninstall --help
   USAGE:
-  
+
     why3find uninstall [PKG...]
-  
+
   DESCRIPTION:
-  
+
     Remove all specified packages from topmost installation site.
-  
+
 
 
 
@@ -645,18 +645,18 @@
 --------------------------------------------------------------------------
   $ why3find CMD --help
   USAGE:
-  
+
     why3find CMD [ARGS...]
-  
+
   DESCRIPTION:
-  
+
     Execute command "CMD" with wrapped arguments.
-  
+
   OPTIONS:
-  
+
     --p|--package PKG : pass --library=<path> for the package
     --drivers : pass also --driver=<DRV> options
-  
+
 
 
 

@@ -634,7 +634,7 @@ let () = Dap.on_launch
           | Some root ->
             clear () ;
             let config = Config.load_config ~root in
-            let env = Project.create ~root ~config () in
+            let env = Wenv.init ~root config in
             Fibers.background @@ Fibers.all @@
             List.map (cc_file adapter env !goals) files ;
             let progress = Dap.progress adapter ~title:"Why3" () in

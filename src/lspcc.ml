@@ -12,10 +12,6 @@ let init () = () (* for dependencies only *)
 (* ---  Source Management                                                 --- *)
 (* -------------------------------------------------------------------------- *)
 
-let plugins = ref true
-
-let load_plugins () = !plugins && (plugins := false ; true)
-
 type source = {
   env : Project.env ;
   src : Docref.source ;
@@ -90,8 +86,7 @@ let preprocess filename diagnostics =
     in
     Hashtbl.remove sources filename ;
     let config = Config.load_config ~root in
-    let loadplugins = load_plugins () in
-    let env = Wenv.init ~root ~loadplugins config in
+    let env = Wenv.init ~root config in
     let wenv = env.why3.env in
     let henv = Axioms.init env in
     let lib = library ~root ~filename in

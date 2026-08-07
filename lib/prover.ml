@@ -348,24 +348,17 @@ let digest_config main Whyconf.{
 [@@ocaml.warning "+9"] (* missing name in record **)
 
 let load (wenv : Config.why3env) desc config =
-  let main = Whyconf.get_main wenv.config in {
-    desc ; config ; relaxed = false ;
-    driver = Driver.load_driver_for_prover main wenv.env config ;
-    digest = digest_config main config ;
-  }
+  let main = Whyconf.get_main wenv.config in
+  let digest = digest_config main config in
+  let driver = Driver.load_driver_for_prover main wenv.env config in
+  { desc ; config ; relaxed = false ; driver ; digest }
 
 let all (wenv : Config.why3env) =
   Whyconf.Mprover.fold
     begin fun _ config m ->
       match desc_of_config_prover config with
       | None -> m
-      | Some desc ->
-        let main = Whyconf.get_main wenv.config in
-        add desc {
-          desc ; config ; relaxed = false ;
-          driver = Driver.load_driver_for_prover main wenv.env config ;
-          digest = digest_config main config ;
-        } m
+      | Some desc -> add desc (load wenv desc config) m
     end (Whyconf.get_provers wenv.config) empty
 
 let all = Config.Whtbl.memoize 5 all
