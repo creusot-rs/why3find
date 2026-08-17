@@ -311,7 +311,7 @@ let downloaded () =
 
 let autoload () =
   downloaded () &&
-  try Sys.getenv "WHY3FIND_DOWNLOAD" <> "no" with Not_found -> !autoload
+  try Sys.getenv "WHY3FIND_AUTOLOAD" <> "no" with Not_found -> !autoload
 
 let init ?root config =
   Project.create

@@ -18,7 +18,7 @@ workflow:
 # ---------------------------------------------------------------------------
 
 .opam: &opam
-  image: registry.frama-c.com/pub/why3find:v2@sha256:df5db8e48bbf2e2de4f762ea201cbee9116c458b14d1d9a0828c9ed163079c2a
+  image: registry.frama-c.com/pub/why3find:v2@sha256:d8ce392c6124a8b3b9cab26a894f0acbe0491bd3305ba686171305df9bf48031
   tags:
     - docker
 
