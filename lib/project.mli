@@ -24,7 +24,6 @@ val create :
   ?autodetect:bool ->
   ?downloaded:bool ->
   ?patterns:string list ->
-  ?why3:Why3.Whyconf.config ->
   ?config:Config.config ->
   unit -> env
 (** Create an environment with configuration [config] for the project

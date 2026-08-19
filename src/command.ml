@@ -434,19 +434,22 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
         then Config.default
         else Config.config_of_json rawconfig in
       let config = Wenv.add_options config in
-      let env = Wenv.init config in
       (* --- List Provers -------------- *)
       if !list_provers || !list_tactics then
         begin
           if !list_provers then
             begin
               Format.printf "Available Provers:@." ;
-              let allprovers = Prover.all env.why3 in
-              if Prover.is_empty allprovers then
-                Format.printf "  (none)@." ;
-              Prover.iter (fun dp _ ->
-                  Format.printf " - %a@." Prover.pp_desc dp
-                ) allprovers ;
+              let autodetect = Wenv.autodetect () in
+              let downloaded = Wenv.downloaded () in
+              let whyconf = Prover.config ~autodetect ~downloaded () in
+              let provers = Prover.available whyconf in
+              if Prover.is_empty provers then
+                Format.printf "  (none)@."
+              else
+                Prover.iter (fun dp _ ->
+                    Format.printf " - %a@." Prover.pp_desc dp
+                  ) provers ;
             end ;
           if !list_tactics then
             begin
@@ -459,6 +462,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             end ;
           exit 0
         end;
+      let env = Wenv.init config in
       (* --- Packages ---- *)
       let pkgs = config.packages in
       if !list && pkgs <> [] then

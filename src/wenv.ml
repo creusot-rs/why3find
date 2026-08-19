@@ -313,12 +313,15 @@ let autoload () =
   downloaded () &&
   try Sys.getenv "WHY3FIND_AUTOLOAD" <> "no" with Not_found -> !autoload
 
+let patterns config =
+  if autoload () then provers config else []
+
 let init ?root config =
   Project.create
     ?root ~config
     ~usecache:!usecache
     ~autodetect:(autodetect ())
     ~downloaded:(downloaded ())
-    ()
+    ~patterns:(patterns config) ()
 
 (* -------------------------------------------------------------------------- *)
