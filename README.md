@@ -266,30 +266,33 @@ You can also control the behavior of why3find with environment variables
 
 For manually download provers, use the `why3find download` command:
 
+    # why3find download --list        ;; list known versions for prover
     # why3find download --list NAME   ;; list known versions for prover
     # why3find download NAME          ;; download the last version
     # why3find download NAME VERSION  ;; download a specific version
 
-If a prover version is not (yet) known by why3find, you can still download
-and install it automatically with the following command:
+Available prover versions depend on the local system (Linux/macOS) and
+architecture (x86/ARM). If a prover version is not (yet) known by why3find, you
+can still download and install it automatically with the following command:
 
     # why3find download NAME VERSION URL[#PATH]
 
-When downloading such a specification, why3find will perform the following steps:
+When downloading a URL prover specification, why3find will perform the following
+steps:
 
-  - download the `URL` from UNIX command `wget` (without `#PATH`);
+  - download the `URL` resource with UNIX command `wget` (without `#PATH`);
   - if necessary, decompress the archive with UNIX command `unzip` or `tar zxf`
     according to `<file>` extension;
   - if specified, only the `#PATH` component of the archive is extracted;
-  - the resulting file is move to the why3find provers directory under name
+  - the resulting file is moved to the why3find provers directory under name
    `NAME@VERSION`;
-  - it is assigned execution rights with UNIX command `chmod a+x`
-  - under macOS, the binary is locally signed using `xcode` command
+  - the binary is assigned execution rights with UNIX command `chmod a+x`;
+  - under macOS, the binary is locally signed using `xcode` command.
 
 A catalog of known provers is distributed in the `why3find shared` directory.
 Feel free to inspect the `provers/<NAME>.<OS>.<ARCH>.json` files and submit
 additional prover specifications through the public why3find GitLab.
-Currently, the catalog contains recent versions of `alt-ergo`, `z3` and `cvc5`
+Currently, the catalog contains decent versions of `alt-ergo`, `z3` and `cvc5`
 for `linux.amd64`, `macosx.amd64` and `macosx.arm64` architectures.
 
 ## Package Proving
