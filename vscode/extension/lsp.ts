@@ -13,8 +13,6 @@
 import { Socket, connect } from 'net';
 
 import {
-  window,
-  OutputChannel,
   workspace,
   Disposable,
 } from 'vscode';

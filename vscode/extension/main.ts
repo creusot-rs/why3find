@@ -10,7 +10,7 @@ import {
   commands, languages, debug, window, workspace,
   ExtensionContext, EventEmitter, Diagnostic,
   DebugSessionCustomEvent, Uri, Range,
-  DebugStackFrame, ProviderResult,
+  DebugThread, DebugStackFrame, ProviderResult,
   TextEditorDecorationType,
   TextDocumentContentProvider,
   ThemeColor,
@@ -153,8 +153,8 @@ export function activate(context: ExtensionContext): void {
   }
 
   // DAP custom request 'why3/context'
-  function onDebugStackFrame(stack: DebugStackFrame | undefined): void {
-    if (stack && stack.session.type === 'why3') {
+  function onDebugStackItem(stack: DebugThread | DebugStackFrame | undefined): void {
+    if (stack instanceof DebugStackFrame && stack.session.type === 'why3') {
       provider.update();
       const { session, threadId, frameId } = stack;
       session
@@ -193,7 +193,7 @@ export function activate(context: ExtensionContext): void {
     debug.registerDebugAdapterDescriptorFactory('why3', dap),
     debug.onDidReceiveDebugSessionCustomEvent(onDebugCustomEvent),
     debug.onDidStartDebugSession(onDebugStart),
-    debug.onDidChangeActiveStackItem(onDebugStackFrame),
+    debug.onDidChangeActiveStackItem(onDebugStackItem),
     debug.onDidTerminateDebugSession(onDebugTerminate),
     workspace.onDidSaveTextDocument(clearDiagnostics),
     workspace.registerTextDocumentContentProvider('why3', provider),
