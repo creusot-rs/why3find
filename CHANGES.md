@@ -5,6 +5,8 @@
 ### Notable New Features
 
  - New command `why3find stats` to generate project JSON statistics (!209)
+ - New command `why3find download` to download provers (!212)
+ - Automatic or on-demand download of missing provers (Cf. README, !212)
  - New CSS style for documentation generator (!210)
  - Support for Markdown maths equations with KaTeX (!211)
 
@@ -14,9 +16,10 @@
    Default behavior is now `--summary` when proving more than 10 files,
    `--modules` when proving more than 1 file and `--theories` when proving 1 file
    (#143, !199).
- - Renamed option `--no-autodetect-provers` into `--no-autodetect` (!212)
- - New option `--no-downloaded` to not use downloaded provers (!212)
+ - New option `--autoload` to automatically download missing provers (!212)
  - New option `--no-autoload` to not download missing provers (!212)
+ - New option `--no-downloaded` to not use downloaded provers (!212)
+ - Renamed option `--no-autodetect-provers` into `--no-autodetect` (!212)
 
 ### IDE Integration
 
