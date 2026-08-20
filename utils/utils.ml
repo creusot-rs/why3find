@@ -68,6 +68,19 @@ let flush () =
   Format.pp_print_flush Format.err_formatter () ;
   if escape_codes Unix.stdout then Printf.printf "\r\027[K%!"
 
+let hline () =
+  let width = Option.value (Terminal_size.get_columns ()) ~default:80 in
+  Format.printf "%s@." (String.make width '-')
+
+let ask ?(default="") fmt =
+  Format.kasprintf
+    (fun msg ->
+       flush () ;
+       Printf.printf "> %s \027[K%!" msg ;
+       let resp = read_line () in
+       if resp = "" then default else resp
+    ) fmt
+
 let nop _ = ()
 
 let mark_open_stag tag =

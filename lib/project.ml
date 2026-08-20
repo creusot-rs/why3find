@@ -24,12 +24,14 @@ let create
     ?(usecache=true)
     ?(autodetect=true)
     ?(downloaded=true)
-    ?patterns
+    ?(autoload=false)
+    ?(missing=false)
     () =
   let pkgs = Meta.find_all config.Config.packages in
   let pkg_path = List.map (fun m -> m.Meta.path) pkgs in
-  let patterns = match patterns with Some ps -> ps | None -> config.provers in
-  let whyconf = Prover.config ~autodetect ~downloaded ~patterns () in
+  let autoload = if autoload then config.provers else [] in
+  let missing= if missing then config.provers else [] in
+  let whyconf = Prover.config ~autodetect ~downloaded ~autoload ~missing () in
   if not !plugins then
     begin
       Why3.Whyconf.load_plugins @@

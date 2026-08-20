@@ -26,10 +26,12 @@ val create :
   ?usecache:bool ->
   ?autodetect:bool ->
   ?downloaded:bool ->
-  ?patterns:string list ->
+  ?autoload:bool ->
+  ?missing:bool ->
   unit -> t
 (** Create an environment with configuration [config] for the project
-    located in [root] (which default to ".") *)
+    located in [root] (which default to ".").
+    See {Prover.config} for prover loading options. *)
 
 val select_tactics : t -> Tactic.tactic list
 val select_provers : ?patterns:string list -> t -> Prover.prover list

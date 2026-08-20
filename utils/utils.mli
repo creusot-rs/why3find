@@ -66,6 +66,9 @@ val show_progress_opt : string * Arg.spec * string
 
 val tty : bool (** Stdout supports ANSI escape codes. *)
 
+val ask : ?default:string -> ('a, Format.formatter, unit, string) format4 -> 'a
+(** Prints the message and reads on line from stdin *)
+
 val set_ansi_tags : Format.formatter -> unit
 (** Register semantic tags for emitting ANSI escape codes. *)
 
@@ -77,6 +80,9 @@ val killline : unit -> unit
 
 val overflows : unit -> bool
 (** Returns [true] if more lines that terminal height were written. *)
+
+val hline : unit -> unit
+(** Prints an horizontal line *)
 
 val progress : ('a,Format.formatter,unit) format -> 'a
 val failwith : ('a,Format.formatter,unit,'b) format4 -> 'a

@@ -42,7 +42,8 @@ let prep = ref None
 let jobs = ref false
 let autodetect = ref true
 let downloaded = ref true
-let autoload = ref true
+let autoload = ref false
+let missing = ref true
 let usecache = ref true
 
 (* -------------------------------------------------------------------------- *)
@@ -171,7 +172,8 @@ let settime prm s =
 let alloptions : (opt * string * Arg.spec * string) list = [
   `All, "--root", Arg.Set_string chdir, "DIR change to directory";
   `All, "--why3-warn-off", Arg.String (add warn), "WRN,… disable why3 warnings";
-  `All, "--no-autoload", Arg.Clear autoload, " disable downloading of missing provers";
+  `All, "--autoload", Arg.Set autoload, " automatic download of missing provers";
+  `All, "--no-autoload", Arg.Clear missing, " disable downloading of missing provers";
   `All, "--no-autodetect", Arg.Clear autodetect, " disable prover autodetection";
   `All, "--no-downloaded", Arg.Clear downloaded, " disable downloaded provers";
   `Package, "--package", Arg.String (add pkgs), "±PKG,… add package dependency";
@@ -309,12 +311,21 @@ let autodetect () =
 let downloaded () =
   try Sys.getenv "WHY3FIND_DOWNLOADED" <> "no" with Not_found -> !downloaded
 
+(* Invariant: missing and autoload can never be true at the same time *)
+
+let missing () =
+  Utils.tty &&
+  downloaded () &&
+  match Sys.getenv "WHY3FIND_AUTOLOAD" with
+  | "yes" | "no" -> false
+  | _ | exception Not_found -> not !autoload && !missing
+
 let autoload () =
   downloaded () &&
-  try Sys.getenv "WHY3FIND_AUTOLOAD" <> "no" with Not_found -> !autoload
-
-let patterns config =
-  if autoload () then provers config else []
+  match Sys.getenv "WHY3FIND_AUTOLOAD" with
+  | "yes" -> true
+  | _ -> false
+  | exception Not_found -> !autoload
 
 let init ?root config =
   Project.create
@@ -322,6 +333,8 @@ let init ?root config =
     ~usecache:!usecache
     ~autodetect:(autodetect ())
     ~downloaded:(downloaded ())
-    ~patterns:(patterns config) ()
+    ~autoload:(autoload ())
+    ~missing:(missing ())
+    ()
 
 (* -------------------------------------------------------------------------- *)

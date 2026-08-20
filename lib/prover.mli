@@ -65,8 +65,16 @@ val pmatch : string -> (desc -> bool) (** Compiled from pattern. *)
 val config :
   ?autodetect:bool ->
   ?downloaded:bool ->
-  ?patterns:string list ->
+  ?autoload:string list ->
+  ?missing:string list ->
   unit -> Why3.Whyconf.config
+(** Configure available provers:
+    - use global Why3 configuration
+    - use PATH autodetection unless [~autodetect:false]
+    - use HOME/.why3find.provers unless [~downloaded:false]
+    - auto-download missing provers [~autoload] (if any)
+    - ask for downloading provers [~missing] (if any)
+*)
 
 val available : Why3.Whyconf.config -> desc portfolio
 val shared : name:string -> (string * string) list (* [VERSION,URL;…] sorted *)

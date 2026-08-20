@@ -188,6 +188,10 @@ let command ~prover ~step msg =
     msg
 
 let downloadrc ~name ~version ~spec =
+  Utils.flush () ;
+  Utils.hline () ;
+  Printf.printf "  Downloading %s@%s\n" name version ;
+  Utils.hline () ;
   let prover = Printf.sprintf "%s@%s" name version in
   let tmp = Filename.temp_dir "why3find" "download" in
   let pwd = Sys.getcwd () in
@@ -240,10 +244,13 @@ let downloadrc ~name ~version ~spec =
           Log.error "Incorrect version for %s (use %s)" name version
     end ;
     Format.printf "Installed prover %s@." prover ;
+    Utils.hline () ;
     Filename.concat binary prover, name, version
   with err ->
     Sys.chdir pwd ;
+    Utils.flush () ;
     command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
+    Utils.hline () ;
     raise err
 
 let download ~name ~version ~spec = ignore @@ downloadrc ~name ~version ~spec
@@ -258,20 +265,38 @@ let shared ~name =
 (* --- Missing Provers                                                    --- *)
 (* -------------------------------------------------------------------------- *)
 
-let missing provers pattern =
+let missed = ref 0
+let installed = ref 0
+
+let ask name version =
+  Utils.tty &&
+  match
+    String.uppercase_ascii @@
+    Utils.ask ~default:"Y"
+      "Missing prover %s@%s. Download @{<bold>[Y/n]@} ?" name version
+  with "Y" | "YES" -> true | _ -> false
+
+let add_missing ~auto provers pattern =
   let name, version = pattern_of_string pattern in
   let pmatch (_,p,v) =
     p = name && match version with None -> true | Some version -> v = version
   in
   if List.exists pmatch provers then provers else
     try
+      incr missed ;
       let specs = shared ~name in
       let version,spec =
         match version with
         | Some v -> v, List.assoc v specs
-        | None -> List.hd specs
-      in downloadrc ~name ~version ~spec :: provers
-    with _exn ->
+        | None -> List.hd specs in
+      if not auto && not @@ ask name version then raise Exit ;
+      let prv = downloadrc ~name ~version ~spec in
+      incr installed ; prv :: provers
+    with
+    | Exit -> provers
+    | Not_found ->
+      warn_prover_not_found pattern ; provers
+    | _exn ->
       Log.warning "Can not download missing prover %s" pattern ; provers
 
 (* -------------------------------------------------------------------------- *)
@@ -284,7 +309,7 @@ let rc_prover_section (path,name,version) =
   let s = Why3.Rc.set_string s "path" path in
   let s = Why3.Rc.set_string s "version" version in s
 
-let config ?(autodetect=false) ?(downloaded=false) ?(patterns=[]) () =
+let config ?(autodetect=true) ?(downloaded=true) ?(autoload=[]) ?(missing=[]) () =
   (* load the Why3 user's config first, if any *)
   let config = Why3.Whyconf.init_config ~extra_config:[] None in
   let data = Why3.Autodetection.read_auto_detection_data config in
@@ -293,7 +318,16 @@ let config ?(autodetect=false) ?(downloaded=false) ?(patterns=[]) () =
   (* prover autodetection *)
   let qs = if autodetect then Why3.Autodetection.find_provers data else [] in
   (* download missing provers *)
-  let provers = List.fold_left missing (ps @ qs) patterns in
+  missed := 0 ;
+  installed := 0 ;
+  let provers = List.fold_left (add_missing ~auto:true) (ps @ qs) autoload in
+  let provers = List.fold_left (add_missing ~auto:false) provers missing in
+  if !missed > 1 then
+    if !installed = 0 then
+      Format.printf "Missing %d provers.@." !missed
+    else
+      Format.printf "Downloaded %d/%d missing provers.@." !installed !missed ;
+  (* complete configuration *)
   if provers <> [] then
     !Why3.Whyconf.provers_from_detected_provers config @@
     Why3.Rc.set_simple_family Why3.Rc.empty "partial_prover" @@
