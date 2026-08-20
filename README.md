@@ -6,15 +6,16 @@
 Why3find provides a collection of utilities to ease the development
 of Why3 projects and the distribution of Why3 libraries and
 packages. It can be used in place of the traditional `why3` command for most
-development tasks, eg. configuring provers, proving files or interactively
+development tasks such as configuring provers, proving files or interactively
 debugging proofs. In additional, it can be used to build enhanced documentation,
-package and install libraries or setup a distributed solver cloud.
+package and install libraries or deploy a solver cloud.
 
 - [Quick Setup](#quick-setup)
 - [IDE Support](#ide-support)
 - [Packages](#packages)
 - [Package Development](#package-development)
 - [Package Configuration](#package-configuration)
+- [Provers Installation](#provers-installation)
 - [Package Proving](#package-proving)
 - [Package Statistics](#package-statistics)
 - [Package Documentation](#package-documentation)
@@ -76,7 +77,7 @@ This will compile and install both the `why3find` command and the VSCode plugin.
 ### Emacs
 
 The LSP can be used on Emacs with `lsp-mode` (Emacs' internal LSP client Eglot
-might also work, but will offer less functionalities).
+might also work, but offers fewer functionalities).
 
 Add this to your `.emacs` file :
 
@@ -214,7 +215,7 @@ Typical examples are:
     why3find config               # Show current config
     why3find config […]           # Update packages, provers, etc.
     why3find config --reset   […] # Configure from scratch (ignore current config)
-    why3find config --default […] # Use all available "default" provers
+    why3find config --default […] # Use all available "default" provers (see below)
     why3find config --check       # Check consistency between proof certificates and configuration
 
 When using `--default` why3find will select the highest available
@@ -230,6 +231,66 @@ Available provers are searched from global Why3 user's configuration and from
 the current `PATH` environment variable. The global Why3 user's configuration is
 taken from `~/.why3.conf` (if any) or `WHY3CONFIG` environment variable (if
 defined).
+
+## Provers Installation
+
+By default, `why3find` uses all available and detected provers from `PATH`.
+It also uses globally configured provers for `Why3` as specified in `~/.why3.conf`
+or `WHY3CONFIG` environment variable.
+
+Additionally, `why3find config` and `why3find prove` can also download missing
+provers, either on-demand or automatically. The command `why3find download` can
+also be used to download and install provers manually.
+
+Provers downloaded by `why3find` are installed in the `~/.why3find.provers`
+directory. You can also add binaries on your side into this directory.
+Alternatively, the environment variable `WHY3FIND_DOWNLOADED` can be used to
+specify another directory.
+
+Here are some recipes for controlling prover download, which also apply
+to why3find prove command:
+
+    # why3find config                 ;; in TTY, ask for missing provers
+    # why3find config --autoload      ;; automatically download missing provers
+    # why3find config --no-autoload   ;; disable prover download
+    # why3find config --no-downloaded ;; do not use downloaded provers
+    # why3find config --no-autodetect ;; do not detect provers from PATH
+
+You can also control the behavior of why3find with environment variables
+(which have precedence on command line arguments):
+
+    WHY3FIND_AUTODETECT=no   ;; same as --no-autodetect
+    WHY3FIND_DOWNLOADED=no   ;; same as --no-downloaded
+    WHY3FIND_AUTOLOAD=no     ;; same as --no-autoload
+    WHY3FIND_AUTOLOAD=yes    ;; same as --autoload
+
+For manually download provers, use the `why3find download` command:
+
+    # why3find download --list NAME   ;; list known versions for prover
+    # why3find download NAME          ;; download the last version
+    # why3find download NAME VERSION  ;; download a specific version
+
+If a prover version is not (yet) known by why3find, you can still download
+and install it automatically with the following command:
+
+    # why3find download NAME VERSION URL[#PATH]
+
+When downloading such a specification, why3find will perform the following steps:
+
+  - download the `URL` from UNIX command `wget` (without `#PATH`);
+  - if necessary, decompress the archive with UNIX command `unzip` or `tar zxf`
+    according to `<file>` extension;
+  - if specified, only the `#PATH` component of the archive is extracted;
+  - the resulting file is move to the why3find provers directory under name
+   `NAME@VERSION`;
+  - it is assigned execution rights with UNIX command `chmod a+x`
+  - under macOS, the binary is locally signed using `xcode` command
+
+A catalog of known provers is distributed in the `why3find shared` directory.
+Feel free to inspect the `provers/<NAME>.<OS>.<ARCH>.json` files and submit
+additional prover specifications through the public why3find GitLab.
+Currently, the catalog contains recent versions of `alt-ergo`, `z3` and `cvc5`
+for `linux.amd64`, `macosx.amd64` and `macosx.arm64` architectures.
 
 ## Package Proving
 
@@ -546,12 +607,12 @@ Section delimiters can have various format:
 
 Actually, `(*proof*)…(*qed*)` is a shortcut for `(*[Proof]-*)…(*/[Qed]*)`.
 Nested sections are allowed. Notice also that sections are authorized to overlap
-code's nested parentheses, although it is not recommended to do so for readability
+code's nested parentheses, although it is not recommended doing so for readability
 reason. For instance `(*proof*) begin (*qed*) end` is valid,
 but makes the generated documentation difficult to read.
 
 *Cloned Modules and Theories* sections are automatically inserted for clones, with
-a copy of the cloned symbols signature, and links to their original definitions.
+the signature of the cloned symbols and links to their original definitions.
 
 *Proof Results* based on proof certificates generated by `why3find prove`
 are also inserted after each goal identifier. Proof summaries are also inserted
@@ -622,7 +683,7 @@ options corresponding to the project configuration and from the `why3find
 extract` command line. Moreover, the `why3find extract` command also generates a
 `dune` file for compiling and installing the library of extracted OCaml code.
 
-You shall specify the the list of Why3 modules (`MODULE`) to be extracted on the
+You shall specify the list of Why3 modules (`MODULE`) to be extracted on the
 command line, as follows:
 
     why3find extract MODULE...
