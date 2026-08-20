@@ -15,9 +15,6 @@
   
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
-    --no-autoload  disable downloading of missing provers
-    --no-autodetect  disable prover autodetection
-    --no-downloaded  disable downloaded provers
     --package ±PKG,… add package dependency
     --fast TIME fast proof time (default 200ms)
     --time TIME median proof time (default 1s)
@@ -34,6 +31,10 @@
     -D  same as --driver
     -j JOBS max parallel provers
     --no-cache do not read results from cache
+    --autoload  automatic download of missing provers
+    --no-autoload  disable downloading of missing provers
+    --no-autodetect  disable prover autodetection
+    --no-downloaded  disable downloaded provers
     --log-prover-results FILE log the prover results in the given file
     --master calibrate provers (master)
     --velocity evaluate prover velocity (local)

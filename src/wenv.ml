@@ -43,7 +43,7 @@ let jobs = ref false
 let autodetect = ref true
 let downloaded = ref true
 let autoload = ref false
-let missing = ref true
+let missing = ref false
 let usecache = ref true
 
 (* -------------------------------------------------------------------------- *)
@@ -161,6 +161,7 @@ type opt = [
   | `Package
   | `Prover
   | `Driver
+  | `Download
 ]
 
 let setjobs n = Runner.set_jobs n ; jobs := true
@@ -172,10 +173,6 @@ let settime prm s =
 let alloptions : (opt * string * Arg.spec * string) list = [
   `All, "--root", Arg.Set_string chdir, "DIR change to directory";
   `All, "--why3-warn-off", Arg.String (add warn), "WRN,… disable why3 warnings";
-  `All, "--autoload", Arg.Set autoload, " automatic download of missing provers";
-  `All, "--no-autoload", Arg.Clear missing, " disable downloading of missing provers";
-  `All, "--no-autodetect", Arg.Clear autodetect, " disable prover autodetection";
-  `All, "--no-downloaded", Arg.Clear downloaded, " disable downloaded provers";
   `Package, "--package", Arg.String (add pkgs), "±PKG,… add package dependency";
   `Prover,  "--fast", Arg.String (settime fast), "TIME fast proof time (default 200ms)";
   `Prover,  "--time", Arg.String (settime time), "TIME median proof time (default 1s)";
@@ -192,19 +189,24 @@ let alloptions : (opt * string * Arg.spec * string) list = [
   `Driver,  "-D", Arg.String (add drvs), " same as --driver";
   `Prover,  "-j", Arg.Int setjobs, "JOBS max parallel provers" ;
   `Prover,  "--no-cache", Arg.Clear usecache, "do not read results from cache";
+  `Download, "--autoload", Arg.Set autoload, " automatic download of missing provers";
+  `Download, "--no-autoload", Arg.Clear missing, " disable downloading of missing provers";
+  `Driver, "--no-autodetect", Arg.Clear autodetect, " disable prover autodetection";
+  `Driver, "--no-downloaded", Arg.Clear downloaded, " disable downloaded provers";
   `Prover,  "--log-prover-results", Arg.String Runner.set_logfile, "FILE log the prover results in the given file";
 ]
 
-let options ?(packages=false) ?(provers=false) ?(drivers=false) () =
+let options ?(packages=false) ?(provers=false) ?(drivers=false) ?(download=false) () =
   let default = not packages && not provers && not drivers in
+  missing := download ;
   List.filter_map
     (fun (opt,name,spec,descr) ->
-       if default ||
-          match opt with
+       if match opt with
           | `All -> true
-          | `Package -> packages
-          | `Prover -> provers
-          | `Driver -> drivers
+          | `Download -> download
+          | `Package -> default || packages
+          | `Prover -> default || provers
+          | `Driver -> default || drivers
        then Some(name,spec,descr)
        else None
     ) alloptions

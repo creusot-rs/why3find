@@ -18,13 +18,12 @@
   
     --root DIR change to directory
     --why3-warn-off WRN,… disable why3 warnings
-    --no-autoload  disable downloading of missing provers
-    --no-autodetect  disable prover autodetection
-    --no-downloaded  disable downloaded provers
     --package ±PKG,… add package dependency
     --driver ±DRV,… configure drivers
     -p  same as --package
     -D  same as --driver
+    --no-autodetect  disable prover autodetection
+    --no-downloaded  disable downloaded provers
     -t TITLE document title (default none)
     -o DIR destination directory (default "html")
     -u output generated URI

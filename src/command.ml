@@ -403,7 +403,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       let update () = strict := true; relax := true in
       parse argv
         begin
-          Wenv.options () @
+          Wenv.options ~download:true () @
           [
             "--master", Arg.Set calibrate, "calibrate provers (master)";
             "--velocity", Arg.Set velocity, "evaluate prover velocity (local)";
@@ -646,7 +646,7 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
       let failed () = context 2 in
       parse argv
         begin
-          Wenv.options () @
+          Wenv.options ~download:true () @
           [
             "-g", Arg.String (add goals), "<name> goals selection";
             "-f", Arg.Unit (set mode `Force), "force rebuild proofs";

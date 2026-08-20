@@ -14,6 +14,7 @@ val options :
   ?packages:bool ->
   ?provers:bool ->
   ?drivers:bool ->
+  ?download:bool ->
   unit -> (string * Arg.spec * string) list
 
 val arg1 : string -> string
