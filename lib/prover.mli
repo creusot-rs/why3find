@@ -13,15 +13,10 @@
 type desc = { name : string ; version : string }
 (** The type of prover descriptions, identifying a unique prover version. *)
 
-exception Invalid_pattern of string
-(** Raised on invalid pattern or prover description, see below. The argument
-    is the erroneous string. *)
-
 val desc_to_string : desc -> string
 val desc_of_string : string -> desc
 (** Converts prover descriptions to and from string. The syntax is the same as
-    patterns below, but the version part is mandatory.
-    @raise Invalid_pattern when the string description is invalid. *)
+    patterns below, but the version part is mandatory. *)
 
 val desc_of_config_prover : Why3.Whyconf.config_prover -> desc option
 (** Returns None for alternative or interactive provers *)
@@ -41,8 +36,11 @@ val empty : 'a portfolio
 val add : desc -> 'a -> 'a portfolio -> 'a portfolio
 val mem : desc -> 'a portfolio -> bool
 val find : desc -> 'a portfolio -> 'a
-val select : name:string -> ?version:string -> 'a portfolio -> 'a
-(** Returns the most recent one if no version is provided. *)
+val select :
+  name:string -> ?version:string -> ?warn:bool -> ?pattern:string ->
+  'a portfolio -> 'a option
+(** No version means the most recent one, if any.
+    Does not warn if [~warn:true] and warns with [~pattern] if provided. *)
 
 val is_empty : 'a portfolio -> bool
 val iter : (desc -> 'a -> unit) -> 'a portfolio -> unit
@@ -58,16 +56,9 @@ val iter : (desc -> 'a -> unit) -> 'a portfolio -> unit
 val pattern : name:string -> ?version:string -> unit -> string
 
 val pattern_name : string -> string
-(** @raise Invalid_pattern when the pattern is invalid *)
-
 val pattern_version : string -> string option
-(** @raise Invalid_pattern when the pattern is invalid *)
-
 val pattern_of_string : string -> string * string option
-(** @raise Invalid_pattern when the pattern is invalid *)
-
-val pmatch : string -> (desc -> bool)
-(** Compiled from pattern. *)
+val pmatch : string -> (desc -> bool) (** Compiled from pattern. *)
 
 (** {1 Why3 Config} *)
 
@@ -107,25 +98,10 @@ val relaxed : prover -> prover
 val pp_prover : Format.formatter -> prover -> unit
 (** Prints prover fullname. *)
 
-val load : Config.why3env -> desc -> Why3.Whyconf.config_prover -> prover
-
-(** {1 Retrieving available provers} *)
-
-val all : Config.why3env -> prover portfolio
-(** Returns the set of all available provers for the given Why3 environment. *)
-
-val default : Config.why3env -> prover list
-(** Returns the set of available "default" provers. *)
-
-val select_all : Config.why3env -> patterns:string list -> prover list
-(** Selects the provers that match one of the [patterns].
-    For each [pattern] in order, if the pattern is invalid or the prover is not
-    in the map, a warning is emitted, otherwise one prover is appended to the
-    return list, either the one specified or the latest available version in
-    case of a version-less pattern. *)
-
-val retrieve : name:string -> ?version:string -> prover list -> prover option
-(** Find some corresponding prover in the list. Emits a warning if not found. *)
+val load : Why3.Whyconf.config -> Why3.Env.env -> desc -> Why3.Whyconf.config_prover -> prover
+(** Load the prover with its configured drivers *)
 
 val download : name:string -> version:string -> spec:string -> unit
 (** Download and install the given prover in binary cache. *)
+
+val provers : Why3.Whyconf.config -> Why3.Env.env -> prover portfolio

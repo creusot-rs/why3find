@@ -1300,12 +1300,12 @@ let process ~wenv ~henv ~out ~title (file,kind) =
   | None -> process_markdown ~wenv ~henv ~out ~title file
   | Some src -> process_source ~wenv ~henv ~out file src
 
-let generate ~(env:Project.env) ~out ~title ~files ~url ~package_url =
+let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
   begin
     (* Why3 environment *)
-    let wenv = env.why3.env in
+    let wenv = project.env in
     (* Axioms config *)
-    let henv = Axioms.init env in
+    let henv = Axioms.init project in
     (* Sounness config *)
     let senv = Soundness.init () in
     (* Shared resources *)

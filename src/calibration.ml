@@ -345,14 +345,14 @@ let iter f profile =
 (* --- Calibration                                                        --- *)
 (* -------------------------------------------------------------------------- *)
 
-let default (env : Why3find.Project.env) =
+let default (env : Why3find.Project.t) =
   if !local then create () else
     match env.config.profile with
     | Some p -> of_json p
     | None -> create ()
 
-let calibrate_provers ~saved (env : Why3find.Project.env) provers =
-  let q = qenv (Whyconf.get_main env.why3.config) env.cache !reftime in
+let calibrate_provers ~saved (project : Why3find.Project.t) provers =
+  let q = qenv (Whyconf.get_main project.whyconf) project.cache !reftime in
   let+ results =
     Fibers.all @@ List.map
       (fun prv ->
@@ -376,16 +376,16 @@ let calibrate_provers ~saved (env : Why3find.Project.env) provers =
     ) results ;
   profile
 
-let velocity_provers (env : Why3find.Project.env) provers =
+let velocity_provers (project : Why3find.Project.t) provers =
   Fibers.await @@
   begin
-    let profile = default env in
+    let profile = default project in
     let* results =
       Fibers.all @@ List.map
         (fun prv ->
            try
              let g = Fibers.find @@ Hashtbl.find profile prv.desc in
-             let+ a = velocity (Whyconf.get_main env.why3.config) env.cache profile prv in
+             let+ a = velocity (Whyconf.get_main project.whyconf) project.cache profile prv in
              prv , Some(g.size,g.time,a)
            with Not_found ->
              Fibers.return (prv , None)

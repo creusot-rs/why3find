@@ -38,4 +38,4 @@ val autoload : unit -> bool
 val update_why3_jobs : Why3.Whyconf.config -> unit
 (** Update [~/.why3conf] with the specified number of jobs, if modified. *)
 
-val init : ?root:string -> Config.config -> Project.env
+val init : ?root:string -> Config.config -> Project.t

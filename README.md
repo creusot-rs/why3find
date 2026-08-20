@@ -218,7 +218,7 @@ Typical examples are:
     why3find config --check       # Check consistency between proof certificates and configuration
 
 When using `--default` why3find will select the highest available
-versions of provers `alt-ergo`, `z3`, `cvc4` and `cvc5`, provided they are
+versions of provers `alt-ergo`, `z3`, and `cvc5` or `cvc4`, provided they are
 accessible from `PATH` or listed in the global why3 configuration.
 
 You can also get the list of available provers and tactics:

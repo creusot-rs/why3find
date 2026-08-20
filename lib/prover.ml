@@ -13,16 +13,14 @@ module Driver = Why3.Driver
 (* --- Provers Patterns                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-exception Invalid_pattern of string
-
 let pattern_of_string s =
   match String.split_on_char '@' s with
+  | [] -> "?", None
   | [ name ] -> String.lowercase_ascii name, None
-  | [ name ; version ] -> String.lowercase_ascii name, Some version
-  | _  -> raise (Invalid_argument "Prover.split_pattern")
+  | name :: version :: _ -> String.lowercase_ascii name, Some version
 
-let pattern_name s = try fst @@ pattern_of_string s with Invalid_pattern _ -> s
-let pattern_version s = try snd @@ pattern_of_string s with Invalid_pattern _ -> None
+let pattern_name s = fst @@ pattern_of_string s
+let pattern_version s = snd @@ pattern_of_string s
 
 let pattern ~name ?version () =
   match version with None -> name | Some v -> Printf.sprintf "%s@%s" name v
@@ -39,10 +37,8 @@ type desc = {
 let desc_to_string p = Format.sprintf "%s@%s" p.name p.version
 
 let desc_of_string s =
-  try
-    let (name, version) = pattern_of_string s in
-    { name ; version = Option.get version }
-  with Invalid_argument _ -> raise (Invalid_pattern s)
+  let (name, version) = pattern_of_string s in
+  { name ; version = Option.get version }
 
 let desc_of_config_prover (cfgprover : Whyconf.config_prover) =
   if not cfgprover.interactive && cfgprover.prover.prover_altern = "" then
@@ -104,34 +100,53 @@ let mem d (m : 'a portfolio) : bool =
 let find d (m : 'a portfolio) : 'a =
   Vmap.find d.version (Smap.find d.name m)
 
-let select ~name ?version (m : 'a portfolio) : 'a =
-  let w = Smap.find name m in
-  match version with
-  | Some v -> Vmap.find v w
-  | None -> snd @@ Vmap.min_binding w
+let warn_prover_not_found =
+  Why3.Wstdlib.Hstr.memo 5 (fun p -> Log.warning "prover %s not found" p)
+
+let select
+    ~name ?version ?(warn=true) ?pattern:spec
+    (m : 'a portfolio) : 'a option =
+  try
+    let w = Smap.find name m in
+    let a =
+      match version with
+      | Some v -> Vmap.find v w
+      | None -> snd @@ Vmap.min_binding w
+    in Some a
+  with Not_found ->
+    if warn then
+      begin
+        warn_prover_not_found @@
+        match spec with Some s -> s | None -> pattern ~name ?version ()
+      end ;
+    None
 
 let is_empty = Smap.is_empty
+
 let iter f m =
-  Smap.iter (fun name w -> Vmap.iter (fun version x ->
-      f { name ; version } x
-    ) w) m
+  Smap.iter
+    (fun name w -> Vmap.iter
+        (fun version x ->
+           f { name ; version } x
+        ) w) m
+
+let portfolio f config =
+  Whyconf.Mprover.fold
+    begin fun _ config m ->
+      match desc_of_config_prover config with
+      | None -> m
+      | Some desc -> add desc (f desc config) m
+    end (Whyconf.get_provers config) empty
 
 (* -------------------------------------------------------------------------- *)
 (* --- Matching                                                           --- *)
 (* -------------------------------------------------------------------------- *)
 
-let warn_invalid_pattern =
-  Why3.Wstdlib.Hstr.memo 5 (fun s -> Log.warning "invalid prover pattern %s" s)
-
-let warn_prover_not_found =
-  Why3.Wstdlib.Hstr.memo 5 (fun s -> Log.warning "prover %s not found" s)
-
 let pmatch pattern =
-  try
-    let name,version = pattern_of_string pattern in
-    fun d -> d.name = name &&
-             match version with None -> true | Some v -> d.version = v
-  with Invalid_pattern s -> warn_invalid_pattern s ; fun _ -> false
+  let name,version = pattern_of_string pattern in
+  fun d ->
+    d.name = name &&
+    match version with None -> true | Some v -> d.version = v
 
 (* -------------------------------------------------------------------------- *)
 (* --- Downloaded Provers                                                 --- *)
@@ -243,12 +258,12 @@ let shared ~name =
 (* --- Missing Provers                                                    --- *)
 (* -------------------------------------------------------------------------- *)
 
-let available name version (_,p,v) =
-  p = name && match version with None -> true | Some version -> v = version
-
 let missing provers pattern =
   let name, version = pattern_of_string pattern in
-  if List.exists (available name version) provers then provers else
+  let pmatch (_,p,v) =
+    p = name && match version with None -> true | Some version -> v = version
+  in
+  if List.exists pmatch provers then provers else
     try
       let specs = shared ~name in
       let version,spec =
@@ -285,13 +300,7 @@ let config ?(autodetect=false) ?(downloaded=false) ?(patterns=[]) () =
     List.map rc_prover_section provers
   else config
 
-let available config =
-  Whyconf.Mprover.fold
-    begin fun _ config m ->
-      match desc_of_config_prover config with
-      | None -> m
-      | Some desc -> add desc desc m
-    end (Whyconf.get_provers config) empty
+let available whyconf = portfolio (fun d _ -> d) whyconf
 
 (* -------------------------------------------------------------------------- *)
 (* --- Full Featured Prover                                               --- *)
@@ -347,49 +356,12 @@ let digest_config main Whyconf.{
   Digest.(to_hex (string (Buffer.contents buf)))
 [@@ocaml.warning "+9"] (* missing name in record **)
 
-let load (wenv : Config.why3env) desc config =
-  let main = Whyconf.get_main wenv.config in
+let load whyconf env desc config =
+  let main = Whyconf.get_main whyconf in
   let digest = digest_config main config in
-  let driver = Driver.load_driver_for_prover main wenv.env config in
+  let driver = Driver.load_driver_for_prover main env config in
   { desc ; config ; relaxed = false ; driver ; digest }
 
-let all (wenv : Config.why3env) =
-  Whyconf.Mprover.fold
-    begin fun _ config m ->
-      match desc_of_config_prover config with
-      | None -> m
-      | Some desc -> add desc (load wenv desc config) m
-    end (Whyconf.get_provers wenv.config) empty
-
-let all = Config.Whtbl.memoize 5 all
+let provers whyconf env = portfolio (load whyconf env) whyconf
 
 let relaxed p = { p with relaxed = true }
-
-let default wenv =
-  let provers = all wenv in
-  let select name = try [ select ~name provers ] with Not_found -> [] in
-  List.concat_map select [ "alt-ergo" ; "z3" ; "cvc4" ; "cvc5" ]
-
-let filter ~pattern provers =
-  try
-    let name, version = pattern_of_string pattern in
-    Some (select ~name ?version provers)
-  with
-  | Not_found -> warn_prover_not_found pattern ; None
-  | Invalid_pattern s -> warn_invalid_pattern s ; None
-
-let select_all wenv ~patterns =
-  let provers = all wenv in
-  List.filter_map (fun pattern -> filter ~pattern provers) patterns
-
-let fit prover ~name ~version =
-  prover.desc.name = name &&
-  match version with
-  | None -> true
-  | Some v ->  v = prover.desc.version
-
-let retrieve ~name ?version provers =
-  let result = List.find_opt (fit ~name ~version) provers in
-  begin
-    if result = None then warn_prover_not_found @@ pattern ~name ?version () ;
-  end ; result

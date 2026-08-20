@@ -462,7 +462,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             end ;
           exit 0
         end;
-      let env = Wenv.init config in
+      let project = Wenv.init config in
       (* --- Packages ---- *)
       let pkgs = config.packages in
       if !list && pkgs <> [] then
@@ -480,7 +480,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
           Utils.pp_time fast Utils.pp_time time ;
       let patterns, provers =
         if !default then
-          let provers = Prover.default env.why3 in
+          let provers = Project.select_default project in
           if !relax
           then List.map Prover.name provers, List.map Prover.relaxed provers
           else List.map Prover.fullname provers, provers
@@ -489,7 +489,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
           let patterns =
             if !relax then
               List.map Prover.pattern_name pconfig else pconfig in
-          let provers = Prover.select_all env.why3 ~patterns in
+          let provers = Project.select_provers ~patterns project in
           let patterns =
             if !strict then List.map Prover.fullname provers else
             if !relax then List.map Prover.name provers else pconfig
@@ -499,12 +499,12 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       let profile =
         if !calibrate then
           Fibers.await @@ begin
-            let+ p = Calibration.calibrate_provers ~saved:true env provers in
+            let+ p = Calibration.calibrate_provers ~saved:true project provers in
             Some (Calibration.to_json p)
           end
         else None in
       if not !calibrate && !velocity then
-        Calibration.velocity_provers env provers ;
+        Calibration.velocity_provers project provers ;
       (* --- Transformations ----- *)
       let depth = config.depth in
       let tactics = config.tactics in
@@ -513,14 +513,15 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       let drivers = config.drivers in
       (* --- Disabled warnings ----- *)
       let warnoff = config.warnoff in
-      (* --- Check ----- *)
+      (* --- Checks ----- *)
       if !check then
         begin
           let rec check_crc = function
             | Crc.Stuck -> ()
             | Tactic { children; _ } -> List.iter check_crc children
             | Prover(name,version,_) ->
-              if Prover.retrieve ~name ?version provers = None then retval := 1 ;
+              if Prover.select ~name ?version project.provers = None
+              then retval := 1 ;
           in
           let check f =
             let iter = Why3.Wstdlib.Mstr.iter in
@@ -528,7 +529,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
           in
           Wenv.allfiles check "."
         end ;
-      let wmain = Why3.Whyconf.get_main env.why3.config in
+      let wmain = Why3.Whyconf.get_main project.whyconf in
       List.iter (check_custom_drivers wmain) provers ;
       (* --- New Configuration --------- *)
       let newprofile = match profile with None -> config.profile | _ -> profile in
@@ -564,7 +565,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
         Format.printf " - @[<hov 2>drivers: %a@]@." pp_list drivers ;
       (* --- Updating -------------- *)
       if !reset || modified then Wenv.save newconfig;
-      Wenv.update_why3_jobs env.why3.config ;
+      Wenv.update_why3_jobs project.whyconf ;
       exit (!retval)
     end
 
@@ -682,12 +683,12 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
       let level = !hammer in
       let session = !session || !ide in
       let config = Wenv.load_config () in
-      let env = Wenv.init config in
+      let project = Wenv.init config in
       let files = if !files = [] then ["."] else !files in
       let files = Wenv.argfiles @@ List.rev files in
       let gnames = List.rev !goals in
       let result = Prove.prove_files
-          ~env ~mode ~level ~session
+          ~project ~mode ~level ~session
           ~results:!results ~axioms:!axioms ~details:!details
           ~files ~gnames in
       let n = List.length result.unfixed in
@@ -696,12 +697,12 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
           Log.error "%d unproved file%a" n Utils.pp_s n ;
           if not !ide then exit 1 ;
           let file = List.hd result.unfixed in
-          let pkgs = env.config.packages in
-          let why3_warn_off = env.config.warnoff in
+          let pkgs = project.config.packages in
+          let why3_warn_off = project.config.warnoff in
           let Prove.{ provers ; time ; mem ; tactics } = result in
           let whyconf = ".why3find/why3.conf" in
           let cfg = ".why3find/hammer.cfg" in
-          Why3.(Rc.to_file whyconf @@ Whyconf.rc_of_config env.why3.config);
+          Why3.(Rc.to_file whyconf @@ Whyconf.rc_of_config project.whyconf);
           Hammer.why3_ide_config ~tactics ~provers ~time ~mem cfg ;
           Format.printf "Fixing %s@." file ;
           exec ~prefix:["ide"] ~pkgs ~why3_warn_off [|
@@ -732,7 +733,7 @@ let () = register ~name:"stats" ~args:"[OPTIONS] PATH..."
           [ "-o", Arg.Set_string out, "output file (default is .why3find/stats.json)" ]
         end (add files) "generate JSON statistics" ;
       let config = Wenv.load_config () in
-      let env = (Wenv.init config).why3.env in
+      let env = (Wenv.init config).env in
       let files = if !files = [] then ["."] else !files in
       let files = Wenv.argfiles @@ List.rev files in
       Json.to_file ~pretty_floats:true !out @@ Prove.statistics ~env ~files ;
@@ -776,8 +777,8 @@ let () = register ~name:"doc" ~args:"[OPTIONS] PATH..."
       let files = Wenv.argfiles ~exts:[".md";".mlw"] @@ List.rev files in
       let out = if !out = "" then "html" else Wenv.arg1 !out in
       let config = Wenv.load_config () in
-      let env = Wenv.init config in
-      Docgen.generate ~env ~out ~title ~files ~url:!url ~package_url:!package_url
+      let project = Wenv.init config in
+      Docgen.generate ~project ~out ~title ~files ~url:!url ~package_url:!package_url
     end
 
 (* -------------------------------------------------------------------------- *)
@@ -804,11 +805,11 @@ let () = register ~name:"print" ~args:"[OPTIONS] PATH..."
       let files = if !files = [] then ["."] else !files in
       let files = Wenv.argfiles ~exts:[".md";".mlw"] @@ List.rev files in
       let config = Wenv.load_config () in
-      let env = Wenv.init config in
+      let project = Wenv.init config in
       List.iter
         begin fun file ->
           let lib = snd @@ Wutil.filepath file in
-          Wutil.load_theories env.why3.env file |> fst |>
+          Wutil.load_theories project.env file |> fst |>
           List.iter
             begin fun (thy : Why3.Theory.theory) ->
               let fullpath = lib @ [thy.th_name.id_string] in
