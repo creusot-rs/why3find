@@ -17,6 +17,7 @@ import {
 } from 'vscode';
 import Lsp from './lsp';
 import Dap from './dap';
+import { resolveNs } from 'dns';
 
 /* -------------------------------------------------------------------------- */
 /* --- Proof Context Helpers                                              --- */
@@ -168,6 +169,7 @@ export function activate(context: ExtensionContext): void {
     }
   }
 
+  // DAP command for Task Preview
   function onDebugShowTaskPreview(): void {
     const active = debug.activeStackItem as (DebugStackFrame | undefined);
     if (active && active.session.type === 'why3') {
@@ -181,6 +183,18 @@ export function activate(context: ExtensionContext): void {
     }
   }
 
+  // Command for Doc Preview
+  async function openDocPreview(): Promise<void> {
+    const current = window.activeTextEditor;
+    if (!current) return;
+    const response = await lsp.send('why3find/openDocPreview', {
+      textDocument: current.document.uri.toString(),
+    });
+    if (typeof(response) === 'string' && response.startsWith('file://')) {
+      await commands.executeCommand('workbench.action.browser.open', response);
+    } else throw('Preview not found');
+  }
+
   // Register commands.
   context.subscriptions.push(
     lsp, dap, diagnostic,
@@ -189,6 +203,7 @@ export function activate(context: ExtensionContext): void {
     commands.registerCommand('why3.dap.start', dap.startDebugging),
     commands.registerCommand('why3.diagnostic.clear', onDebugStart),
     commands.registerCommand('why3.debug.task', onDebugShowTaskPreview),
+    commands.registerCommand('why3.doc.preview', openDocPreview),
     debug.registerDebugConfigurationProvider('why3', dap),
     debug.registerDebugAdapterDescriptorFactory('why3', dap),
     debug.onDidReceiveDebugSessionCustomEvent(onDebugCustomEvent),

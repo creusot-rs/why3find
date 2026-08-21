@@ -130,6 +130,10 @@ export default class Client extends Server implements Disposable {
     await this.shutdown();
   }
 
+  async send(method: string, params?: any) : Promise<any> {
+    return this.client?.sendRequest(method,params);
+  }
+
 }
 
 /* -------------------------------------------------------------------------- */

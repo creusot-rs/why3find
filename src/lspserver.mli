@@ -14,6 +14,9 @@ val to_uri : filename:string -> string
 type location = Loc of { uri: string ; range: Range.range}
 val location : uri:string -> range:Range.range -> location
 
+val jposition : Json.t -> Range.pos
+val jrange : Json.t -> Range.range
+
 (** {2 Document Synchronization} *)
 
 type change = Text of string | Update of Range.range * string
