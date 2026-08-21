@@ -212,11 +212,11 @@ following options can be used:
 The command `why3find config` can be used to manage the package configuration.
 Typical examples are:
 
-    why3find config               # Show current config
-    why3find config […]           # Update packages, provers, etc.
-    why3find config --reset   […] # Configure from scratch (ignore current config)
-    why3find config --default […] # Use all available "default" provers (see below)
-    why3find config --check       # Check consistency between proof certificates and configuration
+    why3find config                # Show current config
+    why3find config […]            # Update packages, provers, etc.
+    why3find config --reset    […] # Configure from scratch (ignore current config)
+    why3find config --default  […] # Use all available "default" provers (see below)
+    why3find config --autoload […] # Download missing provers (see below)
 
 When using `--default` why3find will select the highest available
 versions of provers `alt-ergo`, `z3`, and `cvc5` or `cvc4`, provided they are
@@ -224,13 +224,15 @@ accessible from `PATH` or listed in the global why3 configuration.
 
 You can also get the list of available provers and tactics:
 
+    why3find download --list
     why3find config --list-provers
     why3find config --list-tactics
 
 Available provers are searched from global Why3 user's configuration and from
 the current `PATH` environment variable. The global Why3 user's configuration is
 taken from `~/.why3.conf` (if any) or `WHY3CONFIG` environment variable (if
-defined).
+defined). It is also to automatically download other or missing provers with
+why3find config, prove and download commands.
 
 ## Provers Installation
 
@@ -247,14 +249,14 @@ directory. You can also add binaries on your side into this directory.
 Alternatively, the environment variable `WHY3FIND_DOWNLOADED` can be used to
 specify another directory.
 
-Here are some recipes for controlling prover download, which also apply
-to why3find prove command:
+Here are some recipes for controlling prover download:
 
-    # why3find config                 ;; in TTY, ask for missing provers
-    # why3find config --autoload      ;; automatically download missing provers
-    # why3find config --no-autoload   ;; disable prover download
-    # why3find config --no-downloaded ;; do not use downloaded provers
-    # why3find config --no-autodetect ;; do not detect provers from PATH
+    # why3find config                 ;; installed & missing provers
+    # why3find prove                  ;; in TTY, ask for missing provers
+    # why3find <cmd> --autoload       ;; automatically download missing provers
+    # why3find <cmd> --no-autoload    ;; disable prover download
+    # why3find <cmd> --no-downloaded  ;; do not use downloaded provers
+    # why3find <cmd> --no-autodetect  ;; do not detect provers from PATH
 
 You can also control the behavior of why3find with environment variables
 (which have precedence on command line arguments):
@@ -279,7 +281,6 @@ can still download and install it automatically with the following command:
 
 When downloading a URL prover specification, why3find will perform the following
 steps:
-
   - download the `URL` resource with UNIX command `wget` (without `#PATH`);
   - if necessary, decompress the archive with UNIX command `unzip` or `tar zxf`
     according to `<file>` extension;
@@ -364,11 +365,11 @@ and all its parent goals are marked incomplete.
 
 *Remark:* incomplete proof certificates are also stored in order to be used as
 hints for further proof lookup. However, a tactic-node with all its sub-goals
-marked « stuck » would be removed.
+marked «stuck» would be removed.
 
 The reference time is set to one second by default and can be modified with
 `-t TIME` or configured using `why3find config -t TIME`. A fraction of seconds or
-suffix time units (`h`,`min`,`s`,`ms`) can be given, eg. `0.5`, `200ms`, `3min`.
+suffix time units (`h`,`min`,`s`,`ms`) can be given, for instance `0.5`, `200ms`, `3min`.
 The reference time is specified relatively to the *master* machine, Cf. prover
 calibration below.
 
@@ -387,13 +388,13 @@ and 4. However, known proof hints from previous run will still be played.
 When using `why3find prove -i` mode, the Why3 IDE is loaded with custom proof
 strategies that mimics the why3find proof strategy:
  - strategy `hammer` (keyboard shortcut `H`) repeatedly applies the provers,
-   then try the tactics, then finally retries the provers with a longer time.
+   then try the tactics, then finally retries the provers with a longer time;
  - strategy `provers` (keyboard shortcut `P`) only applies the provers;
  - strategy `unfold` (keyboard shortcut `U`) applies the tactics, then go into
    strategy `hammer`.
 
 *Prover Cache* is used to speed proof process. The hidden directory `.why3find`
-at the root of the package directory stores a hash of each proof tasks send to
+at the root of the package directory stores a hash of each proof task sent to
 provers. You can bypass access to the cache with option `--no-cache`. However,
 it will still be updated for further usage. You may also safely remove the cache
 by _entirely_ suppressing the `.why3find` directory.
@@ -703,20 +704,20 @@ extracted one, as a separated `dune` library.
 
 ## Why3 Development Utilities
 
-For Why3 and Why3 plug-ins developers, Why3find also provides an utility
+For Why3 and Why3 plug-ins developers, Why3find also provides a utility
 to print the internal representations of theories and modules:
 
     why3find print [FILES...]  # pretty print modules and theories
 
-The printer provide the following information:
+The printer provides the following information:
  - structure of declarations and scopes
  - identifiers with their unique hash-consing tags
  - cloning instance tables
 
 ## References
 
-« [Packaging proofs with Why3find](https://cea.hal.science/hal-04407129v1) »
+[Packaging proofs with Why3find](https://cea.hal.science/hal-04407129v1)
 L. Correnson, CEA-LIST, JFLA 2024
 
-« [Why3 — Where Programs Meet Provers](https://inria.hal.science/hal-00789533) »
+[Why3 — Where Programs Meet Provers](https://inria.hal.science/hal-00789533)
 J-C. Filliâtre, A. Paskevich, INRIA, ESOP 2021

@@ -15,6 +15,7 @@ val options :
   ?provers:bool ->
   ?drivers:bool ->
   ?download:bool ->
+  ?missing:bool ->
   unit -> (string * Arg.spec * string) list
 
 val arg1 : string -> string

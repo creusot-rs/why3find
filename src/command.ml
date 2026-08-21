@@ -646,7 +646,7 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
       let failed () = context 2 in
       parse argv
         begin
-          Wenv.options ~download:true () @
+          Wenv.options ~download:true ~missing:true () @
           [
             "-g", Arg.String (add goals), "<name> goals selection";
             "-f", Arg.Unit (set mode `Force), "force rebuild proofs";

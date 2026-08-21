@@ -43,7 +43,7 @@ let jobs = ref false
 let autodetect = ref true
 let downloaded = ref true
 let autoload = ref false
-let missing = ref false
+let loadmissing = ref false
 let usecache = ref true
 
 (* -------------------------------------------------------------------------- *)
@@ -190,15 +190,16 @@ let alloptions : (opt * string * Arg.spec * string) list = [
   `Prover,  "-j", Arg.Int setjobs, "JOBS max parallel provers" ;
   `Prover,  "--no-cache", Arg.Clear usecache, "do not read results from cache";
   `Download, "--autoload", Arg.Set autoload, " automatic download of missing provers";
-  `Download, "--no-autoload", Arg.Clear missing, " disable downloading of missing provers";
+  `Download, "--no-autoload", Arg.Clear loadmissing, " disable downloading of missing provers";
   `Driver, "--no-autodetect", Arg.Clear autodetect, " disable prover autodetection";
   `Driver, "--no-downloaded", Arg.Clear downloaded, " disable downloaded provers";
   `Prover,  "--log-prover-results", Arg.String Runner.set_logfile, "FILE log the prover results in the given file";
 ]
 
-let options ?(packages=false) ?(provers=false) ?(drivers=false) ?(download=false) () =
+let options ?(packages=false) ?(provers=false) ?(drivers=false) ?(download=false) ?(missing=false) () =
   let default = not packages && not provers && not drivers in
-  missing := download ;
+  autoload := false ;
+  loadmissing := missing && download ;
   List.filter_map
     (fun (opt,name,spec,descr) ->
        if match opt with
@@ -320,7 +321,7 @@ let missing () =
   downloaded () &&
   match Sys.getenv "WHY3FIND_AUTOLOAD" with
   | "yes" | "no" -> false
-  | _ | exception Not_found -> not !autoload && !missing
+  | _ | exception Not_found -> not !autoload && !loadmissing
 
 let autoload () =
   downloaded () &&

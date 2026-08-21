@@ -220,15 +220,14 @@ let downloadrc ~name ~version ~spec =
     command ~prover ~step:"Permissions" "chmod a+x %s" binary ;
     if Version.system = "macosx" then
       begin
-        command ~prover ~step:"Quanrantine"
+        command ~prover ~step:"Quarantine"
           "xattr -dr com.apple.quarantine %s" binary ;
         command ~prover ~step:"Autosign"
           "codesign -s - --deep --force %s" binary ;
       end ;
     let cache = Lazy.force binarycache in
     Utils.mkdirs cache ;
-    command ~prover ~step:"Installation"
-      "mv -f %s %s/%s" binary cache prover ;
+    command ~prover ~step:"Installation" "mv -f %s %s/%s" binary cache prover ;
     Utils.flush () ;
     Sys.chdir pwd ;
     command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
@@ -279,7 +278,8 @@ let ask name version =
 let add_missing ~auto provers pattern =
   let name, version = pattern_of_string pattern in
   let pmatch (_,p,v) =
-    p = name && match version with None -> true | Some version -> v = version
+    String.lowercase_ascii p = name &&
+    match version with None -> true | Some version -> v = version
   in
   if List.exists pmatch provers then provers else
     try
