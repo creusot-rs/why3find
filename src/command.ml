@@ -573,7 +573,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
 (* --- DOWNLOAD PROVER                                                    --- *)
 (* -------------------------------------------------------------------------- *)
 
-let () = register ~name:"download" ~args:"NAME VERSION SPEC"
+let () = register ~name:"download" ~args:"[OPTIONS] SPEC"
     begin fun argv ->
       let name = ref "" in
       let version = ref "" in
@@ -588,10 +588,11 @@ let () = register ~name:"download" ~args:"NAME VERSION SPEC"
             Utils.failwith "Unexpected argument (%S)" a
         end
         "USAGE:\n\
-         \n  why3find download [--list] [NAME [VERSION [SPEC]]]\n\n\
+         \n  why3find download [--list] [NAME [VERSION [URL[#PART]]]]\n\n\
          DESCRIPTION:\n\
          \n  Download or list available provers from the given parameters.\
          \n  If VERSION is missing, download the most recent version.\
+         \n  Download from URL and extract PART if specified.\
          \n" ;
       let name = !name in
       if name = ""  then
