@@ -130,6 +130,9 @@ let iter f m =
            f { name ; version } x
         ) w) m
 
+let iterl f m =
+  Smap.iter (fun name w -> f name @@ Vmap.bindings w) m
+
 let portfolio f config =
   Whyconf.Mprover.fold
     begin fun _ config m ->

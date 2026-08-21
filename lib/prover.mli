@@ -44,6 +44,7 @@ val select :
 
 val is_empty : 'a portfolio -> bool
 val iter : (desc -> 'a -> unit) -> 'a portfolio -> unit
+val iterl : (string -> (string * 'a) list -> unit) -> 'a portfolio -> unit
 
 (** {1 Patterns} *)
 
