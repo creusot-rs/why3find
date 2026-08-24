@@ -273,13 +273,13 @@ For manually download provers, use the `why3find download` command:
     # why3find download --list        ;; list known versions for prover
     # why3find download --list NAME   ;; list known versions for prover
     # why3find download NAME          ;; download the last version
-    # why3find download NAME VERSION  ;; download a specific version
+    # why3find download NAME@VERSION  ;; download a specific version
 
 Available prover versions depend on the local system (Linux/macOS) and
 architecture (x86/ARM). If a prover version is not (yet) known by why3find, you
 can still download and install it automatically with the following command:
 
-    # why3find download NAME VERSION URL[#PATH]
+    # why3find download NAME@VERSION URL[#PATH]
 
 When downloading a URL prover specification, why3find will perform the following
 steps:

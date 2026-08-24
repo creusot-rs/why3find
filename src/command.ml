@@ -575,26 +575,24 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
 
 let () = register ~name:"download" ~args:"[OPTIONS] SPEC"
     begin fun argv ->
-      let name = ref "" in
-      let version = ref "" in
-      let spec = ref "" in
+      let prv = ref "" in
+      let url = ref "" in
       let list = ref false in
       parse argv
         [ "--list" , Arg.Set list , "List available versions for NAME" ]
         begin fun a ->
-          if  !name = "" then name := a else
-          if !version = "" then version := a else
-          if !spec = "" then spec := a else
+          if  !prv = "" then prv := a else
+          if !url = "" then url := a else
             Utils.failwith "Unexpected argument (%S)" a
         end
         "USAGE:\n\
-         \n  why3find download [--list] [NAME [VERSION [URL[#PART]]]]\n\n\
+         \n  why3find download [--list] [NAME[@VERSION] [URL[#PART]]]]\n\n\
          DESCRIPTION:\n\
          \n  Download or list available provers from the given parameters.\
          \n  If VERSION is missing, download the most recent version.\
          \n  Download from URL and extract PART if specified.\
          \n" ;
-      let name = !name in
+      let name,version = Prover.pattern_of_string !prv in
       if name = ""  then
         begin
           let open Version in
@@ -613,12 +611,14 @@ let () = register ~name:"download" ~args:"[OPTIONS] SPEC"
             (fun (version,_) -> Format.printf " - %s@%s@." name version)
             (Lazy.force data)
         else
-          let version = !version in
-          let version = if version <> "" then version else
+          let spec = !url in
+          if version = None && spec <> "" then
+            Utils.failwith "Unspecified prover version for URL spec" ;
+          let version =
+            match version with Some v -> v | None ->
               let provers = Lazy.force data in
               try fst @@ List.hd provers with _ ->
                 Utils.failwith "No specification for prover %s" name in
-          let spec = !spec in
           let spec =
             if spec <> "" then spec else
               try List.assoc version (Lazy.force data) with Not_found ->
