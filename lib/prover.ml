@@ -275,7 +275,7 @@ let ask name version =
   match
     String.uppercase_ascii @@
     Utils.ask ~default:"Y"
-      "Missing prover %s@%s. Download @{<bold>[Y/n]@} ?" name version
+      "Missing prover @{<bold>%s@@%s@}. Download @{<bold>[Y/n]@} ?" name version
   with "Y" | "YES" -> true | _ -> false
 
 let add_missing ~auto provers pattern =

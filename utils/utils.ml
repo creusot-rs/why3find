@@ -72,14 +72,16 @@ let hline () =
   let width = Option.value (Terminal_size.get_columns ()) ~default:80 in
   Format.printf "%s@." (String.make width '-')
 
-let ask ?(default="") fmt =
-  Format.kasprintf
-    (fun msg ->
-       flush () ;
-       Printf.printf "> %s \027[K%!" msg ;
+let ask ?(default="") msg =
+  flush () ;
+  Format.print_string "> " ;
+  Format.kfprintf
+    (fun fmt ->
+       Format.pp_print_char fmt ' ' ;
+       Format.pp_print_flush fmt () ;
        let resp = read_line () in
        if resp = "" then default else resp
-    ) fmt
+    ) Format.std_formatter msg
 
 let nop _ = ()
 
