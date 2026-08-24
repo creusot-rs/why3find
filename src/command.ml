@@ -573,7 +573,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
 (* --- DOWNLOAD PROVER                                                    --- *)
 (* -------------------------------------------------------------------------- *)
 
-let () = register ~name:"download" ~args:"[OPTIONS] SPEC"
+let () = register ~name:"download" ~args:"[OPTIONS] PROVER"
     begin fun argv ->
       let prv = ref "" in
       let url = ref "" in
