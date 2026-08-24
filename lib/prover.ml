@@ -228,13 +228,6 @@ let downloadrc ~name ~version ~spec =
         command ~prover ~step:"Autosign"
           "codesign -s - --deep --force %s" binary ;
       end ;
-    let cache = Lazy.force binarycache in
-    Utils.mkdirs cache ;
-    command ~prover ~step:"Installation" "mv -f %s %s/%s" binary cache prover ;
-    Utils.flush () ;
-    Sys.chdir pwd ;
-    command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
-    Utils.flush () ;
     begin
       let config = Why3.Whyconf.init_config ~extra_config:[] None in
       let data = Why3.Autodetection.read_auto_detection_data config in
@@ -245,6 +238,13 @@ let downloadrc ~name ~version ~spec =
         if vp <> version then
           Log.error "Incorrect version for %s (use %s)" name version
     end ;
+    let cache = Lazy.force binarycache in
+    Utils.mkdirs cache ;
+    command ~prover ~step:"Installation" "mv -f %s %s/%s" binary cache prover ;
+    Utils.flush () ;
+    Sys.chdir pwd ;
+    command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
+    Utils.flush () ;
     Format.printf "Installed prover %s@." prover ;
     Utils.hline () ;
     Filename.concat binary prover, name, version
