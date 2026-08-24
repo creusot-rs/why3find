@@ -29,7 +29,7 @@
     -P  same as --prover
     -T  same as --tactic
     -D  same as --driver
-    -j JOBS max parallel provers
+    -j JOBS|'auto' max parallel provers
     --no-cache do not read results from cache
     --autoload  automatic download of missing provers
     --no-autoload  disable downloading of missing provers

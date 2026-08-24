@@ -32,12 +32,10 @@ val add_options : Config.config -> Config.config
 val load_config : unit -> Config.config
 
 val save : Config.config -> unit
+val save_jobs : unit -> unit
 
 val downloaded : unit -> bool
 val autodetect : unit -> bool
 val autoload : unit -> bool
-
-val update_why3_jobs : Why3.Whyconf.config -> unit
-(** Update [~/.why3conf] with the specified number of jobs, if modified. *)
 
 val init : ?root:string -> Config.config -> Project.t

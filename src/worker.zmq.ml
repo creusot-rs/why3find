@@ -199,7 +199,7 @@ let connect ~server ~polling =
   let prvs = Prover.provers whyconf env in
   let provers = Hashtbl.create 5 in
   Prover.iter (Hashtbl.add provers) prvs ;
-  let jobs = Runner.get_jobs main in
+  let jobs = Runner.get_jobs () in
   let cache = Cache.create ~cdir:".why3find" () in
   Utils.flush () ;
   Prover.iter (fun d _ -> Format.printf "Prover %a@." Prover.pp_desc d) prvs ;

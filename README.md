@@ -401,16 +401,15 @@ provers. You can bypass access to the cache with option `--no-cache`. However,
 it will still be updated for further usage. You may also safely remove the cache
 by _entirely_ suppressing the `.why3find` directory.
 
-*Parallel Proving* is used to run different provers parallel on the different
+*Parallel Proving* is used to run different provers parallel on the available
 cores of your machine. You can specify the number of parallel provers with
-option `-j N`.  Alternatively, you can also use `why3find config -j N` to
-configure it locally, in which case your _personal_ Why3 configuration
-`~/.why3.conf` is updated accordingly. Parallel proving is also performed among
-the different goals and proof obligations to be proved. However, priority is put
-on goals that were incomplete with respect to the previously known proof
-certificates. This strategy makes detection of stuck goals faster when debugging
-proofs. During execution in a terminal, `why3find prove` displays a progression
-status with the following format:
+option `-j N`. Alternatively, you can also use `why3find config -j N` to
+configure it locally, or use environment variable `WHY3FIND_JOBS`. Parallel
+proving is also performed among the different goals and proof obligations to be
+proved. However, priority is put on goals that were incomplete with respect to
+the previously known proof certificates. This strategy makes detection of stuck
+goals faster when debugging proofs. During execution in a terminal, `why3find
+prove` displays a progression status with the following format:
 
     $ why3find prove […]
     !P/?Q/S/R goal goal …

@@ -547,7 +547,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       (* --- Printing Final Config -------------- *)
       if !list then
         begin
-          let jobs = Runner.get_jobs wmain in
+          let jobs = Runner.get_jobs () in
           Format.printf "Configuration:@." ;
           Format.printf " - runner: %d jobs" jobs ;
           if fast <> 0.2 then Format.printf ", %a" Utils.pp_time fast ;
@@ -565,7 +565,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
         Format.printf " - @[<hov 2>drivers: %a@]@." pp_list drivers ;
       (* --- Updating -------------- *)
       if !reset || modified then Wenv.save newconfig;
-      Wenv.update_why3_jobs project.whyconf ;
+      Wenv.save_jobs () ;
       exit (!retval)
     end
 

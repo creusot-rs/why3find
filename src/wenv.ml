@@ -39,7 +39,7 @@ let prvs = ref []
 let tacs = ref []
 let warn = ref []
 let prep = ref None
-let jobs = ref false
+let jobs = ref 0
 let autodetect = ref true
 let downloaded = ref true
 let autoload = ref false
@@ -164,7 +164,9 @@ type opt = [
   | `Download
 ]
 
-let setjobs n = Runner.set_jobs n ; jobs := true
+let setjobs arg =
+  try let n = int_of_string arg in Runner.set_jobs n ; jobs := n
+  with _ -> Runner.set_jobs (-1) ; jobs := (-1)
 
 let settime prm s =
   try setv prm (Utils.pa_time s)
@@ -187,7 +189,7 @@ let alloptions : (opt * string * Arg.spec * string) list = [
   `Prover,  "-P", Arg.String (add prvs), " same as --prover";
   `Prover,  "-T", Arg.String (add tacs), " same as --tactic";
   `Driver,  "-D", Arg.String (add drvs), " same as --driver";
-  `Prover,  "-j", Arg.Int setjobs, "JOBS max parallel provers" ;
+  `Prover,  "-j", Arg.String setjobs, "JOBS|'auto' max parallel provers" ;
   `Prover,  "--no-cache", Arg.Clear usecache, "do not read results from cache";
   `Download, "--autoload", Arg.Set autoload, " automatic download of missing provers";
   `Download, "--no-autoload", Arg.Clear loadmissing, " disable downloading of missing provers";
@@ -266,21 +268,6 @@ let save conf =
   Format.printf "Why3find config saved to %s@."
     (Filename.concat root Config.conf_file)
 
-let update_why3_jobs config =
-  if !jobs then
-    begin
-      let open Why3 in
-      let file = Whyconf.get_conf_file config in
-      if file <> "" then
-        let main = Whyconf.get_main config in
-        let jobs = Runner.get_jobs main in
-        let time = Whyconf.timelimit main in
-        let mem = Whyconf.memlimit main in
-        let config = Whyconf.User.set_limits ~time ~mem ~j:jobs config in
-        Whyconf.save_config config ;
-        Format.printf "Why3 config updated with -j %d (%s)@." jobs file
-    end
-
 (* -------------------------------------------------------------------------- *)
 (* --- Why3 Environment                                                   --- *)
 (* -------------------------------------------------------------------------- *)
@@ -339,5 +326,13 @@ let init ?root config =
     ~autoload:(autoload ())
     ~missing:(missing ())
     ()
+
+let save_jobs () =
+  if !jobs < 0 then Utils.rmpath ".why3find/jobs" else
+  if !jobs > 0 then
+    begin
+      Utils.mkdirs ".why3find" ;
+      Utils.writefile ~file:".why3find/jobs" (string_of_int !jobs) ;
+    end
 
 (* -------------------------------------------------------------------------- *)
