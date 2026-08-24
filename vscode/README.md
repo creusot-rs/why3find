@@ -12,6 +12,7 @@ Provides support for the Why3 language and Why3find proof environment.
  - Code Lens (proof feedback, dynamically updated)
  - Document Structure (namespaces, declarations)
  - Folding Ranges (proofs, sections)
+ - Generated Document preview (from `./html/index.html`)
 
 ## Debugger Features
 

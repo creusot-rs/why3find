@@ -24,6 +24,7 @@
 ### IDE Integration
 
  - Enhanced debugger with forward/backward steps and breakpoints (!201)
+ - New command `Open Generated Document` from VSCode extension (!214)
 
 ### Bug Fixes
 
