@@ -24,8 +24,8 @@ type crc =
 let stuck = Stuck
 
 let prover (p : Prover.prover) time =
-  let name = Prover.desc_name p.desc in
-  let vers = if p.relaxed then None else Some (Prover.desc_version p.desc) in
+  let name = p.desc.name in
+  let vers = if p.relaxed then None else Some p.desc.version in
   Prover(name,vers,time)
 
 let get_stuck = function

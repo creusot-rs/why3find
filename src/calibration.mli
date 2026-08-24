@@ -13,7 +13,7 @@
 type profile
 
 val create : unit -> profile
-val default : Project.env -> profile
+val default : Project.t -> profile
 val of_json : ?default:profile -> Json.t -> profile
 val to_json : profile -> Json.t
 
@@ -33,8 +33,8 @@ val velocity : Why3.Whyconf.main -> Cache.t -> profile -> Prover.prover -> float
 val profile : Why3.Whyconf.main -> Cache.t -> profile -> Prover.prover
   -> (int * float) Fibers.t
 
-val calibrate_provers : saved:bool -> Project.env -> Prover.prover list -> profile Fibers.t
-val velocity_provers : Project.env -> Prover.prover list -> unit
+val calibrate_provers : saved:bool -> Project.t -> Prover.prover list -> profile Fibers.t
+val velocity_provers : Project.t -> Prover.prover list -> unit
 
 val options : (string * Arg.spec * string) list
 

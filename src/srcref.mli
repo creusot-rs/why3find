@@ -16,5 +16,5 @@ type symbol =
 
 val parse :
   ?doc:bool -> ?filename:string ->
-  env:Project.env -> src:Docref.source ->
+  project:Project.t -> src:Docref.source ->
   string -> symbol Rangemap.t * Lspserver.symbol list

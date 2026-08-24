@@ -10,5 +10,11 @@
 (* --- HTML Documentation Generator                                       --- *)
 (* -------------------------------------------------------------------------- *)
 
-val generate : env:Project.env -> out:string -> title:string -> files:string list
-  -> url:bool -> package_url:string option -> unit
+val generate :
+  project:Project.t ->
+  out:string ->
+  title:string ->
+  files:string list ->
+  url:bool ->
+  package_url:string option ->
+  unit

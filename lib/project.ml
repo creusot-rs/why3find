@@ -6,47 +6,71 @@
 (*                                                                        *)
 (**************************************************************************)
 
-module WConf = Why3.Whyconf
-
-type env = {
+type t = {
   root : string ;
   cache : Cache.t ;
   config : Config.config ;
-  why3 : Config.why3env ;
+  whyconf : Why3.Whyconf.config ;
+  env : Why3.Env.env ;
   pkgs : Meta.pkg list ;
+  provers : Prover.(prover portfolio) ;
 }
 
-let to_rc provers =
-  let to_section (path, name, version) =
-    let s = Why3.Rc.empty_section in
-    let s = Why3.Rc.set_string s "name" name in
-    let s = Why3.Rc.set_string s "path" path in
-    let s = Why3.Rc.set_string s "version" version in
-    s in
-  let sections = List.map to_section provers in
-  Why3.Rc.set_simple_family Why3.Rc.empty "partial_prover" sections
+let plugins = ref false
 
-(* brittle but the best we can do with the current API *)
-let add_autodetected_provers =
-  Timer.timed ~name:"Prover autodetection" (fun config ->
-      let data = Why3.Autodetection.read_auto_detection_data config in
-      let provers = Why3.Autodetection.find_provers data in
-      !WConf.provers_from_detected_provers config (to_rc provers)
-    )
-
-let why3_config autodetect =
-  let config = WConf.init_config ~extra_config:[] None in
-  if autodetect then
-    add_autodetected_provers config
-  else
-    config
-
-let create ?(root=".") ?(usecache=true) ?(config=Config.default)
-    ?(autodetect_provers=true) () =
+let create
+    ?(root=".")
+    ?(config=Config.default)
+    ?(usecache=true)
+    ?(autodetect=true)
+    ?(downloaded=true)
+    ?(autoload=false)
+    ?(missing=false)
+    () =
   let pkgs = Meta.find_all config.Config.packages in
   let pkg_path = List.map (fun m -> m.Meta.path) pkgs in
-  let wconfig = why3_config autodetect_provers in
-  let why3 = Config.why3env ~loadpath:(root :: pkg_path) wconfig in
+  let autoload = if autoload then config.provers else [] in
+  let missing= if missing then config.provers else [] in
+  let whyconf = Prover.config ~autodetect ~downloaded ~autoload ~missing () in
+  if not !plugins then
+    begin
+      Why3.Whyconf.load_plugins @@
+      Why3.Whyconf.get_main whyconf ;
+      plugins := true ;
+    end ;
+  Debug.init_why3_debug ();
+  List.iter (fun s ->
+      Why3.Loc.disable_warning @@
+      Why3.Loc.register_warning s Why3.Pp.empty_formatted
+    ) config.warnoff;
+  let stdpath = Why3.Whyconf.(loadpath @@ get_main whyconf) in
+  let loadpath = root :: pkg_path @ stdpath in
+  let env = Why3.Env.create_env loadpath in
   let cdir = Filename.concat root ".why3find" in
   let cache = Cache.create ~cdir ~usecache () in
-  { root; config ; cache ; why3 ; pkgs }
+  let provers = Prover.provers whyconf env in
+  { root ; config ; cache ; whyconf ; env ; pkgs ; provers }
+
+let select_tactics prj =
+  Tactic.select prj.env prj.config.tactics
+
+let select_provers ?patterns prj =
+  List.filter_map
+    (fun pattern ->
+       let name, version = Prover.pattern_of_string pattern in
+       Prover.select ~name ?version ~pattern prj.provers
+    ) @@
+  match patterns with Some ps -> ps | None -> prj.config.provers
+
+let select_default prj =
+  begin
+    let pool = ref [] in
+    let add p = pool := p :: !pool in
+    let select name =
+      match Prover.select ~name ~warn:false prj.provers
+      with Some p -> add p ; true | None -> false in
+    ignore @@ select "alt-ergo" ;
+    ignore @@ select "z3" ;
+    if not (select "cvc5") then ignore (select "cvc4") ;
+    List.rev !pool
+  end

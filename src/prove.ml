@@ -40,7 +40,7 @@ let tactics : (string,int ref) Hashtbl.t = Hashtbl.create 0
 let rec full_stats = function
   | Crc.Stuck -> ()
   | Prover(p,v,t) ->
-    let id = Prover.desc ~name:p ?version:v () in
+    let id = Prover.pattern ~name:p ?version:v () in
     let stat =
       try Hashtbl.find provers id with Not_found ->
         let s = Stats.create () in
@@ -425,7 +425,7 @@ let report ~(results:results) henv ~lib proofs =
 
 type mode = [ `Force | `Update | `Minimize | `Replay ]
 
-let process ~env
+let process ~(project:Project.t)
     ?(level=4) ?(mode:mode=`Update) ?provers ?tactics
     ?(results:results=`Default) ?(session=false) ?(axioms=false) ?unsuccess
     ?(gnames=[]) file =
@@ -440,14 +440,14 @@ let process ~env
         exit 2
       end ;
     let dir, lib = Wutil.filepath file in
-    let theories, format = Wutil.load_theories env.Project.why3.env file in
+    let theories, format = Wutil.load_theories project.env file in
     let session = Session.create ~dir ~file ~format theories in
     let jprofile, strategy = Proofs.load file in
     let buffer = (* the proof strategy must be kept to stabilize crc files *)
       if (mode = `Replay)
       then None
       else Some (Proofs.create ~file jprofile strategy) in
-    let default = Calibration.default env in
+    let default = Calibration.default project in
     let profile = Calibration.of_json ~default jprofile in
     let force = (mode = `Force) in
     let hammer =
@@ -456,7 +456,7 @@ let process ~env
         ~replay:(mode = `Replay)
         ~minimize:(mode = `Minimize)
         ?provers ?tactics ~profile
-        env in
+        project in
     let* proofs =
       Fibers.all @@ List.map
         (prove_theory ~hammer ~force ~gnames buffer strategy)
@@ -466,7 +466,7 @@ let process ~env
     Option.iter Proofs.save buffer ;
     let henv =
       if axioms then
-        Some (Axioms.init env)
+        Some (Axioms.init project)
       else None in
     Utils.flush () ;
     let failed = report ~results henv ~lib proofs in
@@ -486,7 +486,7 @@ type outcome = {
   unfixed : string list ;
 }
 
-let prove_files ~(env:Project.env)
+let prove_files ~(project:Project.t)
     ~mode ~level ~session ~results ~axioms ~details
     ~files ~gnames =
   begin
@@ -497,11 +497,12 @@ let prove_files ~(env:Project.env)
         if List.length files > 10 then `Summary else
         if List.length files > 1 then `Modules else `Theories
       | _ -> results in
-    let provers = Prover.select env.why3 ~patterns:env.config.provers in
-    let tactics = Tactic.select env.why3.env env.config.tactics in
+    let provers = Project.select_provers project in
+    let tactics = Tactic.select project.env project.config.tactics in
     on_failed results ;
     List.iter
-      (process ~env ~level ~mode ~session ~results
+      (process
+         ~project ~level ~mode ~session ~results
          ~provers ~tactics ~axioms ~unsuccess ~gnames)
       files ;
     Hammer.run () ;
@@ -516,8 +517,8 @@ let prove_files ~(env:Project.env)
     if axioms then print_axioms_stats () ;
     {
       provers ; tactics ;
-      time = max 1 (int_of_float (0.5 +. env.config.time)) ;
-      mem = Runner.memlimit (Why3.Whyconf.get_main env.why3.config) ;
+      time = max 1 (int_of_float (0.5 +. project.config.time)) ;
+      mem = Runner.memlimit (Why3.Whyconf.get_main project.whyconf) ;
       unfixed = List.rev !unsuccess ;
     }
   end

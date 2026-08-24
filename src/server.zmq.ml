@@ -428,7 +428,7 @@ let handler server id msg =
     | ["HANGUP"] ->
       do_hangup server id
     | _ -> ()
-  with Invalid_argument _ | Not_found | Prover.InvalidProverDescription _ -> ()
+  with Invalid_argument _ | Not_found -> ()
 
 let flush ~time server =
   while recv server ~time (handler server) do () done

@@ -99,11 +99,20 @@ let pp_goals fmt =
     ) !goals
 
 let set_jobs n = jobs := n
-let get_jobs wmain =
-  if !jobs > 0 then !jobs else Whyconf.running_provers_max wmain
+let cpu_jobs = lazy (Cpu.numcores () / 2)
+let get_jobs () =
+  try Sys.getenv "WHY3FIND_JOBS" |> int_of_string with _exn ->
+  try
+    if !jobs > 0 then !jobs else
+    if !jobs = 0 then
+      Utils.readfile ~file:".why3find/jobs" |> String.trim |> int_of_string
+    else raise Exit
+  with _exn ->
+  try Lazy.force cpu_jobs with _exn ->
+    jobs := 1 ; 1
 
-let update_client wmain =
-  let njobs = get_jobs wmain in
+let update_client () =
+  let njobs = get_jobs () in
   if njobs <> !clients then
     begin
       clients := njobs ;
@@ -252,7 +261,7 @@ let call_prover (config : Why3.Whyconf.main)
   let runover = ref false in
   let canceled = ref false in
   let timedout = ref false in
-  update_client config ;
+  update_client () ;
   schedule () ;
   Timer.start launch_proof_timer;
   let call =

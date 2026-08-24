@@ -23,9 +23,10 @@
      packages for why3 developers and associated \
      OCaml extracted code.")
   (depends
-     (dune-site (>= 3.12))
+     cpu xdg
+     (dune-site (>= 3.4))
      (why3 (>= 1.8.0))
-     (ocaml (>= 4.13.0))
+     (ocaml (>= 5.2.0))
      (yojson (>= 1.7.0))
      (terminal_size (>= 0.2.0))
      (zmq :with-test)

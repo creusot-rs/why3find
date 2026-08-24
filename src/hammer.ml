@@ -16,7 +16,7 @@ type hammer = {
   level : int ;
   replay : bool ;
   minimize : bool ;
-  env : Project.env ;
+  project : Project.t ;
   client : Client.client option ;
   preprocess : Tactic.tactic option ;
   provers : Prover.prover list ;
@@ -267,9 +267,9 @@ let merge u v =
 
 let prover ?cancel timeout prv = fun n ->
   let h = n.hammer in
-  let wmain = Why3.Whyconf.get_main h.env.why3.config in
+  let wmain = Why3.Whyconf.get_main h.project.whyconf in
   let name = Session.name n.goal in
-  let* alpha = Calibration.velocity wmain h.env.cache h.profile prv in
+  let* alpha = Calibration.velocity wmain h.project.cache h.profile prv in
   let to_local = Result.map (fun t -> t *. alpha) in
   let to_profile = Result.map (fun t -> t /. alpha) in
   let runner_time = timeout *. alpha in
@@ -277,7 +277,7 @@ let prover ?cancel timeout prv = fun n ->
   let callback = Session.result n.goal in
   let killed = ref false in
   let+ verdict =
-    match Runner.prove_cached h.env.cache prv task runner_time with
+    match Runner.prove_cached h.project.cache prv task runner_time with
     | Some result ->
       Runner.notify wmain prv result callback ;
       Fibers.return (to_profile result)
@@ -289,14 +289,14 @@ let prover ?cancel timeout prv = fun n ->
         Fibers.monitor ?signal:cancel ~handler @@
         Fibers.monitor ~signal:killall ~handler @@
         Fibers.map to_profile @@
-        Fibers.finally ~callback:(Cache.set h.env.cache task prv) @@
+        Fibers.finally ~callback:(Cache.set h.project.cache task prv) @@
         Runner.prove_prepared wmain ~name ~cancel:kill ~callback
           prv ptask runner_time ~idename:(Session.fullname n.goal)
       in match h.client with
       | None -> runner
       | Some cl ->
         (* Don't ask server for too low timeouts *)
-        if timeout < 0.2 *. h.env.config.time then runner else
+        if timeout < 0.2 *. h.project.config.time then runner else
           let signal = Client.request cl h.profile prv ptask timeout in
           let handler result =
             match Result.crop ~timeout result with
@@ -316,7 +316,7 @@ let prover ?cancel timeout prv = fun n ->
 type result = Local of Result.t | Profile of Result.t
 
 let result n prover =
-  let cache = n.hammer.env.cache in
+  let cache = n.hammer.project.cache in
   let profile = n.hammer.profile in
   let result = Cache.get cache (Session.task n.goal) prover in
   try
@@ -343,9 +343,9 @@ let pp_hint fmt (h : hint) = Tactic.pretty fmt (fst h)
 (* -------------------------------------------------------------------------- *)
 
 let apply tac ?(hint : hint option) (n : node) : bool =
-  let env = n.hammer.env in
-  if n.depth > env.config.depth then false else
-    match Session.apply env.why3.env tac n.goal with
+  let project = n.hammer.project in
+  if n.depth > project.config.depth then false else
+    match Session.apply project.env tac n.goal with
     | None -> false
     | Some gs ->
       let hs =
@@ -366,22 +366,22 @@ let create
     ?(provers : Prover.prover list option)
     ?(tactics : Tactic.tactic list option)
     ?(profile : Calibration.profile option)
-    (env : Project.env) : hammer =
+    (project : Project.t) : hammer =
   let provers =
     match provers with Some ps -> ps | None ->
-      Prover.select env.why3 ~patterns:env.config.provers in
+      Project.select_provers project in
   let tactics =
     match tactics with Some ts -> ts | None ->
-      Tactic.select env.why3.env env.config.tactics in
+      Project.select_tactics project in
   let preprocess =
     match preprocess with Some pr -> pr | None ->
-      Option.bind env.config.preprocess (Tactic.lookup env.why3.env) in
+      Option.bind project.config.preprocess (Tactic.lookup project.env) in
   let profile =
     match profile with Some pr -> pr | None ->
-      Calibration.default env in
+      Calibration.default project in
   {
-    level ; replay ; minimize ; env ;
-    client = Client.connect env ;
+    level ; replay ; minimize ; project ;
+    client = Client.connect project ;
     provers ; tactics ; profile ; preprocess ;
   }
 
@@ -391,7 +391,7 @@ let prove hammer ?(callback=ignore) goal hint =
   | None -> push hammer ~parent goal hint
   | Some tactic ->
     match
-      Session.apply hammer.env.why3.env tactic ~allow_no_effect:true goal
+      Session.apply hammer.project.env tactic ~allow_no_effect:true goal
     with
     | None ->
       Log.warning "Ignored goal %s: preprocessing tactic %a failed"
@@ -410,7 +410,7 @@ let prove hammer ?(callback=ignore) goal hint =
 
 let hammer0 : strategy = fun n ->
   let h = n.hammer in
-  let t = h.env.config.fast in
+  let t = h.project.config.fast in
   if h.level > 0 && t > 0.0 && List.length h.provers > 1
   then
     let hprove p n =
@@ -426,7 +426,7 @@ let hammer13 minlevel timefactor n =
   let h = n.hammer in
   if h.level <= minlevel then notfound () else
     let cancel = Fibers.signal () in
-    let time = timefactor *. h.env.config.time in
+    let time = timefactor *. h.project.config.time in
     let callback = function Valid _ -> Fibers.emit cancel () | _ -> () in
     let+ verdicts =
       Fibers.all @@
@@ -464,10 +464,10 @@ let hammer =
 (* --- Node Processing                                                    --- *)
 (* -------------------------------------------------------------------------- *)
 
-let period (h : hammer) = h.env.config.time
+let period (h : hammer) = h.project.config.time
 
 let try_prover p v t : strategy = fun n ->
-  match Prover.find n.hammer.provers ~name:p ?version:v () with
+  match Prover.select ~name:p ?version:v n.hammer.project.provers with
   | None -> notfound ()
   | Some p ->
     let period = period n.hammer in
@@ -494,7 +494,7 @@ let try_tactic ~hint n =
       if Tactic.equal t (fst hint) && apply t ~hint n then
         Resolved
       else
-        match Session.apply n.hammer.env.why3.env t n.goal with
+        match Session.apply n.hammer.project.env t n.goal with
         | None -> aux ts
         | Some _ ->
           Log.warning "Goal %S: tactic '%a' shadowed by '%a'"
@@ -519,7 +519,7 @@ let execute n =
       else
         update_prover p v t n
     | Tactic { id ; children } ->
-      match Tactic.lookup n.hammer.env.why3.env id with
+      match Tactic.lookup n.hammer.project.env id with
       | Some tac ->
         let hint = tac, children in
         if n.hammer.replay then

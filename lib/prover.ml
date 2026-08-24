@@ -10,7 +10,23 @@ module Whyconf = Why3.Whyconf
 module Driver = Why3.Driver
 
 (* -------------------------------------------------------------------------- *)
-(* --- Provers                                                            --- *)
+(* --- Provers Patterns                                                   --- *)
+(* -------------------------------------------------------------------------- *)
+
+let pattern_of_string s =
+  match String.split_on_char '@' s with
+  | [] -> "?", None
+  | [ name ] -> String.lowercase_ascii name, None
+  | name :: version :: _ -> String.lowercase_ascii name, Some version
+
+let pattern_name s = fst @@ pattern_of_string s
+let pattern_version s = snd @@ pattern_of_string s
+
+let pattern ~name ?version () =
+  match version with None -> name | Some v -> Printf.sprintf "%s@%s" name v
+
+(* -------------------------------------------------------------------------- *)
+(* --- Provers Description                                                --- *)
 (* -------------------------------------------------------------------------- *)
 
 type desc = {
@@ -18,34 +34,25 @@ type desc = {
   version : string ;
 }
 
-exception InvalidPattern of string
-exception InvalidProverDescription of string
-
-let split_pattern s =
-  match String.split_on_char '@' s with
-  | [] -> assert false
-  | [ name ] -> String.lowercase_ascii name, None
-  | [ name ; version ] -> String.lowercase_ascii name, Some version
-  | _  -> raise (InvalidPattern s)
-
-let desc_to_string p =
-  Format.sprintf "%s@%s" p.name p.version
+let desc_to_string p = Format.sprintf "%s@%s" p.name p.version
 
 let desc_of_string s =
-  try
-    let (name, version) = split_pattern s in
-    { name ; version = Option.get version }
-  with
-  | Invalid_argument _ | InvalidPattern _ ->
-    raise (InvalidProverDescription s)
+  let (name, version) = pattern_of_string s in
+  { name ; version = Option.get version }
 
-let desc ~name ?version () =
-  match version with None -> name | Some v -> Printf.sprintf "%s@%s" name v
-
-let desc_name p = p.name
-let desc_version p = p.version
+let desc_of_config_prover (cfgprover : Whyconf.config_prover) =
+  if not cfgprover.interactive && cfgprover.prover.prover_altern = "" then
+    Some {
+      name = String.lowercase_ascii cfgprover.prover.prover_name ;
+      version = cfgprover.prover.prover_version ;
+    }
+  else None
 
 let pp_desc fmt p = Format.fprintf fmt "%s@%s" p.name p.version
+
+(* -------------------------------------------------------------------------- *)
+(* --- Semantic Versioning                                                --- *)
+(* -------------------------------------------------------------------------- *)
 
 type sem = V of int | S of string
 let sem s = try V (int_of_string s) with Failure _ -> S s
@@ -61,14 +68,280 @@ let compare_version p q =
   List.compare cmp (String.split_on_char '.' p) (String.split_on_char '.' q)
 
 let compare_desc p q =
-  let c = String.compare p.name q.name in
-  if c <> 0 then c else
+  let cmp = String.compare p.name q.name in
+  if cmp <> 0 then cmp else
     compare_version p.version q.version
 
-module Mdesc = Why3.Extmap.Make (struct
-    type t = desc
-    let compare = compare_desc
-  end)
+let by_version u v = compare_version (fst u) (fst v)
+
+(* -------------------------------------------------------------------------- *)
+(* --- Prover Description Portfolios                                      --- *)
+(* -------------------------------------------------------------------------- *)
+
+module Smap = Why3.Wstdlib.Mstr
+module Vmap =
+  Why3.Extmap.Make
+    (struct
+      type t = string
+      let compare = compare_version
+    end)
+
+type 'a portfolio = 'a Vmap.t Smap.t
+
+let empty : 'a portfolio = Smap.empty
+
+let add d v (m : 'a portfolio) : 'a portfolio =
+  let w = Smap.find_def Vmap.empty d.name m in
+  Smap.add d.name (Vmap.add d.version v w) m
+
+let mem d (m : 'a portfolio) : bool =
+  Vmap.mem d.version (Smap.find d.name m)
+
+let find d (m : 'a portfolio) : 'a =
+  Vmap.find d.version (Smap.find d.name m)
+
+let warn_prover_not_found =
+  Why3.Wstdlib.Hstr.memo 5 (fun p -> Log.warning "prover %s not found" p)
+
+let select
+    ~name ?version ?(warn=true) ?pattern:spec
+    (m : 'a portfolio) : 'a option =
+  try
+    let w = Smap.find name m in
+    let a =
+      match version with
+      | Some v -> Vmap.find v w
+      | None -> snd @@ Vmap.min_binding w
+    in Some a
+  with Not_found ->
+    if warn then
+      begin
+        warn_prover_not_found @@
+        match spec with Some s -> s | None -> pattern ~name ?version ()
+      end ;
+    None
+
+let is_empty = Smap.is_empty
+
+let iter f m =
+  Smap.iter
+    (fun name w -> Vmap.iter
+        (fun version x ->
+           f { name ; version } x
+        ) w) m
+
+let iterl f m =
+  Smap.iter (fun name w -> f name @@ Vmap.bindings w) m
+
+let portfolio f config =
+  Whyconf.Mprover.fold
+    begin fun _ config m ->
+      match desc_of_config_prover config with
+      | None -> m
+      | Some desc -> add desc (f desc config) m
+    end (Whyconf.get_provers config) empty
+
+(* -------------------------------------------------------------------------- *)
+(* --- Matching                                                           --- *)
+(* -------------------------------------------------------------------------- *)
+
+let pmatch pattern =
+  let name,version = pattern_of_string pattern in
+  fun d ->
+    d.name = name &&
+    match version with None -> true | Some v -> d.version = v
+
+(* -------------------------------------------------------------------------- *)
+(* --- Downloaded Provers                                                 --- *)
+(* -------------------------------------------------------------------------- *)
+
+let binarycache = lazy
+  begin
+    try Sys.getenv "WHY3FIND_PROVERS" with Not_found ->
+      let xdg_cache = Xdg.cache_dir @@ Xdg.create ~env:Sys.getenv_opt () in
+      Filename.concat xdg_cache "why3find/provers"
+  end
+
+let find_downloaded_provers () =
+  let cache = Lazy.force binarycache in
+  let files = try Sys.readdir cache with _ -> [| |] in
+  let provers = ref [] in
+  Array.iter
+    (fun file ->
+       match String.split_on_char '@' file with
+       | [ name ; version ] ->
+         let path = Filename.concat cache file in
+         provers := (path,name,version) :: !provers
+       | _ -> ()
+    ) files ; !provers
+
+(* -------------------------------------------------------------------------- *)
+(* --- Download Provers                                                   --- *)
+(* -------------------------------------------------------------------------- *)
+
+let command ~prover ~step msg =
+  Format.kasprintf
+    (begin fun cmd ->
+       if Sys.command cmd <> 0 then
+         begin
+           Utils.flush () ;
+           Utils.failwith "[%s] %s failed" prover step ;
+         end
+     end)
+    msg
+
+let downloadrc ~name ~version ~spec =
+  Utils.flush () ;
+  Utils.hline () ;
+  Printf.printf "  Downloading %s@%s\n" name version ;
+  Utils.hline () ;
+  let prover = Printf.sprintf "%s@%s" name version in
+  let tmp = Filename.temp_dir "why3find" "download" in
+  let pwd = Sys.getcwd () in
+  try
+    Sys.chdir tmp ;
+    let url, path =
+      match String.split_on_char '#' spec with
+      | [ url ] -> url , None
+      | [ url ; path ] -> url , Some path
+      | _ -> Utils.failwith "[%s] Invalid prover URL %S" prover spec in
+    let file = Filename.basename url in
+    command ~prover ~step:"Download"
+      "wget -t 5 -q --show-progress %S -O %s" url file ;
+    Utils.killline () ;
+    let binary =
+      match path with
+      | None -> file
+      | Some path ->
+        begin
+          if Filename.check_suffix file ".zip" then
+            command ~prover ~step:"Unpack" "unzip %s %s" file path
+          else
+            command ~prover ~step:"Unpack" "tar zxf %s %s" file path
+        end ; path
+    in
+    command ~prover ~step:"Permissions" "chmod a+x %s" binary ;
+    if Version.system = "macosx" then
+      begin
+        command ~prover ~step:"Quarantine"
+          "xattr -dr com.apple.quarantine %s" binary ;
+        command ~prover ~step:"Autosign"
+          "codesign -s - --deep --force %s" binary ;
+      end ;
+    begin
+      let config = Why3.Whyconf.init_config ~extra_config:[] None in
+      let data = Why3.Autodetection.read_auto_detection_data config in
+      match Why3.Autodetection.find_prover data name binary with
+      | None | Some "" ->
+        Log.warning "Unrecognized version for %s (use %s)" name version
+      | Some vp ->
+        if vp <> version then
+          Log.error "Incorrect version for %s (use %s)" name version
+    end ;
+    let cache = Lazy.force binarycache in
+    Utils.mkdirs cache ;
+    command ~prover ~step:"Installation" "mv -f %s %s/%s" binary cache prover ;
+    Utils.flush () ;
+    Sys.chdir pwd ;
+    command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
+    Utils.flush () ;
+    Format.printf "Installed prover %s@." prover ;
+    Utils.hline () ;
+    Filename.concat binary prover, name, version
+  with err ->
+    Sys.chdir pwd ;
+    Utils.flush () ;
+    command ~prover ~step:"Cleaning" "rm -fr %s" tmp ;
+    Utils.hline () ;
+    raise err
+
+let download ~name ~version ~spec = ignore @@ downloadrc ~name ~version ~spec
+
+let shared ~name =
+  List.sort by_version @@
+  Json.jassoc Json.jstring @@ Json.of_file @@ Meta.shared @@
+  let open Version in
+  Printf.sprintf "provers/%s.%s.%s.json" name system architecture
+
+(* -------------------------------------------------------------------------- *)
+(* --- Missing Provers                                                    --- *)
+(* -------------------------------------------------------------------------- *)
+
+let missed = ref 0
+let installed = ref 0
+
+let ask name version =
+  Utils.tty &&
+  match
+    String.uppercase_ascii @@
+    Utils.ask ~default:"Y"
+      "Missing prover @{<bold>%s@@%s@}. Download @{<bold>[Y/n]@} ?" name version
+  with "Y" | "YES" -> true | _ -> false
+
+let add_missing ~auto provers pattern =
+  let name, version = pattern_of_string pattern in
+  let pmatch (_,p,v) =
+    String.lowercase_ascii p = name &&
+    match version with None -> true | Some version -> v = version
+  in
+  if List.exists pmatch provers then provers else
+    try
+      incr missed ;
+      let specs = shared ~name in
+      let version,spec =
+        match version with
+        | Some v -> v, List.assoc v specs
+        | None -> List.hd specs in
+      if not auto && not @@ ask name version then raise Exit ;
+      let prv = downloadrc ~name ~version ~spec in
+      incr installed ; prv :: provers
+    with
+    | Exit -> provers
+    | Not_found ->
+      warn_prover_not_found pattern ; provers
+    | _exn ->
+      Log.warning "Can not download missing prover %s" pattern ; provers
+
+(* -------------------------------------------------------------------------- *)
+(* --- Prover Scanning                                                    --- *)
+(* -------------------------------------------------------------------------- *)
+
+let rc_prover_section (path,name,version) =
+  let s = Why3.Rc.empty_section in
+  let s = Why3.Rc.set_string s "name" name in
+  let s = Why3.Rc.set_string s "path" path in
+  let s = Why3.Rc.set_string s "version" version in s
+
+let config ?(autodetect=true) ?(downloaded=true) ?(autoload=[]) ?(missing=[]) () =
+  (* load the Why3 user's config first, if any *)
+  let config = Why3.Whyconf.init_config ~extra_config:[] None in
+  let data = Why3.Autodetection.read_auto_detection_data config in
+  (* downloaded provers *)
+  let ps = if downloaded then find_downloaded_provers () else [] in
+  (* prover autodetection *)
+  let qs = if autodetect then Why3.Autodetection.find_provers data else [] in
+  (* download missing provers *)
+  missed := 0 ;
+  installed := 0 ;
+  let provers = List.fold_left (add_missing ~auto:true) (ps @ qs) autoload in
+  let provers = List.fold_left (add_missing ~auto:false) provers missing in
+  if !missed > 1 then
+    if !installed = 0 then
+      Format.printf "Missing %d provers.@." !missed
+    else
+      Format.printf "Downloaded %d/%d missing provers.@." !installed !missed ;
+  (* complete configuration *)
+  if provers <> [] then
+    !Why3.Whyconf.provers_from_detected_provers config @@
+    Why3.Rc.set_simple_family Why3.Rc.empty "partial_prover" @@
+    List.map rc_prover_section provers
+  else config
+
+let available whyconf = portfolio (fun d _ -> d) whyconf
+
+(* -------------------------------------------------------------------------- *)
+(* --- Full Featured Prover                                               --- *)
+(* -------------------------------------------------------------------------- *)
 
 type prover = {
   desc : desc ;
@@ -118,104 +391,14 @@ let digest_config main Whyconf.{
       List.iter (fun f -> add_string buf (digest_driver main (Some d, f))) l
     ) extra_drivers;
   Digest.(to_hex (string (Buffer.contents buf)))
-[@@ocaml.warning "+9"]
+[@@ocaml.warning "+9"] (* missing name in record **)
 
-let pattern_name s =
-  try
-    let (name, _) = split_pattern s in
-    name
-  with InvalidPattern _ -> s
+let load whyconf env desc config =
+  let main = Whyconf.get_main whyconf in
+  let digest = digest_config main config in
+  let driver = Driver.load_driver_for_prover main env config in
+  { desc ; config ; relaxed = false ; driver ; digest }
 
-let pattern_version s =
-  try
-    let (_, version) = split_pattern s in
-    version
-  with InvalidPattern _ -> None
-
-let pattern_of_string = split_pattern
-
-let desc_of_config config = {
-  name = String.lowercase_ascii config.Whyconf.prover.prover_name ;
-  version = config.Whyconf.prover.prover_version ;
-}
-
-let digest_config = Timer.timed2 ~name:"Digest prover" digest_config
-
-let load_driver_for_prover =
-  Timer.timed3 ~name:"Load driver" Driver.load_driver_for_prover
-
-let load (wenv : Config.why3env) (pconfig : Whyconf.config_prover) =
-  let main = Whyconf.get_main wenv.config in
-  {
-    desc = desc_of_config pconfig ; relaxed = false ;
-    config = pconfig ;
-    driver = load_driver_for_prover main wenv.env pconfig ;
-    digest = digest_config main pconfig;
-  }
-
-let all wenv =
-  let folder _ c m =
-    if c.Whyconf.prover.prover_altern = "" && not c.Whyconf.interactive
-    then let p = load wenv c in Mdesc.add p.desc p m
-    else m in
-  let configs = Whyconf.get_provers wenv.config in
-  Whyconf.Mprover.fold folder configs Mdesc.empty
-
-let all = Config.Whtbl.memoize 5 all
+let provers whyconf env = portfolio (load whyconf env) whyconf
 
 let relaxed p = { p with relaxed = true }
-
-let filter_prover ~name ?version p =
-  p.desc.name = name
-  && (version = None || p.desc.version = Option.get version)
-
-let find_exn wenv ~pattern =
-  let (name, version) = split_pattern pattern in
-  let filter _ p = filter_prover ~name ?version p in
-  let prv = snd @@ Mdesc.min_binding @@ Mdesc.filter filter @@ all wenv in
-  if version = None then relaxed prv else prv
-
-let find_default (wenv : Config.why3env) name =
-  try [ find_exn wenv ~pattern:name ] with Not_found -> []
-
-let default wenv =
-  find_default wenv "alt-ergo" @
-  find_default wenv "z3" @
-  find_default wenv "cvc4" @
-  find_default wenv "cvc5"
-
-let warn_prover_not_found =
-  Why3.Wstdlib.Hstr.memo 5
-    (fun s -> Log.warning "prover %s not found" s)
-
-let select_from_map ~patterns all =
-  let find pattern =
-    try
-      match split_pattern pattern with
-      | name, Some version -> `Ok (Mdesc.find { name ; version } all)
-      | name, None ->
-        let filter { name = s ; _ } _ = String.equal name s in
-        `Ok (relaxed @@ snd @@ Mdesc.min_binding @@ Mdesc.filter filter all)
-    with
-    | InvalidPattern s -> `InvalidPattern s
-    | Not_found -> `PatternNotFound pattern in
-  List.map find patterns
-
-let select wenv ~patterns =
-  let filter = function
-    | `Ok p -> Some p
-    | `InvalidPattern s -> Log.warning "invalid prover pattern %s" s; None
-    | `PatternNotFound s -> warn_prover_not_found s; None in
-  List.filter_map filter @@ select_from_map ~patterns @@ all wenv
-
-let fit prover ~name ~version =
-  prover.desc.name = name &&
-  match version with
-  | None -> true
-  | Some v ->  v = prover.desc.version
-
-let find provers ~name ?version () =
-  let result = List.find_opt (fit ~name ~version) provers in
-  begin
-    if result = None then warn_prover_not_found @@ desc ~name ?version () ;
-  end ; result

@@ -562,19 +562,19 @@ let cc_theory hammer buffer strategy gnames theory =
 
 let hline = "--------------------------------------------------------"
 
-let cc_file adapter env gnames file =
+let cc_file adapter project gnames file =
   try
     Dap.output adapter "Compiling %s@." file ;
     let dir, lib = Wutil.filepath file in
-    let theories, format = Wutil.load_theories env.Project.why3.env file in
+    let theories, format = Wutil.load_theories project.Project.env file in
     let session = Session.create ~dir ~file ~format theories in
     let jprofile, strategy = Proofs.load file in
-    let default = Calibration.default env in
+    let default = Calibration.default project in
     let profile = Calibration.of_json ~default jprofile in
     Prove.clear_stats () ;
     Runner.clear_stats () ;
     let buffer = Proofs.create ~file jprofile strategy in
-    let hammer = Hammer.create ~profile env in
+    let hammer = Hammer.create ~profile project in
     let callback _ =
       begin
         Proofs.save buffer ;
@@ -634,7 +634,7 @@ let () = Dap.on_launch
           | Some root ->
             clear () ;
             let config = Config.load_config ~root in
-            let env = Project.create ~root ~config () in
+            let env = Wenv.init ~root config in
             Fibers.background @@ Fibers.all @@
             List.map (cc_file adapter env !goals) files ;
             let progress = Dap.progress adapter ~title:"Why3" () in

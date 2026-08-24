@@ -30,7 +30,7 @@ type outcome = {
 }
 
 val prove_files :
-  env:Project.env ->
+  project:Project.t ->
   mode:mode ->
   level:int ->
   session:bool ->

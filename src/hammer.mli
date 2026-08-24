@@ -36,7 +36,7 @@ val create :
   ?provers:Prover.prover list ->
   ?tactics:Tactic.tactic list ->
   ?profile:Calibration.profile ->
-  Project.env -> hammer
+  Project.t -> hammer
 
 type node
 type parent =

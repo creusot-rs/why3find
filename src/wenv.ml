@@ -39,8 +39,11 @@ let prvs = ref []
 let tacs = ref []
 let warn = ref []
 let prep = ref None
-let jobs = ref false
+let jobs = ref 0
 let autodetect = ref true
+let downloaded = ref true
+let autoload = ref false
+let loadmissing = ref false
 let usecache = ref true
 
 (* -------------------------------------------------------------------------- *)
@@ -158,9 +161,12 @@ type opt = [
   | `Package
   | `Prover
   | `Driver
+  | `Download
 ]
 
-let setjobs n = Runner.set_jobs n ; jobs := true
+let setjobs arg =
+  try let n = int_of_string arg in Runner.set_jobs n ; jobs := n
+  with _ -> Runner.set_jobs (-1) ; jobs := (-1)
 
 let settime prm s =
   try setv prm (Utils.pa_time s)
@@ -169,7 +175,6 @@ let settime prm s =
 let alloptions : (opt * string * Arg.spec * string) list = [
   `All, "--root", Arg.Set_string chdir, "DIR change to directory";
   `All, "--why3-warn-off", Arg.String (add warn), "WRN,… disable why3 warnings";
-  `All, "--no-autodetect-provers", Arg.Clear autodetect, " disable prover autodetection";
   `Package, "--package", Arg.String (add pkgs), "±PKG,… add package dependency";
   `Prover,  "--fast", Arg.String (settime fast), "TIME fast proof time (default 200ms)";
   `Prover,  "--time", Arg.String (settime time), "TIME median proof time (default 1s)";
@@ -184,21 +189,27 @@ let alloptions : (opt * string * Arg.spec * string) list = [
   `Prover,  "-P", Arg.String (add prvs), " same as --prover";
   `Prover,  "-T", Arg.String (add tacs), " same as --tactic";
   `Driver,  "-D", Arg.String (add drvs), " same as --driver";
-  `Prover,  "-j", Arg.Int setjobs, "JOBS max parallel provers" ;
+  `Prover,  "-j", Arg.String setjobs, "JOBS|'auto' max parallel provers" ;
   `Prover,  "--no-cache", Arg.Clear usecache, "do not read results from cache";
+  `Download, "--autoload", Arg.Set autoload, " automatic download of missing provers";
+  `Download, "--no-autoload", Arg.Clear loadmissing, " disable downloading of missing provers";
+  `Driver, "--no-autodetect", Arg.Clear autodetect, " disable prover autodetection";
+  `Driver, "--no-downloaded", Arg.Clear downloaded, " disable downloaded provers";
   `Prover,  "--log-prover-results", Arg.String Runner.set_logfile, "FILE log the prover results in the given file";
 ]
 
-let options ?(packages=false) ?(provers=false) ?(drivers=false) () =
+let options ?(packages=false) ?(provers=false) ?(drivers=false) ?(download=false) ?(missing=false) () =
   let default = not packages && not provers && not drivers in
+  autoload := false ;
+  loadmissing := missing && download ;
   List.filter_map
     (fun (opt,name,spec,descr) ->
-       if default ||
-          match opt with
+       if match opt with
           | `All -> true
-          | `Package -> packages
-          | `Prover -> provers
-          | `Driver -> drivers
+          | `Download -> download
+          | `Package -> default || packages
+          | `Prover -> default || provers
+          | `Driver -> default || drivers
        then Some(name,spec,descr)
        else None
     ) alloptions
@@ -257,21 +268,6 @@ let save conf =
   Format.printf "Why3find config saved to %s@."
     (Filename.concat root Config.conf_file)
 
-let update_why3_config config =
-  if !jobs then
-    begin
-      let open Why3 in
-      let file = Whyconf.get_conf_file config in
-      if file <> "" then
-        let main = Whyconf.get_main config in
-        let jobs = Runner.get_jobs main in
-        let time = Whyconf.timelimit main in
-        let mem = Whyconf.memlimit main in
-        let config = Whyconf.User.set_limits ~time ~mem ~j:jobs config in
-        Whyconf.save_config config ;
-        Format.printf "Why3 config saved to %s@." file
-    end
-
 (* -------------------------------------------------------------------------- *)
 (* --- Why3 Environment                                                   --- *)
 (* -------------------------------------------------------------------------- *)
@@ -299,26 +295,44 @@ let add_options config =
 let load_config () =
   add_options @@ Config.config_of_json @@ load_raw_config ()
 
-(* TODO: fix this ugly workaround one way or another *)
-let disable_warning s =
-  Why3.Loc.disable_warning @@
-  Why3.Loc.register_warning s Why3.Pp.empty_formatted
-
 let autodetect () =
-  let env = try Sys.getenv "WHY3FIND_AUTODETECT_PROVERS" <> "no" with
-    | Not_found -> true in
-  !autodetect && env
+  try Sys.getenv "WHY3FIND_AUTODETECT" <> "no" with Not_found -> !autodetect
 
-let init ?root ?(loadplugins=true) config =
-  begin
-    let wenv = Project.create ?root ~config ~usecache:!usecache
-        ~autodetect_provers:(autodetect ()) () in
-    if loadplugins then
-      Why3.Whyconf.load_plugins @@
-      Why3.Whyconf.get_main wenv.why3.config;
-    Debug.init_why3_debug ();
-    List.iter disable_warning config.warnoff;
-    wenv
-  end
+let downloaded () =
+  try Sys.getenv "WHY3FIND_DOWNLOADED" <> "no" with Not_found -> !downloaded
+
+(* Invariant: missing and autoload can never be true at the same time *)
+
+let missing () =
+  Utils.tty &&
+  downloaded () &&
+  match Sys.getenv "WHY3FIND_AUTOLOAD" with
+  | "yes" | "no" -> false
+  | _ | exception Not_found -> not !autoload && !loadmissing
+
+let autoload () =
+  downloaded () &&
+  match Sys.getenv "WHY3FIND_AUTOLOAD" with
+  | "yes" -> true
+  | _ -> false
+  | exception Not_found -> !autoload
+
+let init ?root config =
+  Project.create
+    ?root ~config
+    ~usecache:!usecache
+    ~autodetect:(autodetect ())
+    ~downloaded:(downloaded ())
+    ~autoload:(autoload ())
+    ~missing:(missing ())
+    ()
+
+let save_jobs () =
+  if !jobs < 0 then Utils.rmpath ".why3find/jobs" else
+  if !jobs > 0 then
+    begin
+      Utils.mkdirs ".why3find" ;
+      Utils.writefile ~file:".why3find/jobs" (string_of_int !jobs) ;
+    end
 
 (* -------------------------------------------------------------------------- *)

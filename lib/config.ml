@@ -87,27 +87,3 @@ let load_config ~root =
 let save_config ~root config =
   let path = Filename.concat root conf_file in
   Json.to_file ~pretty_floats:true path @@ config_to_json config
-
-(* -------------------------------------------------------------------------- *)
-(* --- Why3 Environments                                                  --- *)
-(* -------------------------------------------------------------------------- *)
-
-module WEnv = Why3.Env
-module WConf = Why3.Whyconf
-
-type why3env = {
-  config : WConf.config ;
-  env : WEnv.env ;
-}
-
-module Whtbl = Why3.Weakhtbl.Make (struct
-    type t = why3env
-    let tag w = WEnv.env_tag w.env
-    (* [LC] a new tag is generated for every why3 environment.
-       Hence it is sufficient to identify both the Whyconf and the Env. *)
-  end)
-
-let why3env ?(loadpath=[]) config =
-  let loadpath = loadpath @ WConf.(loadpath @@ get_main config) in
-  let env = WEnv.create_env loadpath in
-  { config ; env }

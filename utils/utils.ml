@@ -58,10 +58,30 @@ let progress msg =
            String.sub msg 0 (max 0 (width - 3))
     ) (Format.formatter_of_buffer buffer) msg
 
+let killline () =
+  Format.pp_print_flush Format.std_formatter () ;
+  Format.pp_print_flush Format.err_formatter () ;
+  if escape_codes Unix.stdout then Printf.printf "\r\027[F\027[K%!"
+
 let flush () =
   Format.pp_print_flush Format.std_formatter () ;
   Format.pp_print_flush Format.err_formatter () ;
   if escape_codes Unix.stdout then Printf.printf "\r\027[K%!"
+
+let hline () =
+  let width = Option.value (Terminal_size.get_columns ()) ~default:80 in
+  Format.printf "%s@." (String.make width '-')
+
+let ask ?(default="") msg =
+  flush () ;
+  Format.print_string "> " ;
+  Format.kfprintf
+    (fun fmt ->
+       Format.pp_print_char fmt ' ' ;
+       Format.pp_print_flush fmt () ;
+       let resp = read_line () in
+       if resp = "" then default else resp
+    ) Format.std_formatter msg
 
 let nop _ = ()
 

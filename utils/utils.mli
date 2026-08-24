@@ -64,11 +64,26 @@ val round : float -> float
 
 val show_progress_opt : string * Arg.spec * string
 
-val tty : bool
+val tty : bool (** Stdout supports ANSI escape codes. *)
+
+val ask : ?default:string -> ('a, Format.formatter, unit, string) format4 -> 'a
+(** Prints the message and reads on line from stdin *)
+
 val set_ansi_tags : Format.formatter -> unit
+(** Register semantic tags for emitting ANSI escape codes. *)
 
 val flush : unit -> unit
+(** Clears the current line and move cursor to the left-end side. *)
+
+val killline : unit -> unit
+(** Clears the {i list} written line and move cursor the left-end side. *)
+
 val overflows : unit -> bool
+(** Returns [true] if more lines that terminal height were written. *)
+
+val hline : unit -> unit
+(** Prints an horizontal line *)
+
 val progress : ('a,Format.formatter,unit) format -> 'a
 val failwith : ('a,Format.formatter,unit,'b) format4 -> 'a
 

@@ -12,12 +12,8 @@ let init () = () (* for dependencies only *)
 (* ---  Source Management                                                 --- *)
 (* -------------------------------------------------------------------------- *)
 
-let plugins = ref true
-
-let load_plugins () = !plugins && (plugins := false ; true)
-
 type source = {
-  env : Project.env ;
+  project : Project.t ;
   src : Docref.source ;
   refs : Srcref.symbol Rangemap.t ;
   types : Namespace.t ;
@@ -26,15 +22,13 @@ type source = {
 }
 
 let sources = Hashtbl.create 0
-let set_source ~filename env src refs types symbols =
+let set_source ~filename project src refs types symbols =
   Hashtbl.replace sources filename {
-    env ; src ; refs ; types ; symbols ; updates = [] ;
+    project ; src ; refs ; types ; symbols ; updates = [] ;
   }
 
 let find_decl (source:source) id =
-  let env = source.env.why3.env in
-  let src = source.src in
-  Docref.find_decl env src id
+  Docref.find_decl source.project.env source.src id
 
 (* -------------------------------------------------------------------------- *)
 (* --- Compiler for the LSP Server                                        --- *)
@@ -90,10 +84,9 @@ let preprocess filename diagnostics =
     in
     Hashtbl.remove sources filename ;
     let config = Config.load_config ~root in
-    let loadplugins = load_plugins () in
-    let env = Wenv.init ~root ~loadplugins config in
-    let wenv = env.why3.env in
-    let henv = Axioms.init env in
+    let project = Wenv.init ~root config in
+    let wenv = project.env in
+    let henv = Axioms.init project in
     let lib = library ~root ~filename in
     let parser = Docref.source ~wenv ~henv ~lib ~root ~filename in
     let src = Utils.input ~file:filename parser in
@@ -102,8 +95,8 @@ let preprocess filename diagnostics =
         (fun _ (t : Docref.theory) d ->
            Namespace.add_types ~lib:src.lib t.theory d)
         src.theories Namespace.empty in
-    let refs, symbols = Srcref.parse ~doc:false ~env ~src filename in
-    set_source ~filename env src refs types symbols ;
+    let refs, symbols = Srcref.parse ~doc:false ~project ~src filename in
+    set_source ~filename project src refs types symbols ;
   with
   | Why3.Loc.Located(loc,exn) ->
     let file,range = of_loc loc in
