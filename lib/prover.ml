@@ -158,8 +158,8 @@ let pmatch pattern =
 let binarycache = lazy
   begin
     try Sys.getenv "WHY3FIND_PROVERS" with Not_found ->
-    try Filename.concat (Sys.getenv "HOME") ".why3find.provers" with Not_found ->
-      Log.warning "Binary cache not found (use 'WHY3FIND_PROVERS')." ; ""
+      let xdg_cache = Xdg.cache_dir @@ Xdg.create ~env:Sys.getenv_opt () in
+      Filename.concat xdg_cache "why3find/provers"
   end
 
 let find_downloaded_provers () =

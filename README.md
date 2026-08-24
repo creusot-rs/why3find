@@ -244,10 +244,12 @@ Additionally, `why3find config` and `why3find prove` can also download missing
 provers, either on-demand or automatically. The command `why3find download` can
 also be used to download and install provers manually.
 
-Provers downloaded by `why3find` are installed in the `~/.why3find.provers`
-directory. You can also add binaries on your side into this directory.
-Alternatively, the environment variable `WHY3FIND_DOWNLOADED` can be used to
-specify another directory.
+Provers downloaded by `why3find` are installed in the `why3find/provers`
+sub-directory of standard
+[XDG](https://specifications.freedesktop.org/basedir/latest/) cache directory.
+You can also add binaries on your side into this directory. Alternatively, the
+environment variable `WHY3FIND_DOWNLOADED` can be used to specify another
+directory.
 
 Here are some recipes for controlling prover download:
 

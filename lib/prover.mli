@@ -72,7 +72,7 @@ val config :
 (** Configure available provers:
     - use global Why3 configuration
     - use PATH autodetection unless [~autodetect:false]
-    - use HOME/.why3find.provers unless [~downloaded:false]
+    - use XDG_CACHE_HOME/why3find/provers unless [~downloaded:false]
     - auto-download missing provers [~autoload] (if any)
     - ask for downloading provers [~missing] (if any)
 *)
