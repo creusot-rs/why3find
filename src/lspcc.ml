@@ -527,6 +527,22 @@ let symbols _channel ~uri =
 let () = Lspserver.on_document_symbol symbols
 
 (* -------------------------------------------------------------------------- *)
+(* ---  Document Preview                                                  --- *)
+(* -------------------------------------------------------------------------- *)
+
+let () = Lsp.register "why3find/openDocPreview"
+    begin fun _channel data ->
+      let uri = Json.jfield "textDocument" data |> Json.jstring in
+      (* let pos = Json.jfield "position" data |> Lspserver.jposition in *)
+      match Lspserver.to_file ~uri with
+      | None -> failwith "No such document"
+      | Some filename ->
+        let source = Hashtbl.find sources filename in
+        let filename = Printf.sprintf "%s/html/index.html" source.project.root in
+        Json.string @@ Lspserver.to_uri ~filename
+    end
+
+(* -------------------------------------------------------------------------- *)
 (* ---  Proof Watcher                                                     --- *)
 (* -------------------------------------------------------------------------- *)
 

@@ -50,6 +50,12 @@
       },
       {
         "category": "Why3",
+        "command": "why3.doc.preview",
+        "title": "Open Generated Documentation",
+        "icon": "$(open-preview)"
+      },
+      {
+        "category": "Why3",
         "command": "why3.dap.start",
         "title": "Start the Why3 Debugger",
         "enablement": "!inDebugMode",
@@ -76,6 +82,11 @@
     ],
     "menus": {
       "editor/title": [
+        {
+         "command": "why3.doc.preview",
+          "when": "resourceLangId == why3",
+          "group": "navigation"
+        },
         {
           "submenu": "why3.menu",
           "group": "action"

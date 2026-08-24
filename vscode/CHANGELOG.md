@@ -7,6 +7,7 @@ in this file.
 ## Unreleased
 
 - Enhanced debugger with breakpoints and forward and backward steps
+- New "Open Generated Documentation" command to preview `./html/index.html`
 
 ## [1.2.0]
 

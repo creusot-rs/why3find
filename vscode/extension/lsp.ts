@@ -13,8 +13,6 @@
 import { Socket, connect } from 'net';
 
 import {
-  window,
-  OutputChannel,
   workspace,
   Disposable,
 } from 'vscode';
@@ -130,6 +128,10 @@ export default class Client extends Server implements Disposable {
     }
     this.disconnectFromServer();
     await this.shutdown();
+  }
+
+  async send(method: string, params?: any) : Promise<any> {
+    return this.client?.sendRequest(method,params);
   }
 
 }
