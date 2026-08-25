@@ -25,7 +25,7 @@ val allfiles : ?exts:string list -> (string -> unit) -> string -> unit
 
 val default : Config.config
 
-val load_raw_config : unit -> Json.t
+val load_raw_config : ?back:bool -> unit -> Json.t
 
 val add_options : Config.config -> Config.config
 

@@ -428,7 +428,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
          \n\n\
          OPTIONS:\n" ;
       (* --- Why3 Config --- *)
-      let rawconfig = Wenv.load_raw_config () in
+      let rawconfig = Wenv.load_raw_config ~back:true () in
       let config =
         if !reset
         then Config.default
