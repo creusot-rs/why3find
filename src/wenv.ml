@@ -274,9 +274,9 @@ let save conf =
 
 let default = Config.default
 
-let load_raw_config () =
+let load_raw_config ?back () =
   move_to_root ();
-  Config.load_raw_config ~root:"."
+  Config.load_raw_config ?back ~root:"." ()
 
 let add_options config =
   {

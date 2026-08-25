@@ -34,9 +34,14 @@ let root_for file =
       else lookup (Filename.dirname dir)
   in lookup (Filename.dirname file)
 
-let load_raw_config ~root =
+let load_raw_config ?(back=false) ~root () =
   let path = Filename.concat root conf_file in
-  if Sys.file_exists path then Json.of_file path else `Null
+  if Sys.file_exists path then
+    try Json.of_file path with exn ->
+      if back then Utils.copy ~src:path ~tgt:(path ^ ".back") ;
+      Log.warning "Invalid configuration file (%s, %s)"
+        path (Printexc.to_string exn) ; `Null
+  else `Null
 
 let get ~of_json ~default name json =
   try of_json (Json.jfield_exn name json) with
@@ -82,7 +87,7 @@ let config_to_json config =
   Json.assoc ~keepnull:false fields
 
 let load_config ~root =
-  config_of_json @@ load_raw_config ~root
+  config_of_json @@ load_raw_config ~root ()
 
 let save_config ~root config =
   let path = Filename.concat root conf_file in
