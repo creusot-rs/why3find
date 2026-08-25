@@ -312,17 +312,17 @@ let pp_delta fmt t =
 let pa_time s =
   let n = String.length s in
   if String.ends_with ~suffix:"min" s then
-    60.0 *. (float @@ int_of_string @@ String.sub s 0 (n-3))
+    60.0 *. (float_of_string @@ String.sub s 0 (n-3))
   else
   if n > 1 then
     match s.[n-1] with
-    | 'h' -> 3600.0 *. (float @@ int_of_string @@ String.sub s 0 (n-1))
+    | 'h' -> 3600.0 *. (float_of_string @@ String.sub s 0 (n-1))
     | 's' ->
       begin
         match s.[n-2] with
-        | 'm' -> 1.e-3 *. (float @@ int_of_string @@ String.sub s 0 (n-2))
-        | 'n' -> 1.e-6 *. (float @@ int_of_string @@ String.sub s 0 (n-2))
-        | _ -> float @@ int_of_string @@ String.sub s 0 (n-1)
+        | 'm' -> 1.e-3 *. (float_of_string @@ String.sub s 0 (n-2))
+        | 'n' -> 1.e-6 *. (float_of_string @@ String.sub s 0 (n-2))
+        | _ -> float_of_string @@ String.sub s 0 (n-1)
       end
     | _ -> float_of_string s
   else float_of_string s
