@@ -30,7 +30,8 @@
 
  - Fixed relaxed prover constraints in CRC files (!198)
  - Improved time stability in proof witnessess (!204)
- - Fixed parsing of decimal time (!215)
+ - Fixed invalid configuration file (!215)
+ - Fixed parsing of decimal time (!216)
 
 ### API
 
