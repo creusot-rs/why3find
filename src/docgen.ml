@@ -895,6 +895,7 @@ let process_ident env s =
       | "module" | "theory" -> process_open_module env s
       | "end" when env.opened = [] -> process_close_module env s
       | "assume" ->
+        text env ;
         Pdoc.pp env.out Pdoc.pp_admitted s
       | _ ->
         process_clone_token env (`Kwd s) ;
