@@ -56,7 +56,6 @@ type source = {
   path: string ;
   file: string ;
   lib: string list ;
-  profile: Calibration.profile ;
   theories: theory Mstr.t ;
   mutable outdated : bool ;
 }

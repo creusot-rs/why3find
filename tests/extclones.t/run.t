@@ -51,9 +51,6 @@
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
-  <h1>Provers</h1>
-  <pre class="src">
-  </pre>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="A" href="foo.A.html">foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src">
@@ -117,9 +114,6 @@
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
-  <h1>Provers</h1>
-  <pre class="src">
-  </pre>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="B" href="bar.B.html">bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src">
@@ -136,9 +130,6 @@
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
-  <h1>Provers</h1>
-  <pre class="src">
-  </pre>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="B" href="bar.B.html">bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src">
@@ -155,9 +146,6 @@
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
-  <h1>Provers</h1>
-  <pre class="src">
-  </pre>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="A" href="foo.A.html">foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src">

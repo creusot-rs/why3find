@@ -81,7 +81,6 @@ type source = {
   path: string ;
   file: string ;
   lib: string list ;
-  profile: Calibration.profile ;
   theories: theory Mstr.t ;
   mutable outdated : bool ;
 }
@@ -265,11 +264,12 @@ let zip_goals thy proofs =
     (Why3.Task.split_theory thy None None)
 
 let reload_proofs source =
-  let { root ; path } = source in
-  let Proofs.{ strategy } = Proofs.load ~root ~path ~file:source.file () in
+  let { file ; root ; path } = source in
+  let proof = Proofs.load ~move:false ~root ~path ~file () in
+  source.outdated <- Utils.outdated ~source:file ~target:proof.file ;
   Mstr.iter
     (fun _ (th : theory) ->
-       let proofs = get_proofs th.theory strategy in
+       let proofs = get_proofs th.theory proof.strategy in
        th.proofs <- Mstr.mapi (fun a _ -> get_proof a proofs) th.proofs
     ) source.theories
 
@@ -294,7 +294,6 @@ let derived src id =
 let empty () = {
   file = "" ;
   lib = [] ; path = "" ; root = "" ;
-  profile = Calibration.create () ;
   theories = Mstr.empty ;
   outdated = true ;
 }
@@ -306,7 +305,6 @@ let source ~wenv ~henv ~root ~lib ~path ~file inc =
     Why3.Glob.clear file ;
     let thys = Why3.Env.read_channel Why3.Env.base_language wenv file inc in
     let proof = Proofs.load ~move:false ~root ~path ~file () in
-    let profile = Calibration.of_json proof.profile in
     let theories =
       Mstr.mapi
         (fun name (theory : Thy.theory) ->
@@ -329,7 +327,7 @@ let source ~wenv ~henv ~root ~lib ~path ~file inc =
         ) thys
     in
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
-    { file ; lib ; root ; path ; profile ; theories ; outdated=false }
+    { file ; lib ; root ; path ; theories ; outdated=false }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn

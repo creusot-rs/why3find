@@ -1210,13 +1210,6 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
        <code>proofs</code>\
        </header>@." src.path src.path ;
     Pdoc.flush crc ;
-    Pdoc.printf crc "<h1>Provers</h1>@\n<pre class=\"src\">" ;
-    Calibration.iter
-      (fun p n t ->
-         Pdoc.printf crc "@\n  %-12s @%-6s n=%-3d %a"
-           p.name p.version n Utils.pp_time t
-      ) src.profile ;
-    Pdoc.printf crc "@\n</pre>@." ;
     Pdoc.printf crc "<h1>Proofs</h1>@\n" ;
     parse env ;
     Pdoc.close_all out ;
