@@ -88,7 +88,8 @@ let preprocess filename diagnostics =
     let wenv = project.env in
     let henv = Axioms.init project in
     let lib = library ~root ~filename in
-    let parser = Docref.source ~wenv ~henv ~lib ~root ~filename in
+    let path = String.concat "." lib in
+    let parser = Docref.source ~wenv ~henv ~lib ~root ~path ~file:filename in
     let src = Utils.input ~file:filename parser in
     let types =
       Why3.Wstdlib.Mstr.fold

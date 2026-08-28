@@ -32,7 +32,7 @@ let filepath file =
   let lib =
     normalize @@ String.split_on_char '/' @@
     if Filename.is_relative file then dir else Filename.basename dir
-  in dir, lib
+  in dir, String.concat "." lib, lib
 
 let load_theories (env : Why3.Env.env) file =
   let byloc a b =

@@ -28,17 +28,24 @@ let map ?keepnull cc m =
 
 let jproofs : strategy -> Json.t = map (map  ~keepnull:true Crc.to_json)
 
-let filename file =
-  Filename.concat (Filename.chop_extension file) "proof.json"
+let filename ~root ~path ~file =
+  let oldfile =
+    Filename.concat (Filename.chop_extension file) "proof.json" in
+  let newfile =
+    Filename.concat root @@
+    Filename.concat "why3find.proofs" @@ path ^ ".json"
+  in ignore newfile ; oldfile
 
-let load source =
-  let proof = filename source in
+let load ~root ~path ~file =
+  let proof = filename ~root ~path ~file in
   let js = if Sys.file_exists proof then Json.of_file proof else `Null in
   let profile = if js = `Null then `List [] else Json.jfield "profile" js in
   let strategy = jmap (jmap Crc.of_json) @@ Json.jfield "proofs" js in
   { profile ; strategy }
 
 type buffer = {
+  root : string ;
+  path : string ;
   file : string;
   profile : Json.t ;
   mutable proofs : strategy ;
@@ -48,8 +55,8 @@ type buffer = {
 let dump =
   Timer.throttle @@
   Timer.timed ~name:"Proofs dump"
-    begin function { file; profile; proofs } ->
-      let file = filename file in
+    begin function { root; path; file; profile; proofs } ->
+      let file = filename ~root ~path ~file in
       Utils.mkdirs (Filename.dirname file) ;
       Json.to_file ~pretty_floats:true file @@ `Assoc [
         "profile", profile ;
@@ -57,8 +64,8 @@ let dump =
       ]
     end
 
-let create ~file profile proofs =
-  { file; profile ; proofs ; theories_seen = Hashtbl.create 8 }
+let create ~root ~path ~file profile proofs =
+  { root; path; file; profile ; proofs ; theories_seen = Hashtbl.create 8 }
 
 let add theory goal crc buffer =
   let theory = Session.thy_name theory in

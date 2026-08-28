@@ -439,14 +439,15 @@ let process ~(project:Project.t)
         Log.error "invalid file name: %S" file ;
         exit 2
       end ;
-    let dir, lib = Wutil.filepath file in
+    let root = project.root in
+    let dir, path, lib = Wutil.filepath file in
     let theories, format = Wutil.load_theories project.env file in
     let session = Session.create ~dir ~file ~format theories in
-    let Proofs.{ profile ; strategy } = Proofs.load file in
+    let Proofs.{ profile ; strategy } = Proofs.load ~root ~path ~file in
     let buffer = (* the proof strategy must be kept to stabilize crc files *)
       if (mode = `Replay)
       then None
-      else Some (Proofs.create ~file profile strategy) in
+      else Some (Proofs.create ~root ~path ~file profile strategy) in
     let default = Calibration.default project in
     let profile = Calibration.of_json ~default profile in
     let force = (mode = `Force) in
@@ -600,15 +601,15 @@ let stats_theory env proofs (thy : Session.theory) =
     "children", Json.list_map (stats_goal env proofs) goals ;
   ]
 
-let statistics ~env ~files =
+let statistics ~root ~env ~files =
   begin
     let js = Json.list_map
         (fun file ->
            Utils.progress "%s" file ;
            let theories, format = Wutil.load_theories env file in
-           let dir, lib = Wutil.filepath file in
+           let dir, path, lib = Wutil.filepath file in
            let session = Session.create ~dir ~file ~format theories in
-           let Proofs.{ strategy } = Proofs.load file in
+           let Proofs.{ strategy } = Proofs.load ~root ~path ~file in
            let theories = Session.theories session in
            Json.assoc [
              "file", `String file ;

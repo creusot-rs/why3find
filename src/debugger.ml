@@ -565,11 +565,12 @@ let hline = "--------------------------------------------------------"
 let cc_file adapter project gnames file =
   try
     Dap.output adapter "Compiling %s@." file ;
-    let dir, lib = Wutil.filepath file in
+    let root = project.Project.root in
+    let dir, path, lib = Wutil.filepath file in
     let theories, format = Wutil.load_theories project.Project.env file in
     let session = Session.create ~dir ~file ~format theories in
-    let Proofs.{ profile ; strategy } = Proofs.load file in
-    let buffer = Proofs.create ~file profile strategy in
+    let Proofs.{ profile ; strategy } = Proofs.load ~root ~path ~file in
+    let buffer = Proofs.create ~root ~path ~file profile strategy in
     let default = Calibration.default project in
     let profile = Calibration.of_json ~default profile in
     Prove.clear_stats () ;

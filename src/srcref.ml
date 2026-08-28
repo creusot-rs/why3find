@@ -139,7 +139,9 @@ let add_symbol doc id =
 (* ---  Clones & Identifiers                                              --- *)
 (* -------------------------------------------------------------------------- *)
 
-let resolve doc id = Id.resolve ~lib:doc.src.lib ~root:doc.src.filename id
+let resolve doc id =
+  let root = if doc.src.root = "." then None else Some doc.src.root in
+  Id.resolve ~lib:doc.src.lib ?root id
 
 let process_clone_token doc token =
   let state, action = Cloning.process doc.cloning doc.input token in

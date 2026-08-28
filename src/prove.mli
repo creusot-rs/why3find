@@ -41,4 +41,4 @@ val prove_files :
   gnames:string list ->
   outcome
 
-val statistics : env:Why3.Env.env -> files:string list -> Json.t
+val statistics : root:string -> env:Why3.Env.env -> files:string list -> Json.t

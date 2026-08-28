@@ -77,10 +77,10 @@ type theory = {
 }
 
 type source = {
-  root: string option ;
-  filename: string ;
-  lib: string list ;
+  root: string ;
   path: string ;
+  file: string ;
+  lib: string list ;
   profile: Calibration.profile ;
   theories: theory Mstr.t ;
   mutable outdated : bool ;
@@ -132,10 +132,10 @@ let resolve ~src ~theory ~infix pos =
     | (id, Why3.Glob.Def, _) ->
       let id = strip_lemma id theory in
       let proof = find_proof id theory in
-      Def (Id.resolve ~lib:src.lib ?root id, proof)
+      Def (Id.resolve ~lib:src.lib ~root id, proof)
     | (id, Why3.Glob.Use, _) ->
       let id = strip_lemma id theory in
-      Ref (Id.resolve ~lib:src.lib ?root id)
+      Ref (Id.resolve ~lib:src.lib ~root id)
   with Not_found -> NoRef
 
 (* -------------------------------------------------------------------------- *)
@@ -265,7 +265,8 @@ let zip_goals thy proofs =
     (Why3.Task.split_theory thy None None)
 
 let reload_proofs source =
-  let Proofs.{ strategy } = Proofs.load source.filename in
+  let { root ; path } = source in
+  let Proofs.{ strategy } = Proofs.load ~root ~path ~file:source.file in
   Mstr.iter
     (fun _ (th : theory) ->
        let proofs = get_proofs th.theory strategy in
@@ -291,21 +292,21 @@ let derived src id =
   Printf.sprintf "%s.%s.html" (String.concat "." src.lib) id
 
 let empty () = {
-  filename = "" ;
-  lib = [] ; path = "" ; root = None ;
+  file = "" ;
+  lib = [] ; path = "" ; root = "" ;
   profile = Calibration.create () ;
   theories = Mstr.empty ;
   outdated = true ;
 }
 
-let source ~wenv ~henv ~lib ?root ~filename inc =
+let source ~wenv ~henv ~root ~lib ~path ~file inc =
   let globals = Why3.Debug.test_flag Why3.Glob.flag in
   try
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
-    Why3.Glob.clear filename ;
-    let path = String.concat "." lib in
-    let thys = Why3.Env.read_channel Why3.Env.base_language wenv filename inc in
-    let Proofs.{ profile ; strategy } = Proofs.load filename in
+    Why3.Glob.clear file ;
+    let thys = Why3.Env.read_channel Why3.Env.base_language wenv file inc in
+    let Proofs.{ profile ; strategy } =
+      Proofs.load ~root ~path ~file in
     let profile = Calibration.of_json profile in
     let theories =
       Mstr.mapi
@@ -329,21 +330,22 @@ let source ~wenv ~henv ~lib ?root ~filename inc =
         ) thys
     in
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
-    { filename ; lib ; root ; path ; profile ; theories ; outdated=false }
+    { file ; lib ; root ; path ; profile ; theories ; outdated=false }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn
 
-let parse ~wenv ~henv file =
+let parse ~root ~wenv ~henv file =
   if not @@ String.ends_with ~suffix:".mlw" file then
     begin
       Log.error "invalid file name: %S" file ;
       exit 2
     end ;
   let lib = library_path file in
+  let path = String.concat "." lib in
   try
     let inc = open_in file in
-    let src = source ~wenv ~henv ~lib ~filename:file inc in
+    let src = source ~wenv ~henv ~lib ~root ~path ~file inc in
     close_in inc ; src
   with exn ->
     Log.error "%s" (Printexc.to_string exn) ;

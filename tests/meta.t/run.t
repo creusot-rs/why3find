@@ -3,7 +3,6 @@
   $ why3find install --dune --doc foo mypkg foo.cfg foo.drv
   Warning: won't install configuration file "foo.cfg"
   install (source)   mypkg/foo.mlw
-  install (proof)    mypkg/foo/proof.json
   install (driver)   foo.drv
   install (html)     html/fonts/icofont.woff
   install (html)     html/fonts/icofont.woff2
@@ -32,7 +31,6 @@
     (files
       (META.json as mypkg/META.json)
       (mypkg/foo.mlw as mypkg/mypkg/foo.mlw)
-      (mypkg/foo/proof.json as mypkg/mypkg/foo/proof.json)
       (foo.drv as mypkg/foo.drv)
       (foo/fonts/icofont.woff as mypkg/html/fonts/icofont.woff)
       (foo/fonts/icofont.woff2 as mypkg/html/fonts/icofont.woff2)

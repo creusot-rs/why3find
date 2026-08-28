@@ -1287,11 +1287,11 @@ let shared ~out ~file =
   let src = Meta.shared file in
   Utils.copy ~src ~tgt
 
-let preprocess ~henv ~wenv ~senv file =
+let preprocess ~root ~henv ~wenv ~senv file =
   file ,
   if Filename.check_suffix file ".md" then None else
   if Filename.check_suffix file ".mlw" then
-    let src = Docref.parse ~henv ~wenv file in
+    let src = Docref.parse ~root ~henv ~wenv file in
     Soundness.register senv src ; Some src
   else
     Utils.failwith "Don't known what to do with %S" file
@@ -1305,6 +1305,7 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
   begin
     (* Why3 environment *)
     let wenv = project.env in
+    let root = project.root in
     (* Axioms config *)
     let henv = Axioms.init project in
     (* Sounness config *)
@@ -1317,7 +1318,7 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
     shared ~out ~file:"fonts/icofont.woff" ;
     shared ~out ~file:"fonts/icofont.woff2" ;
     (* Pre-processing *)
-    let sources = List.map (preprocess ~wenv ~henv ~senv) files in
+    let sources = List.map (preprocess ~root ~wenv ~henv ~senv) files in
     (* Doc generation *)
     List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url) sources ;
     (* Indexing *)
