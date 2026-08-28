@@ -569,10 +569,10 @@ let cc_file adapter project gnames file =
     let dir, path, lib = Wutil.filepath file in
     let theories, format = Wutil.load_theories project.Project.env file in
     let session = Session.create ~dir ~file ~format theories in
-    let Proofs.{ profile ; strategy } = Proofs.load ~root ~path ~file in
-    let buffer = Proofs.create ~root ~path ~file profile strategy in
+    let proof = Proofs.load ~move:false ~root ~path ~file () in
+    let buffer = Proofs.buffer proof in
     let default = Calibration.default project in
-    let profile = Calibration.of_json ~default profile in
+    let profile = Calibration.of_json ~default proof.profile in
     Prove.clear_stats () ;
     Runner.clear_stats () ;
     let hammer = Hammer.create ~profile project in
@@ -587,7 +587,7 @@ let cc_file adapter project gnames file =
       end in
     Fibers.map callback @@ Fibers.all @@
     List.map
-      (cc_theory hammer buffer strategy gnames)
+      (cc_theory hammer buffer proof.strategy gnames)
       (Session.theories session)
   with Why3.Loc.Located(loc,exn) ->
     let file,line,_,_,_ = Why3.Loc.get loc in

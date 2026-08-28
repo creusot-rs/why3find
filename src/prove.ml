@@ -443,13 +443,12 @@ let process ~(project:Project.t)
     let dir, path, lib = Wutil.filepath file in
     let theories, format = Wutil.load_theories project.env file in
     let session = Session.create ~dir ~file ~format theories in
-    let Proofs.{ profile ; strategy } = Proofs.load ~root ~path ~file in
+    let move = mode <> `Replay in
+    let proof = Proofs.load ~move ~root ~path ~file () in
     let buffer = (* the proof strategy must be kept to stabilize crc files *)
-      if (mode = `Replay)
-      then None
-      else Some (Proofs.create ~root ~path ~file profile strategy) in
+      if mode = `Replay then None else Some (Proofs.buffer proof) in
     let default = Calibration.default project in
-    let profile = Calibration.of_json ~default profile in
+    let profile = Calibration.of_json ~default proof.profile in
     let force = (mode = `Force) in
     let hammer =
       Hammer.create
@@ -460,7 +459,7 @@ let process ~(project:Project.t)
         project in
     let* proofs =
       Fibers.all @@ List.map
-        (prove_theory ~hammer ~force ~gnames buffer strategy)
+        (prove_theory ~hammer ~force ~gnames buffer proof.strategy)
         (Session.theories session)
     in
     if save then Session.save session ;
@@ -609,7 +608,8 @@ let statistics ~root ~env ~files =
            let theories, format = Wutil.load_theories env file in
            let dir, path, lib = Wutil.filepath file in
            let session = Session.create ~dir ~file ~format theories in
-           let Proofs.{ strategy } = Proofs.load ~root ~path ~file in
+           let Proofs.{ strategy } =
+             Proofs.load ~move:false ~root ~path ~file () in
            let theories = Session.theories session in
            Json.assoc [
              "file", `String file ;

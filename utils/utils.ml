@@ -169,11 +169,11 @@ let rec mkdirs = function
         Sys.mkdir path 0o755 ;
       end
 
-let copy ~src ~tgt =
-  mkdirs (F.dirname tgt) ;
+let copy ~source ~target =
+  mkdirs (F.dirname target) ;
   let buffer = Bytes.create 2048 in
-  let inc = open_in src in
-  let out = open_out tgt in
+  let inc = open_in source in
+  let out = open_out target in
   let rec walk () =
     let n = Stdlib.input inc buffer 0 (Bytes.length buffer) in
     if n > 0 then

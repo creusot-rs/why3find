@@ -12,7 +12,8 @@
 
 val mkdirs : string -> unit
 val rmpath : string -> unit
-val copy : src:string -> tgt:string -> unit
+val copy : source:string -> target:string -> unit
+val outdated : source:string -> target:string -> bool
 val locate : string -> (string * string) option
 val is_local : root:string -> file:string -> bool
 val chdir : string -> unit
@@ -39,10 +40,6 @@ val iterpath :
   ?leave:(string -> unit) ->
   ?ignored:(string -> bool) ->
   string -> unit
-
-val outdated : source:string -> target:string -> bool
-(** File [source] has been modified _after_ [target].
-    Returns [true] if any of the two file does not exist. *)
 
 val pp_hex : Format.formatter -> string -> unit
 val pp_arg : Format.formatter -> string -> unit

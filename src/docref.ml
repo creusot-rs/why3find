@@ -266,7 +266,7 @@ let zip_goals thy proofs =
 
 let reload_proofs source =
   let { root ; path } = source in
-  let Proofs.{ strategy } = Proofs.load ~root ~path ~file:source.file in
+  let Proofs.{ strategy } = Proofs.load ~root ~path ~file:source.file () in
   Mstr.iter
     (fun _ (th : theory) ->
        let proofs = get_proofs th.theory strategy in
@@ -305,9 +305,8 @@ let source ~wenv ~henv ~root ~lib ~path ~file inc =
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
     Why3.Glob.clear file ;
     let thys = Why3.Env.read_channel Why3.Env.base_language wenv file inc in
-    let Proofs.{ profile ; strategy } =
-      Proofs.load ~root ~path ~file in
-    let profile = Calibration.of_json profile in
+    let proof = Proofs.load ~move:false ~root ~path ~file () in
+    let profile = Calibration.of_json proof.profile in
     let theories =
       Mstr.mapi
         (fun name (theory : Thy.theory) ->
@@ -318,7 +317,7 @@ let source ~wenv ~henv ~root ~lib ~path ~file inc =
              order = 0 ; used = [] ; clones = [] ;
            } in
            iter_theory ~scope:[] cenv theory ;
-           let proofs = zip_goals theory strategy in
+           let proofs = zip_goals theory proof.strategy in
            let signature = Axioms.signature henv theory in
            let path = Id.fullname ~lib theory.th_name in
            {

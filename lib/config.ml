@@ -38,7 +38,7 @@ let load_raw_config ?(back=false) ~root () =
   let path = Filename.concat root conf_file in
   if Sys.file_exists path then
     try Json.of_file path with exn ->
-      if back then Utils.copy ~src:path ~tgt:(path ^ ".back") ;
+      if back then Utils.copy ~source:path ~target:(path ^ ".back") ;
       Log.warning "Invalid configuration file (%s, %s)"
         path (Printexc.to_string exn) ; `Null
   else `Null

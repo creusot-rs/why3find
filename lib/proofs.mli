@@ -16,18 +16,20 @@ open Why3.Wstdlib
     The map is indexed first by theory name then by  task name. *)
 type strategy = Crc.crc Mstr.t Mstr.t
 
-val filename : root:string -> path:string -> file:string -> string
+type proof = { file : string ; profile : Json.t ; strategy : strategy }
+
+val filename : ?move:bool -> root:string -> path:string -> file:string ->
+  unit -> string
 (** Returns the proofs file associated with the given mlw file *)
 
-type t = { profile : Json.t ; strategy : strategy }
-
-val load : root:string -> path:string -> file:string -> t
+val load : ?move:bool -> root:string -> path:string -> file:string ->
+  unit -> proof
 (** Load the content of the proofs file associated with the given mlw file. *)
 
 (** Collection of proofs to be saved *)
 type buffer
 
-val create : root:string -> path:string -> file:string -> Json.t -> strategy -> buffer
+val buffer : proof -> buffer
 val add : Session.theory -> Session.goal -> Crc.crc -> buffer -> unit
 val init : Session.theory -> Session.goal list -> Crc.crc Mstr.t -> buffer -> unit
 val save : buffer -> unit

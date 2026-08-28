@@ -11,7 +11,7 @@ module Th = Why3.Theory
 
 type strategy = Crc.crc M.t M.t (* Theory -> Task -> CRC *)
 
-type t = { profile : Json.t ; strategy : strategy }
+type proof = { file : string ; profile : Json.t ; strategy : strategy }
 
 (* -------------------------------------------------------------------------- *)
 (* --- Proof Files                                                        --- *)
@@ -28,26 +28,53 @@ let map ?keepnull cc m =
 
 let jproofs : strategy -> Json.t = map (map  ~keepnull:true Crc.to_json)
 
-let filename ~root ~path ~file =
-  let oldfile =
-    Filename.concat (Filename.chop_extension file) "proof.json" in
-  let newfile =
-    Filename.concat root @@
-    Filename.concat "why3find.proofs" @@ path ^ ".json"
-  in ignore newfile ; oldfile
+let warn_moved =
+  let once = ref true in
+  fun () ->
+    if !once then
+      begin
+        once := false ;
+        if Sys.file_exists ".git" then
+          Log.warning "Moving proof files to `./why3find.proofs (use git add -A)"
+        else
+          Log.warning "Moving proof files to `./why3find.proofs"
+      end
 
-let load ~root ~path ~file =
-  let proof = filename ~root ~path ~file in
-  let js = if Sys.file_exists proof then Json.of_file proof else `Null in
+let moved = Hashtbl.create 32
+
+let filename ?(move=true) ~root ~path ~file () =
+  let target =
+    Filename.concat root @@
+    Filename.concat "why3find.proofs" @@ path ^ ".json" in
+  let source =
+    Filename.concat (Filename.chop_extension file) "proof.json" in
+  if move && not (Hashtbl.mem moved file) then
+    begin
+      Hashtbl.add moved file () ;
+      if Sys.file_exists source then
+        begin
+          if Utils.outdated ~source ~target then
+            begin
+              warn_moved () ;
+              Utils.copy ~source ~target ;
+            end ;
+          Utils.rmpath source ;
+        end ;
+      target
+    end
+  else
+    if Sys.file_exists source && not (Sys.file_exists target)
+    then source else target
+
+let load ?move ~root ~path ~file () =
+  let file = filename ?move ~root ~path ~file () in
+  let js = if Sys.file_exists file then Json.of_file file else `Null in
   let profile = if js = `Null then `List [] else Json.jfield "profile" js in
   let strategy = jmap (jmap Crc.of_json) @@ Json.jfield "proofs" js in
-  { profile ; strategy }
+  { file ; profile ; strategy }
 
 type buffer = {
-  root : string ;
-  path : string ;
-  file : string;
-  profile : Json.t ;
+  origin : proof ;
   mutable proofs : strategy ;
   theories_seen : (string, unit) Hashtbl.t ;
 }
@@ -55,8 +82,7 @@ type buffer = {
 let dump =
   Timer.throttle @@
   Timer.timed ~name:"Proofs dump"
-    begin function { root; path; file; profile; proofs } ->
-      let file = filename ~root ~path ~file in
+    begin function { origin = { file ; profile } ; proofs } ->
       Utils.mkdirs (Filename.dirname file) ;
       Json.to_file ~pretty_floats:true file @@ `Assoc [
         "profile", profile ;
@@ -64,8 +90,8 @@ let dump =
       ]
     end
 
-let create ~root ~path ~file profile proofs =
-  { root; path; file; profile ; proofs ; theories_seen = Hashtbl.create 8 }
+let buffer origin =
+  { origin ; proofs = origin.strategy ; theories_seen = Hashtbl.create 8 }
 
 let add theory goal crc buffer =
   let theory = Session.thy_name theory in

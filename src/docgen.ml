@@ -1283,9 +1283,9 @@ let index ~out:dir ~senv ~title =
 (* -------------------------------------------------------------------------- *)
 
 let shared ~out ~file =
-  let tgt = Filename.concat out file in
-  let src = Meta.shared file in
-  Utils.copy ~src ~tgt
+  let source = Meta.shared file in
+  let target = Filename.concat out file in
+  Utils.copy ~source ~target
 
 let preprocess ~root ~henv ~wenv ~senv file =
   file ,

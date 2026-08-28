@@ -528,7 +528,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             let root = "." in
             let _,path,_ = Wutil.filepath file in
             iter (fun _ -> iter (fun _ -> check_crc))
-            @@ (Proofs.load ~root ~path ~file).strategy
+            @@ (Proofs.load ~root ~path ~file ()).strategy
           in
           Wenv.allfiles check "."
         end ;
@@ -1014,12 +1014,12 @@ let () = register ~name:"install" ~args:"PKG PATH..."
       if not dune then Utils.mkdirs path ;
       let dunefiles = ref [] in
       let log ~kind src = Format.printf "install %-10s %s@." kind src in
-      let install ~kind ?tgt src =
-        let tgt = match tgt with Some p -> p | None -> src in
+      let install ~kind ?tgt source =
+        let tgt = match tgt with Some p -> p | None -> source in
         log ~kind tgt ;
         if dune
-        then dunefiles := (src,tgt) :: !dunefiles
-        else Utils.copy ~src ~tgt:(Filename.concat path tgt)
+        then dunefiles := (source,tgt) :: !dunefiles
+        else Utils.copy ~source ~target:(Filename.concat path tgt)
       in
       let allsrc = ref true in
       let pkg_prefix = String.starts_with ~prefix:(Filename.concat pkg "") in
