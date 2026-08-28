@@ -27,12 +27,22 @@ let exts () =
   let exts = List.concat_map (fun (_, exts, _) -> exts) formats in
   List.map (fun ext -> "." ^ ext) exts
 
-let filepath file =
-  let dir = Filename.chop_extension file in
-  let lib =
-    normalize @@ String.split_on_char '/' @@
-    if Filename.is_relative file then dir else Filename.basename dir
-  in dir, String.concat "." lib, lib
+let filepath ~root ~file =
+  let file = Filename.chop_extension file in
+  let root, file =
+    match Filename.is_relative root , Filename.is_relative file with
+    | true , true | false, false -> root, file
+    | true , false -> Filename.concat (Sys.getcwd ()) root , file
+    | false , true -> root , Filename.concat (Sys.getcwd ()) file
+  in
+  let droot = normalize @@ String.split_on_char '/' root in
+  let dfile = normalize @@ String.split_on_char '/' file in
+  let dir =
+    let rec reroot ps qs =
+      match ps, qs with p :: ps , q :: qs when p = q -> reroot ps qs | _ -> qs
+    in reroot droot dfile
+  in
+  String.concat "/" dir, String.concat "." dir, dir
 
 let load_theories (env : Why3.Env.env) file =
   let byloc a b =

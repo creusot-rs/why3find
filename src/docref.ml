@@ -266,7 +266,6 @@ let zip_goals thy proofs =
 let reload_proofs source =
   let { file ; root ; path } = source in
   let proof = Proofs.load ~move:false ~root ~path ~file () in
-  source.outdated <- Utils.outdated ~source:file ~target:proof.file ;
   Mstr.iter
     (fun _ (th : theory) ->
        let proofs = get_proofs th.theory proof.strategy in
@@ -276,17 +275,6 @@ let reload_proofs source =
 (* -------------------------------------------------------------------------- *)
 (* --- Parsing                                                            --- *)
 (* -------------------------------------------------------------------------- *)
-
-let library_path file =
-  let rec scan r p =
-    let d = Filename.dirname p in
-    if d = "." || d = "" || d = p
-    then p::r
-    else scan (Filename.basename p :: r) d
-  in
-  if Filename.is_relative file then
-    scan [] (Filename.chop_extension file)
-  else Filename.[chop_extension @@ basename file]
 
 let derived src id =
   Printf.sprintf "%s.%s.html" (String.concat "." src.lib) id
@@ -332,14 +320,13 @@ let source ~wenv ~henv ~root ~lib ~path ~file inc =
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn
 
-let parse ~root ~wenv ~henv file =
+let parse ~wenv ~henv ~root ~file =
   if not @@ String.ends_with ~suffix:".mlw" file then
     begin
       Log.error "invalid file name: %S" file ;
       exit 2
     end ;
-  let lib = library_path file in
-  let path = String.concat "." lib in
+  let _,path,lib = Wutil.filepath ~root ~file in
   try
     let inc = open_in file in
     let src = source ~wenv ~henv ~lib ~root ~path ~file inc in

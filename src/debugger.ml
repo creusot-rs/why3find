@@ -566,7 +566,7 @@ let cc_file adapter project gnames file =
   try
     Dap.output adapter "Compiling %s@." file ;
     let root = project.Project.root in
-    let dir, path, lib = Wutil.filepath file in
+    let dir, path, lib = Wutil.filepath ~root ~file in
     let theories, format = Wutil.load_theories project.Project.env file in
     let session = Session.create ~dir ~file ~format theories in
     let proof = Proofs.load ~move:false ~root ~path ~file () in

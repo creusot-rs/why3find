@@ -48,24 +48,16 @@ let range_of_pos ((p,q) : lexpos) : string * Range.range =
   let q = Range.at ~line:(q.pos_lnum - 1) ~col:(q.pos_cnum - q.pos_bol) () in
   file , (p,q)
 
-let library ~root ~filename =
-  if String.starts_with ~prefix:root filename then
-    let p = String.length root in
-    let n = String.length filename in
-    Docref.library_path @@ String.sub filename p (n-p)
-  else
-    Docref.library_path @@ filename
-
-let preprocess filename diagnostics =
+let preprocess file diagnostics =
   try
-    let warning (file,range) message =
-      if file = filename then
+    let warning (f,range) message =
+      if f = file then
         let severity = `Warning in
         let diag = Lspserver.diagnostic ~range ~severity ~message () in
         diagnostics := diag :: !diagnostics
       else
         Format.printf "[Warning] File %s, line %d: %s@."
-          file (1+(fst range).line) message
+          f (1+(fst range).line) message
     in
     Why3.Loc.set_warning_hook
       begin fun ?loc message ->
@@ -78,30 +70,29 @@ let preprocess filename diagnostics =
         warning (range_of_pos @@ Token.position input) message
       end ;
     let root =
-      match Config.root_for filename with
-      | None -> Filename.dirname filename
+      match Config.root_for file with
+      | None -> Filename.dirname file
       | Some root -> root
     in
-    Hashtbl.remove sources filename ;
+    Hashtbl.remove sources file ;
     let config = Config.load_config ~root in
     let project = Wenv.init ~root config in
     let wenv = project.env in
     let henv = Axioms.init project in
-    let lib = library ~root ~filename in
-    let path = String.concat "." lib in
-    let parser = Docref.source ~wenv ~henv ~lib ~root ~path ~file:filename in
-    let src = Utils.input ~file:filename parser in
+    let _,path,lib = Wutil.filepath ~root ~file in
+    let parser = Docref.source ~wenv ~henv ~lib ~root ~path ~file in
+    let src = Utils.input ~file:file parser in
     let types =
       Why3.Wstdlib.Mstr.fold
         (fun _ (t : Docref.theory) d ->
            Namespace.add_types ~lib:src.lib t.theory d)
         src.theories Namespace.empty in
-    let refs, symbols = Srcref.parse ~doc:false ~project ~src filename in
-    set_source ~filename project src refs types symbols ;
+    let refs, symbols = Srcref.parse ~doc:false ~project ~src file in
+    set_source ~filename:file project src refs types symbols ;
   with
   | Why3.Loc.Located(loc,exn) ->
     let file,range = of_loc loc in
-    if file = filename then
+    if file = file then
       let severity = `Error in
       let message = Printexc.to_string exn in
       let diag = Lspserver.diagnostic ~range ~severity ~message () in

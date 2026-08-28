@@ -440,7 +440,7 @@ let process ~(project:Project.t)
         exit 2
       end ;
     let root = project.root in
-    let dir, path, lib = Wutil.filepath file in
+    let dir, path, lib = Wutil.filepath ~root ~file in
     let theories, format = Wutil.load_theories project.env file in
     let session = Session.create ~dir ~file ~format theories in
     let move = mode <> `Replay in
@@ -607,7 +607,7 @@ let statistics ~root ~env ~files =
         (fun file ->
            Utils.progress "%s" file ;
            let theories, format = Wutil.load_theories env file in
-           let dir, path, lib = Wutil.filepath file in
+           let dir, path, lib = Wutil.filepath ~root ~file in
            let session = Session.create ~dir ~file ~format theories in
            let Proofs.{ strategy } =
              Proofs.load ~move:false ~root ~path ~file () in

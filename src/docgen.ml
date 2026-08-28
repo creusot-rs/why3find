@@ -1284,7 +1284,7 @@ let preprocess ~root ~henv ~wenv ~senv file =
   file ,
   if Filename.check_suffix file ".md" then None else
   if Filename.check_suffix file ".mlw" then
-    let src = Docref.parse ~root ~henv ~wenv file in
+    let src = Docref.parse ~root ~henv ~wenv ~file in
     Soundness.register senv src ; Some src
   else
     Utils.failwith "Don't known what to do with %S" file

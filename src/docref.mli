@@ -60,15 +60,15 @@ type source = {
   mutable outdated : bool ;
 }
 
-val library_path : string -> string list
-
-val parse : root:string -> wenv:Why3.Env.env -> henv:Axioms.henv -> string -> source
+val parse :
+  wenv:Why3.Env.env ->
+  henv:Axioms.henv ->
+  root:string -> file:string -> source
 
 val source :
   wenv:Why3.Env.env ->
   henv:Axioms.henv ->
-  root:string ->
-  lib:string list -> path:string -> file:string ->
+  root:string -> lib:string list -> path:string -> file:string ->
   in_channel -> source
 
 val empty : unit -> source

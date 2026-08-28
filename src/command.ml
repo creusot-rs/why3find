@@ -526,7 +526,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
           let check file =
             let iter = Why3.Wstdlib.Mstr.iter in
             let root = "." in
-            let _,path,_ = Wutil.filepath file in
+            let _,path,_ = Wutil.filepath ~root ~file in
             iter (fun _ -> iter (fun _ -> check_crc))
             @@ (Proofs.load ~root ~path ~file ()).strategy
           in
@@ -813,7 +813,8 @@ let () = register ~name:"print" ~args:"[OPTIONS] PATH..."
       let project = Wenv.init config in
       List.iter
         begin fun file ->
-          let _,_,lib = Wutil.filepath file in
+          let root = project.root in
+          let _,_,lib = Wutil.filepath ~root ~file in
           Wutil.load_theories project.env file |> fst |>
           List.iter
             begin fun (thy : Why3.Theory.theory) ->
