@@ -445,10 +445,11 @@ let process ~(project:Project.t)
     let session = Session.create ~dir ~file ~format theories in
     let move = mode <> `Replay in
     let proof = Proofs.load ~move ~root ~path ~file () in
-    let buffer = (* the proof strategy must be kept to stabilize crc files *)
-      if mode = `Replay then None else Some (Proofs.buffer proof) in
     let default = Calibration.default project in
     let profile = Calibration.of_json ~default proof.profile in
+    let buffer = (* the proof strategy must be kept to stabilize crc files *)
+      if mode = `Replay then None else
+        Some (Proofs.buffer ~profile:(Calibration.to_json profile) proof) in
     let force = (mode = `Force) in
     let hammer =
       Hammer.create

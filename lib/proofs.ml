@@ -48,23 +48,30 @@ let filename ?(move=true) ~root ~path ~file () =
     Filename.concat "why3find.proofs" @@ path ^ ".json" in
   let source =
     Filename.concat (Filename.chop_extension file) "proof.json" in
-  if move && not (Hashtbl.mem moved file) then
+  if move then
     begin
-      Hashtbl.add moved file () ;
-      if Sys.file_exists source then
+      (* upgrade old proof files (once) *)
+      if not (Hashtbl.mem moved file) then
         begin
-          if Utils.outdated ~source ~target then
+          Hashtbl.add moved file () ;
+          (* move old file to new target *)
+          if Sys.file_exists source then
             begin
-              warn_moved () ;
-              Utils.copy ~source ~target ;
+              if Utils.outdated ~source ~target then
+                begin
+                  warn_moved () ;
+                  Utils.copy ~source ~target ;
+                end ;
+              Utils.rmpath source ;
             end ;
-          Utils.rmpath source ;
+          (* cleanup old directory *)
+          Utils.rmdirs (Filename.dirname source) ;
         end ;
       target
     end
   else
-    if Sys.file_exists source && not (Sys.file_exists target)
-    then source else target
+  if Sys.file_exists source && not (Sys.file_exists target)
+  then source else target
 
 let load ?move ~root ~path ~file () =
   let file = filename ?move ~root ~path ~file () in
@@ -73,35 +80,41 @@ let load ?move ~root ~path ~file () =
   let strategy = jmap (jmap Crc.of_json) @@ Json.jfield "proofs" js in
   { file ; profile ; strategy }
 
-type buffer = {
-  origin : proof ;
-  mutable proofs : strategy ;
-  theories_seen : (string, unit) Hashtbl.t ;
-}
+type buffer = Buffer of {
+    file : string ;
+    profile : Json.t ;
+    mutable proofs : strategy ;
+    theories_seen : (string, unit) Hashtbl.t ;
+  }
 
 let dump =
   Timer.throttle @@
   Timer.timed ~name:"Proofs dump"
-    begin function { origin = { file ; profile } ; proofs } ->
-      Utils.mkdirs (Filename.dirname file) ;
-      Json.to_file ~pretty_floats:true file @@ `Assoc [
-        "profile", profile ;
-        "proofs", jproofs proofs ;
+    begin function Buffer b ->
+      Utils.mkdirs (Filename.dirname b.file) ;
+      Json.to_file ~pretty_floats:true b.file @@ `Assoc [
+        "profile", b.profile ;
+        "proofs", jproofs b.proofs ;
       ]
     end
 
-let buffer origin =
-  { origin ; proofs = origin.strategy ; theories_seen = Hashtbl.create 8 }
+let buffer ?profile origin =
+  Buffer {
+    file = origin.file ;
+    proofs = origin.strategy ;
+    profile = Option.value ~default:origin.profile profile ;
+    theories_seen = Hashtbl.create 8
+  }
 
-let add theory goal crc buffer =
+let add theory goal crc (Buffer b as buffer) =
   let theory = Session.thy_name theory in
   let goal = Session.name goal in
-  let tasks = M.add goal crc @@ M.find_def M.empty theory buffer.proofs in
-  buffer.proofs <- M.add theory tasks buffer.proofs ; dump buffer
+  let tasks = M.add goal crc @@ M.find_def M.empty theory b.proofs in
+  b.proofs <- M.add theory tasks b.proofs ; dump buffer
 
-let init theory goals hints buffer =
+let init theory goals hints (Buffer b as buffer) =
   let theory = Session.thy_name theory in
-  Hashtbl.add buffer.theories_seen theory ();
+  Hashtbl.add b.theories_seen theory ();
   let results =
     if M.is_empty hints then M.empty else
       List.fold_left
@@ -111,9 +124,8 @@ let init theory goals hints buffer =
            | None -> rs
            | Some r -> M.add a r rs)
         M.empty goals
-  in buffer.proofs <- M.add theory results buffer.proofs ; dump buffer
+  in b.proofs <- M.add theory results b.proofs ; dump buffer
 
-let save buf =
-  let proofs =
-    M.filter (fun th _ -> Hashtbl.mem buf.theories_seen th) buf.proofs in
-  dump ~force:true { buf with proofs }
+let save (Buffer b as buffer) =
+  b.proofs <- M.filter (fun th _ -> Hashtbl.mem b.theories_seen th) b.proofs ;
+  dump ~force:true buffer

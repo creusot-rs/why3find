@@ -161,12 +161,24 @@ let rec iterpath ?(enter=ignore) ?(file=ignore) ?(leave=ignore)
 let rmpath p = iterpath ~file:Sys.remove ~leave:Sys.rmdir p
 
 let rec mkdirs = function
-  | "/" | "." -> ()
+  | "" | "." | ".." | "/" -> ()
   | path ->
     if not (Sys.file_exists path) then
       begin
         mkdirs (F.dirname path) ;
         Sys.mkdir path 0o755 ;
+      end
+
+let rec rmdirs = function
+  | "" | "." | ".." | "/" -> ()
+  | path ->
+    if Sys.file_exists path
+    && Sys.is_directory path
+    && Array.length (Sys.readdir path) = 0
+    then
+      begin
+        Sys.rmdir path ;
+        rmdirs @@ Filename.dirname path ;
       end
 
 let copy ~source ~target =
@@ -182,7 +194,7 @@ let copy ~source ~target =
 
 let rec lookup ~dir ~file ~path =
   match dir with
-  | "/" | "." -> None
+  | "" | "." | ".." | "/" -> None
   | _ ->
     if Sys.file_exists (F.concat dir file)
     then Some (dir,path)

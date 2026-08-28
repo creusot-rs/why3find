@@ -570,9 +570,9 @@ let cc_file adapter project gnames file =
     let theories, format = Wutil.load_theories project.Project.env file in
     let session = Session.create ~dir ~file ~format theories in
     let proof = Proofs.load ~move:false ~root ~path ~file () in
-    let buffer = Proofs.buffer proof in
     let default = Calibration.default project in
     let profile = Calibration.of_json ~default proof.profile in
+    let buffer = Proofs.buffer ~profile:(Calibration.to_json profile) proof in
     Prove.clear_stats () ;
     Runner.clear_stats () ;
     let hammer = Hammer.create ~profile project in

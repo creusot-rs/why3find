@@ -29,7 +29,7 @@ val load : ?move:bool -> root:string -> path:string -> file:string ->
 (** Collection of proofs to be saved *)
 type buffer
 
-val buffer : proof -> buffer
+val buffer : ?profile:Json.t -> proof -> buffer
 val add : Session.theory -> Session.goal -> Crc.crc -> buffer -> unit
 val init : Session.theory -> Session.goal list -> Crc.crc Mstr.t -> buffer -> unit
 val save : buffer -> unit
