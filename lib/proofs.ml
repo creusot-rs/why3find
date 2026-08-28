@@ -9,7 +9,9 @@
 module M = Why3.Wstdlib.Mstr
 module Th = Why3.Theory
 
-type proofs = Crc.crc M.t M.t (* Theory -> Task -> CRC *)
+type strategy = Crc.crc M.t M.t (* Theory -> Task -> CRC *)
+
+type t = { profile : Json.t ; strategy : strategy }
 
 (* -------------------------------------------------------------------------- *)
 (* --- Proof Files                                                        --- *)
@@ -24,22 +26,22 @@ let jmap cc js =
 let map ?keepnull cc m =
   Json.assoc ?keepnull @@ List.rev @@ M.fold (fun a e js -> (a, cc e) :: js) m []
 
-let jproofs : proofs -> Json.t = map (map  ~keepnull:true Crc.to_json)
+let jproofs : strategy -> Json.t = map (map  ~keepnull:true Crc.to_json)
 
 let filename file =
   Filename.concat (Filename.chop_extension file) "proof.json"
 
-let load file : Json.t * proofs =
-  let file = filename file in
-  let js = if Sys.file_exists file then Json.of_file file else `Null in
+let load source =
+  let proof = filename source in
+  let js = if Sys.file_exists proof then Json.of_file proof else `Null in
   let profile = if js = `Null then `List [] else Json.jfield "profile" js in
   let strategy = jmap (jmap Crc.of_json) @@ Json.jfield "proofs" js in
-  profile , strategy
+  { profile ; strategy }
 
 type buffer = {
   file : string;
   profile : Json.t ;
-  mutable proofs : proofs ;
+  mutable proofs : strategy ;
   theories_seen : (string, unit) Hashtbl.t ;
 }
 

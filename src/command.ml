@@ -525,7 +525,8 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
           in
           let check f =
             let iter = Why3.Wstdlib.Mstr.iter in
-            iter (fun _ -> iter (fun _ -> check_crc)) @@ snd @@ Proofs.load f
+            iter (fun _ -> iter (fun _ -> check_crc)) @@
+            (Proofs.load f).strategy
           in
           Wenv.allfiles check "."
         end ;

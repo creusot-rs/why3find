@@ -244,7 +244,7 @@ let process_proofs_summary env ~crc id = function
       Docref.Mstr.fold
         (fun _g c (s,p) -> s + Crc.get_stuck c , p + Crc.get_proved c)
         proofs (0,0) in
-    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.urlbase id in
+    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.path id in
     let r = Crc.nverdict ~stuck ~proved in
     Pdoc.pp env.out (pp_vlink ~href) r ;
     if crc then Pdoc.pp env.crc pp_verdict r
@@ -447,7 +447,7 @@ let pp_axioms = pp_axioms_link ?href:None
 let process_axioms_summary env id ~crc = function
   | None -> ()
   | Some (thy : Docref.theory) ->
-    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.urlbase id in
+    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.path id in
     let hs = List.fold_left add_axiom unknown @@ Axioms.parameters thy.signature in
     let hs = { hs with sound = Soundness.compute env.senv thy } in
     Pdoc.pp env.out (pp_axioms_link ~href) hs ;
@@ -827,7 +827,7 @@ let process_open_module env key =
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>module %s</code>\
        </header>@."
-      env.src.urlbase path id ;
+      env.src.path path id ;
     env.mode <- Body ;
     env.block <- Raw ;
     if prelude <> "" then
@@ -1178,9 +1178,9 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
 
 let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
     (src : Docref.source) =
-  let title = Printf.sprintf "Library %s" src.urlbase in
-  let href = src.urlbase ^ ".index.html"in
-  let pref = src.urlbase ^ ".proof.html"in
+  let title = Printf.sprintf "Library %s" src.path in
+  let href = src.path ^ ".index.html"in
+  let pref = src.path ^ ".proof.html"in
   let ofile = Filename.concat dir href in
   let pfile = Filename.concat dir pref in
   let out = Pdoc.output ~file:ofile ~title in
@@ -1201,14 +1201,14 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
     Pdoc.printf out
       "<header>\
        <a href=\"index.html\">index</a> — <code>library %s</code>\
-       </header>@." src.urlbase ;
+       </header>@." src.path ;
     Pdoc.flush out ;
     Pdoc.printf crc
       "<header>\
        <a href=\"index.html\">index</a> — \
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>proofs</code>\
-       </header>@." src.urlbase src.urlbase ;
+       </header>@." src.path src.path ;
     Pdoc.flush crc ;
     Pdoc.printf crc "<h1>Provers</h1>@\n<pre class=\"src\">" ;
     Calibration.iter

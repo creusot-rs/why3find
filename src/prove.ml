@@ -442,13 +442,13 @@ let process ~(project:Project.t)
     let dir, lib = Wutil.filepath file in
     let theories, format = Wutil.load_theories project.env file in
     let session = Session.create ~dir ~file ~format theories in
-    let jprofile, strategy = Proofs.load file in
+    let Proofs.{ profile ; strategy } = Proofs.load file in
     let buffer = (* the proof strategy must be kept to stabilize crc files *)
       if (mode = `Replay)
       then None
-      else Some (Proofs.create ~file jprofile strategy) in
+      else Some (Proofs.create ~file profile strategy) in
     let default = Calibration.default project in
-    let profile = Calibration.of_json ~default jprofile in
+    let profile = Calibration.of_json ~default profile in
     let force = (mode = `Force) in
     let hammer =
       Hammer.create
@@ -608,12 +608,12 @@ let statistics ~env ~files =
            let theories, format = Wutil.load_theories env file in
            let dir, lib = Wutil.filepath file in
            let session = Session.create ~dir ~file ~format theories in
-           let _, proofs = Proofs.load file in
+           let Proofs.{ strategy } = Proofs.load file in
            let theories = Session.theories session in
            Json.assoc [
              "file", `String file ;
              "library", `String (String.concat "." lib) ;
-             "children", Json.list_map (stats_theory env proofs) theories ;
+             "children", Json.list_map (stats_theory env strategy) theories ;
            ]
         ) files in
     Utils.flush () ; js

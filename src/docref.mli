@@ -52,12 +52,13 @@ type theory = {
 }
 
 type source = {
-  root: string option;
-  filename: string;
-  lib: string list;
-  urlbase: string;
-  profile: Calibration.profile;
-  theories: theory Mstr.t;
+  root: string option ;
+  filename: string ;
+  lib: string list ;
+  path: string ;
+  profile: Calibration.profile ;
+  theories: theory Mstr.t ;
+  mutable outdated : bool ;
 }
 
 val library_path : string -> string list

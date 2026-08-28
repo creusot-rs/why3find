@@ -458,6 +458,9 @@ let () = Lspserver.on_hover hover
 (* ---  Code Lenses                                                       --- *)
 (* -------------------------------------------------------------------------- *)
 
+let pp_outdated fmt outdated =
+  if outdated then Format.fprintf fmt " (outdated)"
+
 let lenses _channel ~uri =
   match Lspserver.to_file ~uri with
   | None -> raise Not_found
@@ -474,14 +477,16 @@ let lenses _channel ~uri =
           | Clone(_,ids) ->
             let cs = List.filter_map (get_proof source) ids in
             if cs <> [] then
-              let title = Format.asprintf "%a" Crc.pp_hints cs in
+              let title = Format.asprintf "%a%a"
+                  Crc.pp_hints cs pp_outdated source.src.outdated in
               let cmd = Lspserver.Cmd { title ; command = "" ; args = [] } in
               pool := Lspserver.resolved pos cmd :: !pool
           | Def id ->
             match get_proof source id with
             | None -> ()
             | Some crc ->
-              let title = Format.asprintf "%a" Crc.pp_hint crc in
+              let title = Format.asprintf "%a%a"
+                  Crc.pp_hint crc pp_outdated source.src.outdated in
               let cmd = Lspserver.Cmd { title ; command = "" ; args = [] } in
               pool := Lspserver.resolved pos cmd :: !pool
       end source.refs ;

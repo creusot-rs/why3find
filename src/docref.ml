@@ -67,7 +67,7 @@ type instance = Instance of {
 type instances = instance Mstr.t Hid.t
 
 type theory = {
-  path: string;
+  path: string ;
   theory: Thy.theory ;
   depends: Thy.theory list ;
   signature: Axioms.signature ;
@@ -77,12 +77,13 @@ type theory = {
 }
 
 type source = {
-  root: string option;
-  filename: string;
-  lib: string list;
-  urlbase: string;
+  root: string option ;
+  filename: string ;
+  lib: string list ;
+  path: string ;
   profile: Calibration.profile ;
-  theories: theory Mstr.t;
+  theories: theory Mstr.t ;
+  mutable outdated : bool ;
 }
 
 let extract ~infix position =
@@ -264,10 +265,10 @@ let zip_goals thy proofs =
     (Why3.Task.split_theory thy None None)
 
 let reload_proofs source =
-  let _, proofs = Proofs.load source.filename in
+  let Proofs.{ strategy } = Proofs.load source.filename in
   Mstr.iter
     (fun _ (th : theory) ->
-       let proofs = get_proofs th.theory proofs in
+       let proofs = get_proofs th.theory strategy in
        th.proofs <- Mstr.mapi (fun a _ -> get_proof a proofs) th.proofs
     ) source.theories
 
@@ -291,9 +292,10 @@ let derived src id =
 
 let empty () = {
   filename = "" ;
-  lib = [] ; urlbase = "" ; root = None ;
+  lib = [] ; path = "" ; root = None ;
   profile = Calibration.create () ;
   theories = Mstr.empty ;
+  outdated = true ;
 }
 
 let source ~wenv ~henv ~lib ?root ~filename inc =
@@ -303,7 +305,7 @@ let source ~wenv ~henv ~lib ?root ~filename inc =
     Why3.Glob.clear filename ;
     let path = String.concat "." lib in
     let thys = Why3.Env.read_channel Why3.Env.base_language wenv filename inc in
-    let profile, proofs = Proofs.load filename in
+    let Proofs.{ profile ; strategy } = Proofs.load filename in
     let profile = Calibration.of_json profile in
     let theories =
       Mstr.mapi
@@ -315,7 +317,7 @@ let source ~wenv ~henv ~lib ?root ~filename inc =
              order = 0 ; used = [] ; clones = [] ;
            } in
            iter_theory ~scope:[] cenv theory ;
-           let proofs = zip_goals theory proofs in
+           let proofs = zip_goals theory strategy in
            let signature = Axioms.signature henv theory in
            let path = Id.fullname ~lib theory.th_name in
            {
@@ -327,7 +329,7 @@ let source ~wenv ~henv ~lib ?root ~filename inc =
         ) thys
     in
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
-    { filename ; lib ; root ; urlbase = path ; profile ; theories }
+    { filename ; lib ; root ; path ; profile ; theories ; outdated=false }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn

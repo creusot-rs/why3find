@@ -40,6 +40,10 @@ val iterpath :
   ?ignored:(string -> bool) ->
   string -> unit
 
+val outdated : source:string -> target:string -> bool
+(** File [source] has been modified _after_ [target].
+    Returns [true] if any of the two file does not exist. *)
+
 val pp_hex : Format.formatter -> string -> unit
 val pp_arg : Format.formatter -> string -> unit
 val pp_args : Format.formatter -> string list -> unit
