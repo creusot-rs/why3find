@@ -18,3 +18,6 @@ val create : cdir:string -> ?usecache:bool -> unit -> t
 
 val get : t -> Why3.Task.task -> Prover.prover -> Result.t
 val set : t -> Why3.Task.task -> Prover.prover -> Result.t -> unit
+
+val update : t -> path:string -> file:string -> proof:string -> unit
+val outdated : t -> path:string -> file:string -> proof:string -> bool

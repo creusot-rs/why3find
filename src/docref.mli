@@ -57,6 +57,7 @@ type source = {
   file: string ;
   lib: string list ;
   theories: theory Mstr.t ;
+  cache : Cache.t option ;
   mutable outdated : bool ;
 }
 
@@ -66,6 +67,7 @@ val parse :
   root:string -> file:string -> source
 
 val source :
+  ?cache:Cache.t ->
   wenv:Why3.Env.env ->
   henv:Axioms.henv ->
   root:string -> lib:string list -> path:string -> file:string ->

@@ -578,7 +578,7 @@ let cc_file adapter project gnames file =
     let hammer = Hammer.create ~profile project in
     let callback _ =
       begin
-        Proofs.save buffer ;
+        Proofs.save project.cache buffer ;
         Log.printf "%s@\nLibrary %s:@\n%t%t%s@."
           hline (String.concat "." lib)
           Runner.print_stats

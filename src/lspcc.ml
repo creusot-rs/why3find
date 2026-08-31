@@ -80,7 +80,9 @@ let preprocess file diagnostics =
     let wenv = project.env in
     let henv = Axioms.init project in
     let _,path,lib = Wutil.filepath ~root ~file in
-    let parser = Docref.source ~wenv ~henv ~lib ~root ~path ~file in
+    let cdir = Filename.concat root ".why3find" in
+    let cache = Cache.create ~cdir () in
+    let parser = Docref.source ~cache ~wenv ~henv ~lib ~root ~path ~file in
     let src = Utils.input ~file:file parser in
     let types =
       Why3.Wstdlib.Mstr.fold
@@ -551,25 +553,36 @@ let () = Lspserver.on_open
       if not !watching then
         begin
           watching := true ;
-          ignore @@ Lspserver.watch channel ["**/proof.json"]
+          ignore @@ Lspserver.watch channel ["**/.why3find/crc/*.crc"] ;
+          ignore @@ Lspserver.watch channel ["**/why3find.proofs/*.json"] ;
         end
     end
+
+let watched file =
+  let dir = Filename.dirname file in
+  let root =
+    match Filename.basename dir with
+    | "crc" -> Filename.dirname @@ Filename.dirname dir
+    | "why3find.proofs" -> Filename.dirname dir
+    | _ -> raise Not_found in
+  let path = Filename.basename @@ Filename.chop_extension file in
+  let lib = String.split_on_char '.' path in
+  let src = List.fold_left Filename.concat root lib ^ ".mlw" in
+  Hashtbl.find sources src
 
 let () = Lspserver.on_file_event
     begin fun channel ~uri _evt ->
       match Lspserver.to_file ~uri with
       | None -> ()
       | Some file ->
-        let suffix = "/proof.json" in
-        if String.ends_with ~suffix file then
-          let n = String.length suffix in
-          let base = String.sub file 0 (String.length file - n) in
-          let file = base ^ ".mlw" in
-          match Hashtbl.find_opt sources file with
-          | None -> ()
-          | Some source ->
+        if Filename.check_suffix file ".json"
+        || Filename.check_suffix file ".crc"
+        then
+          try
+            let source = watched file in
             Docref.reload_proofs source.src ;
-            Lspserver.refresh_codelens channel
+            Lspserver.refresh_codelens channel ;
+          with _ -> ()
     end
 
 

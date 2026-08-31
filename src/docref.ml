@@ -82,6 +82,7 @@ type source = {
   file: string ;
   lib: string list ;
   theories: theory Mstr.t ;
+  cache: Cache.t option ;
   mutable outdated : bool ;
 }
 
@@ -264,13 +265,20 @@ let zip_goals thy proofs =
     (Why3.Task.split_theory thy None None)
 
 let reload_proofs source =
-  let { file ; root ; path } = source in
-  let proof = Proofs.load ~move:false ~root ~path ~file () in
-  Mstr.iter
-    (fun _ (th : theory) ->
-       let proofs = get_proofs th.theory proof.strategy in
-       th.proofs <- Mstr.mapi (fun a _ -> get_proof a proofs) th.proofs
-    ) source.theories
+  begin
+    let { file ; root ; path } = source in
+    let crc = Proofs.load ~move:false ~root ~path ~file () in
+    Mstr.iter
+      (fun _ (th : theory) ->
+         let proofs = get_proofs th.theory crc.strategy in
+         th.proofs <- Mstr.mapi (fun a _ -> get_proof a proofs) th.proofs
+      ) source.theories ;
+    Option.iter
+      (fun cache ->
+         let Proofs.{ file ; path ; proof } = crc in
+         source.outdated <- Cache.outdated cache ~path ~file ~proof ;
+      ) source.cache ;
+  end
 
 (* -------------------------------------------------------------------------- *)
 (* --- Parsing                                                            --- *)
@@ -281,18 +289,19 @@ let derived src id =
 
 let empty () = {
   file = "" ;
+  cache = None ;
   lib = [] ; path = "" ; root = "" ;
   theories = Mstr.empty ;
   outdated = true ;
 }
 
-let source ~wenv ~henv ~root ~lib ~path ~file inc =
+let source ?cache ~wenv ~henv ~root ~lib ~path ~file inc =
   let globals = Why3.Debug.test_flag Why3.Glob.flag in
   try
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
     Why3.Glob.clear file ;
     let thys = Why3.Env.read_channel Why3.Env.base_language wenv file inc in
-    let proof = Proofs.load ~move:false ~root ~path ~file () in
+    let crc = Proofs.load ~move:false ~root ~path ~file () in
     let theories =
       Mstr.mapi
         (fun name (theory : Thy.theory) ->
@@ -303,7 +312,7 @@ let source ~wenv ~henv ~root ~lib ~path ~file inc =
              order = 0 ; used = [] ; clones = [] ;
            } in
            iter_theory ~scope:[] cenv theory ;
-           let proofs = zip_goals theory proof.strategy in
+           let proofs = zip_goals theory crc.strategy in
            let signature = Axioms.signature henv theory in
            let path = Id.fullname ~lib theory.th_name in
            {
@@ -315,7 +324,14 @@ let source ~wenv ~henv ~root ~lib ~path ~file inc =
         ) thys
     in
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
-    { file ; lib ; root ; path ; theories ; outdated=false }
+    let outdated =
+      match cache with
+      | None -> true
+      | Some cache ->
+        let Proofs.{ path ; file ; proof } = crc in
+        Cache.outdated cache ~file ~path ~proof
+    in
+    { file ; lib ; root ; path ; theories ; cache ; outdated }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn

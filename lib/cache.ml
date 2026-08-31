@@ -109,4 +109,25 @@ let set cache task prover result =
       Hash.replace cache.results entry consolidated ;
       write cache task prover consolidated
 
+let crc_file cache ~path =
+  let (//) = Filename.concat in cache.cdir // "crc" // path ^ ".crc"
+
+let crc_compute ~file ~proof =
+  let src = Digest.file file in
+  let crc = Digest.file proof in
+  Digest.to_hex src ^ Digest.to_hex crc
+
+let update cache ~path ~file ~proof =
+  try
+    let dst = crc_file cache ~path in
+    Utils.mkdirs @@ Filename.dirname dst ;
+    Utils.writefile ~file:dst (crc_compute ~file ~proof)
+  with _ -> ()
+
+let outdated cache ~path ~file ~proof =
+  try
+    let last = Utils.readfile ~file:(crc_file cache ~path) |> String.trim in
+    crc_compute ~file ~proof <> last
+  with _ -> true
+
 (* -------------------------------------------------------------------------- *)

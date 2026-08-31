@@ -11,7 +11,13 @@ module Th = Why3.Theory
 
 type strategy = Crc.crc M.t M.t (* Theory -> Task -> CRC *)
 
-type proof = { file : string ; profile : Json.t ; strategy : strategy }
+type crc_info = {
+  path : string ;
+  file : string ;
+  proof : string ;
+  profile : Json.t ;
+  strategy : strategy ;
+}
 
 (* -------------------------------------------------------------------------- *)
 (* --- Proof Files                                                        --- *)
@@ -74,36 +80,37 @@ let filename ?(move=true) ~root ~path ~file () =
   then source else target
 
 let load ?move ~root ~path ~file () =
-  let file = filename ?move ~root ~path ~file () in
-  let js = if Sys.file_exists file then Json.of_file file else `Null in
+  let proof = filename ?move ~root ~path ~file () in
+  let js = if Sys.file_exists proof then Json.of_file proof else `Null in
   let profile = if js = `Null then `List [] else Json.jfield "profile" js in
   let strategy = jmap (jmap Crc.of_json) @@ Json.jfield "proofs" js in
-  { file ; profile ; strategy }
+  { path ; file ; proof ; profile ; strategy }
 
 type buffer = Buffer of {
-    file : string ;
+    crc : crc_info ;
     profile : Json.t ;
     mutable proofs : strategy ;
-    theories_seen : (string, unit) Hashtbl.t ;
+    theories : (string, unit) Hashtbl.t ;
   }
 
 let dump =
   Timer.throttle @@
   Timer.timed ~name:"Proofs dump"
     begin function Buffer b ->
-      Utils.mkdirs (Filename.dirname b.file) ;
-      Json.to_file ~pretty_floats:true b.file @@ `Assoc [
+      let proof = b.crc.proof in
+      Utils.mkdirs (Filename.dirname proof) ;
+      Json.to_file ~pretty_floats:true proof @@ `Assoc [
         "profile", b.profile ;
         "proofs", jproofs b.proofs ;
       ]
     end
 
-let buffer ?profile origin =
+let buffer ?profile crc =
   Buffer {
-    file = origin.file ;
-    proofs = origin.strategy ;
-    profile = Option.value ~default:origin.profile profile ;
-    theories_seen = Hashtbl.create 8
+    crc ;
+    proofs = crc.strategy ;
+    profile = Option.value ~default:crc.profile profile ;
+    theories = Hashtbl.create 8 ;
   }
 
 let add theory goal crc (Buffer b as buffer) =
@@ -114,7 +121,7 @@ let add theory goal crc (Buffer b as buffer) =
 
 let init theory goals hints (Buffer b as buffer) =
   let theory = Session.thy_name theory in
-  Hashtbl.add b.theories_seen theory ();
+  Hashtbl.add b.theories theory ();
   let results =
     if M.is_empty hints then M.empty else
       List.fold_left
@@ -126,6 +133,10 @@ let init theory goals hints (Buffer b as buffer) =
         M.empty goals
   in b.proofs <- M.add theory results b.proofs ; dump buffer
 
-let save (Buffer b as buffer) =
-  b.proofs <- M.filter (fun th _ -> Hashtbl.mem b.theories_seen th) b.proofs ;
-  dump ~force:true buffer
+let save cache (Buffer b as buffer) =
+  begin
+    b.proofs <- M.filter (fun th _ -> Hashtbl.mem b.theories th) b.proofs ;
+    dump ~force:true buffer ;
+    let { path ; file ; proof } = b.crc in
+    Cache.update cache ~path ~file ~proof ;
+  end

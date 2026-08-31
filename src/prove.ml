@@ -464,7 +464,7 @@ let process ~(project:Project.t)
         (Session.theories session)
     in
     if save then Session.save session ;
-    Option.iter Proofs.save buffer ;
+    Option.iter (Proofs.save project.cache) buffer ;
     let henv =
       if axioms then
         Some (Axioms.init project)
