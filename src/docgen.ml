@@ -1220,8 +1220,11 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
 (* --- Generating Index                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
+let warns_outdated = lazy
+  (try Sys.getenv "WHY3FIND_OUTDATED" <> "no" with Not_found -> true)
+
 let process_chapter_proofs out (src : Docref.source) =
-  if src.outdated then
+  if src.outdated && Lazy.force warns_outdated then
     Log.warning "%s: proof files might be outdated" src.file ;
   let (stuck,proved) =
     Docref.Mstr.fold
