@@ -145,13 +145,11 @@ created. The package directory shall be structured as follows:
     DIR
     ├── .why3find             # Why3find local cache     (*not* versioned)
     ├── why3find.json         # Why3find configuration      (versioned)
+    ├── why3find.proofs       # Why3find proof hints        (versioned)
     ├── dune-project          # Dune project configuration  (versioned)
     ├── lib/**                # OCaml extracted files       (versioned)
     └── PKG                   # Package source directory
-        ├── **/*.mlw          # Why3 source files           (versioned)
-        ├── **/*/proof.json   # Why3find proof witness      (versioned)
-        ├── **/*/why3session.xml  # Why3 internal files   (*not* versioned)
-        └── **/*/why3shapes.gz    # Why3 internal files   (*not* versioned)
+        └── **/*.mlw          # Why3 source files           (versioned)
 
 You shall put your Why3 source files in this subdirectory in order
 to be compliant with Why3 global naming policy. Consider for instance
@@ -427,8 +425,8 @@ sessions, but with much less information details: they contain only prover
 results with time information, tactics, and contain at most one proving strategy
 for each goal. Proof certificates are also used when generating documentation.
 
-Proof certificates are stored in `proof.json` files located just after the usual
-Why3 sessions files. The management of proof certificates is controlled by the
+Proof certificates are stored in `why3find.proofs` directory at the project root.
+The management of proof certificates is controlled by the
 following options:
 
     why3find prove -f    # Force proof reconstruction from scratch (no hints)

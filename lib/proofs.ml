@@ -48,7 +48,7 @@ let warn_moved =
 
 let moved = Hashtbl.create 32
 
-let filename ?(move=true) ~root ~path ~file () =
+let filename ~move ~root ~path ~file () =
   let target =
     Filename.concat root @@
     Filename.concat "why3find.proofs" @@ path ^ ".json" in
@@ -79,8 +79,8 @@ let filename ?(move=true) ~root ~path ~file () =
   if Sys.file_exists source && not (Sys.file_exists target)
   then source else target
 
-let load ?move ~root ~path ~file () =
-  let proof = filename ?move ~root ~path ~file () in
+let load ?(move=false) ~root ~path ~file () =
+  let proof = filename ~move ~root ~path ~file () in
   let js = if Sys.file_exists proof then Json.of_file proof else `Null in
   let profile = if js = `Null then `List [] else Json.jfield "profile" js in
   let strategy = jmap (jmap Crc.of_json) @@ Json.jfield "proofs" js in

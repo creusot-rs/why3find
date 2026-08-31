@@ -24,7 +24,7 @@ type crc_info = {
   strategy : strategy ;
 }
 
-val filename : ?move:bool -> root:string -> path:string -> file:string ->
+val filename : move:bool -> root:string -> path:string -> file:string ->
   unit -> string
 (** Returns the proofs file associated with the given mlw file *)
 
