@@ -193,7 +193,7 @@
       <span class="comment section-toggle">begin</span>
         <span class="keyword">lemma</span> <a id="S.commutative" href="clones.Commutative.html#commutative" title="clones.IntC.S.commutative  (cloned from clones.Commutative.commutative)">commutative</a><a href="clones.proof.html#IntC.S.commutative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
-    </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class="keyword">with</span> <span class="keyword">type</span> M.<a title="clones.Commutative.M.t" href="clones.Commutative.html#M.t">t</a> = int, <span class="keyword">function</span> M.<a title="clones.Commutative.M.op" href="clones.Commutative.html#M.op">op</a> = ( <a title="int.Int.(+)" href="https://www.why3.org/stdlib/int.html#infix%20+_19">+</a> )
+    </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class="keyword">with</span> <span class="keyword">type</span> M.<a title="clones.Commutative.M.t" href="clones.Commutative.html#M.t">t</a> = int, <span class="keyword">function</span> M.<a title="clones.Commutative.M.op" href="clones.Commutative.html#M.op">op</a> = (+)
     <span class="keyword">clone</span> <a title="clones.Commutative" href="clones.Commutative.html">Commutative</a> <span class="keyword">as</span> P<span class="section">{<span class="section-toggle">#</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
         <span class="comment">(* cloned <a name="clone-5" href="clones.Monoid.html">clones.Monoid</a> *)</span>
@@ -203,7 +203,7 @@
       <span class="comment section-toggle">begin</span>
         <span class="keyword">lemma</span> <a id="P.commutative" href="clones.Commutative.html#commutative" title="clones.IntC.P.commutative  (cloned from clones.Commutative.commutative)">commutative</a><a href="clones.proof.html#IntC.P.commutative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
-    </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class="keyword">with</span> <span class="keyword">type</span> M.<a title="clones.Commutative.M.t" href="clones.Commutative.html#M.t">t</a> = int, <span class="keyword">function</span> M.<a title="clones.Commutative.M.op" href="clones.Commutative.html#M.op">op</a> = ( <a title="int.Int.(*)" href="https://www.why3.org/stdlib/int.html#infix%20*_20">*</a> )
+    </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class="keyword">with</span> <span class="keyword">type</span> M.<a title="clones.Commutative.M.t" href="clones.Commutative.html#M.t">t</a> = int, <span class="keyword">function</span> M.<a title="clones.Commutative.M.op" href="clones.Commutative.html#M.op">op</a> = (*)
   <span class="keyword">end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
