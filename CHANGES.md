@@ -37,6 +37,7 @@
  - Improved time stability in proof witnessess (!204)
  - Fixed invalid configuration file (!215)
  - Fixed parsing of decimal time (!216)
+ - Fix rendering of infix operators in documentation (!219)
 
 ### API
 
