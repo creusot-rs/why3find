@@ -244,7 +244,7 @@ let process_proofs_summary env ~crc id = function
       Docref.Mstr.fold
         (fun _g c (s,p) -> s + Crc.get_stuck c , p + Crc.get_proved c)
         proofs (0,0) in
-    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.urlbase id in
+    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.path id in
     let r = Crc.nverdict ~stuck ~proved in
     Pdoc.pp env.out (pp_vlink ~href) r ;
     if crc then Pdoc.pp env.crc pp_verdict r
@@ -447,7 +447,7 @@ let pp_axioms = pp_axioms_link ?href:None
 let process_axioms_summary env id ~crc = function
   | None -> ()
   | Some (thy : Docref.theory) ->
-    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.urlbase id in
+    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.path id in
     let hs = List.fold_left add_axiom unknown @@ Axioms.parameters thy.signature in
     let hs = { hs with sound = Soundness.compute env.senv thy } in
     Pdoc.pp env.out (pp_axioms_link ~href) hs ;
@@ -827,7 +827,7 @@ let process_open_module env key =
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>module %s</code>\
        </header>@."
-      env.src.urlbase path id ;
+      env.src.path path id ;
     env.mode <- Body ;
     env.block <- Raw ;
     if prelude <> "" then
@@ -1178,9 +1178,9 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
 
 let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
     (src : Docref.source) =
-  let title = Printf.sprintf "Library %s" src.urlbase in
-  let href = src.urlbase ^ ".index.html"in
-  let pref = src.urlbase ^ ".proof.html"in
+  let title = Printf.sprintf "Library %s" src.path in
+  let href = src.path ^ ".index.html"in
+  let pref = src.path ^ ".proof.html"in
   let ofile = Filename.concat dir href in
   let pfile = Filename.concat dir pref in
   let out = Pdoc.output ~file:ofile ~title in
@@ -1201,22 +1201,15 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
     Pdoc.printf out
       "<header>\
        <a href=\"index.html\">index</a> — <code>library %s</code>\
-       </header>@." src.urlbase ;
+       </header>@." src.path ;
     Pdoc.flush out ;
     Pdoc.printf crc
       "<header>\
        <a href=\"index.html\">index</a> — \
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>proofs</code>\
-       </header>@." src.urlbase src.urlbase ;
+       </header>@." src.path src.path ;
     Pdoc.flush crc ;
-    Pdoc.printf crc "<h1>Provers</h1>@\n<pre class=\"src\">" ;
-    Calibration.iter
-      (fun p n t ->
-         Pdoc.printf crc "@\n  %-12s @%-6s n=%-3d %a"
-           p.name p.version n Utils.pp_time t
-      ) src.profile ;
-    Pdoc.printf crc "@\n</pre>@." ;
     Pdoc.printf crc "<h1>Proofs</h1>@\n" ;
     parse env ;
     Pdoc.close_all out ;
@@ -1227,7 +1220,12 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
 (* --- Generating Index                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
+let warns_outdated = lazy
+  (try Sys.getenv "WHY3FIND_OUTDATED" <> "no" with Not_found -> true)
+
 let process_chapter_proofs out (src : Docref.source) =
+  if src.outdated && Lazy.force warns_outdated then
+    Log.warning "%s: proof files might be outdated" src.file ;
   let (stuck,proved) =
     Docref.Mstr.fold
       (fun _ (thy : Docref.theory) acc ->
@@ -1283,15 +1281,15 @@ let index ~out:dir ~senv ~title =
 (* -------------------------------------------------------------------------- *)
 
 let shared ~out ~file =
-  let tgt = Filename.concat out file in
-  let src = Meta.shared file in
-  Utils.copy ~src ~tgt
+  let source = Meta.shared file in
+  let target = Filename.concat out file in
+  Utils.copy ~source ~target
 
-let preprocess ~henv ~wenv ~senv file =
+let preprocess ~root ~cache ~henv ~wenv ~senv file =
   file ,
   if Filename.check_suffix file ".md" then None else
   if Filename.check_suffix file ".mlw" then
-    let src = Docref.parse ~henv ~wenv file in
+    let src = Docref.parse ~cache ~root ~henv ~wenv ~file () in
     Soundness.register senv src ; Some src
   else
     Utils.failwith "Don't known what to do with %S" file
@@ -1305,6 +1303,7 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
   begin
     (* Why3 environment *)
     let wenv = project.env in
+    let root = project.root in
     (* Axioms config *)
     let henv = Axioms.init project in
     (* Sounness config *)
@@ -1317,7 +1316,8 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
     shared ~out ~file:"fonts/icofont.woff" ;
     shared ~out ~file:"fonts/icofont.woff2" ;
     (* Pre-processing *)
-    let sources = List.map (preprocess ~wenv ~henv ~senv) files in
+    let cache = Cache.create ~root:project.root () in
+    let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
     (* Doc generation *)
     List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url) sources ;
     (* Indexing *)

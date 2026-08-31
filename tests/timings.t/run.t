@@ -5,8 +5,8 @@
   Proved (foo.mlw) ✔
   Split theories         XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
   Transformation         XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
-  Proofs dump            XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
   Task checksum          XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
+  Proofs dump            XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
   Task preparation       XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
   Task printing          XX.XX (   XX) | XX.XX - XX.XX - XX.XX |
   Launch proof           XX.XX (   XX) | XX.XX - XX.XX - XX.XX |

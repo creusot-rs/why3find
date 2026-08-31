@@ -10,7 +10,7 @@
   Theory test.T: ✔ (-)
   Proved (test.mlw) ✔
 
-  $ cat test/proof.json
+  $ cat why3find.proofs/test.json
   {
     "profile": [],
     "proofs": { "T": { "g": { "tactic": "split_vc", "children": [] } } }
@@ -21,5 +21,5 @@
   $ why3find prove test.mlw
   Proved (test.mlw) ✔
 
-  $ cat test/proof.json
+  $ cat why3find.proofs/test.json
   { "profile": [], "proofs": {} }

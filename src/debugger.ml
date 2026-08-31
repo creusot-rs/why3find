@@ -565,19 +565,20 @@ let hline = "--------------------------------------------------------"
 let cc_file adapter project gnames file =
   try
     Dap.output adapter "Compiling %s@." file ;
-    let dir, lib = Wutil.filepath file in
+    let root = project.Project.root in
+    let dir, path, lib = Wutil.filepath ~root ~file in
     let theories, format = Wutil.load_theories project.Project.env file in
     let session = Session.create ~dir ~file ~format theories in
-    let jprofile, strategy = Proofs.load file in
+    let proof = Proofs.load ~move:false ~root ~path ~file () in
     let default = Calibration.default project in
-    let profile = Calibration.of_json ~default jprofile in
+    let profile = Calibration.of_json ~default proof.profile in
+    let buffer = Proofs.buffer ~profile:(Calibration.to_json profile) proof in
     Prove.clear_stats () ;
     Runner.clear_stats () ;
-    let buffer = Proofs.create ~file jprofile strategy in
     let hammer = Hammer.create ~profile project in
     let callback _ =
       begin
-        Proofs.save buffer ;
+        Proofs.save project.cache buffer ;
         Log.printf "%s@\nLibrary %s:@\n%t%t%s@."
           hline (String.concat "." lib)
           Runner.print_stats
@@ -586,7 +587,7 @@ let cc_file adapter project gnames file =
       end in
     Fibers.map callback @@ Fibers.all @@
     List.map
-      (cc_theory hammer buffer strategy gnames)
+      (cc_theory hammer buffer proof.strategy gnames)
       (Session.theories session)
   with Why3.Loc.Located(loc,exn) ->
     let file,line,_,_,_ = Why3.Loc.get loc in

@@ -52,20 +52,27 @@ type theory = {
 }
 
 type source = {
-  root: string option;
-  filename: string;
-  lib: string list;
-  urlbase: string;
-  profile: Calibration.profile;
-  theories: theory Mstr.t;
+  root: string ;
+  path: string ;
+  file: string ;
+  lib: string list ;
+  theories: theory Mstr.t ;
+  cache : Cache.t option ;
+  mutable outdated : bool ;
 }
 
-val library_path : string -> string list
+val parse :
+  cache:Cache.t ->
+  wenv:Why3.Env.env ->
+  henv:Axioms.henv ->
+  root:string -> file:string ->
+  unit -> source
 
-val parse : wenv:Why3.Env.env -> henv:Axioms.henv -> string -> source
-
-val source : wenv:Why3.Env.env -> henv:Axioms.henv ->
-  lib:string list -> ?root:string -> filename:string ->
+val source :
+  ?cache:Cache.t ->
+  wenv:Why3.Env.env ->
+  henv:Axioms.henv ->
+  root:string -> lib:string list -> path:string -> file:string ->
   in_channel -> source
 
 val empty : unit -> source

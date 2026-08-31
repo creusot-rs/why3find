@@ -10,7 +10,15 @@ open Why3
 
 (** All recognized extensions. Typically [".mlw"] and other from plugins. *)
 val exts : unit -> string list
-val filepath : string -> string * string list (* dir & lib *)
+
+val filepath : root:string -> file:string -> string * string * string list
+(**
+   Compute derived path from a source filename relatively to the root,
+   namely dir, path and lib:
+    - from [~root:"./project"] and [~file:"project/backup/../foo/bar.mlw"]
+    - returns [( "foo/bar", "foo.bar", ["foo";"bar"] )]
+*)
+
 val load_theories : Env.env -> Env.filename -> Theory.theory list * Env.fformat
 
 (** Iterates over declared id. *)

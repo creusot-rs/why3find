@@ -10,9 +10,11 @@
 (* --- System Utilities                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-val mkdirs : string -> unit
-val rmpath : string -> unit
-val copy : src:string -> tgt:string -> unit
+val rmpath : string -> unit (* remove file or directory *)
+val mkdirs : string -> unit (* make missing parent directories *)
+val rmdirs : string -> unit (* remove empty parent directories *)
+val copy : source:string -> target:string -> unit
+val outdated : source:string -> target:string -> bool
 val locate : string -> (string * string) option
 val is_local : root:string -> file:string -> bool
 val chdir : string -> unit

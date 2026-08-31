@@ -200,7 +200,8 @@ let connect ~server ~polling =
   let provers = Hashtbl.create 5 in
   Prover.iter (Hashtbl.add provers) prvs ;
   let jobs = Runner.get_jobs () in
-  let cache = Cache.create ~cdir:".why3find" () in
+  let root = try Sys.getenv "HOME" with Not_found -> Sys.getcwd () in
+  let cache = Cache.create ~root () in
   Utils.flush () ;
   Prover.iter (fun d _ -> Format.printf "Prover %a@." Prover.pp_desc d) prvs ;
   Format.printf "Server %s@." server ;

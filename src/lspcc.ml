@@ -48,24 +48,16 @@ let range_of_pos ((p,q) : lexpos) : string * Range.range =
   let q = Range.at ~line:(q.pos_lnum - 1) ~col:(q.pos_cnum - q.pos_bol) () in
   file , (p,q)
 
-let library ~root ~filename =
-  if String.starts_with ~prefix:root filename then
-    let p = String.length root in
-    let n = String.length filename in
-    Docref.library_path @@ String.sub filename p (n-p)
-  else
-    Docref.library_path @@ filename
-
-let preprocess filename diagnostics =
+let preprocess file diagnostics =
   try
-    let warning (file,range) message =
-      if file = filename then
+    let warning (f,range) message =
+      if f = file then
         let severity = `Warning in
         let diag = Lspserver.diagnostic ~range ~severity ~message () in
         diagnostics := diag :: !diagnostics
       else
         Format.printf "[Warning] File %s, line %d: %s@."
-          file (1+(fst range).line) message
+          f (1+(fst range).line) message
     in
     Why3.Loc.set_warning_hook
       begin fun ?loc message ->
@@ -78,29 +70,30 @@ let preprocess filename diagnostics =
         warning (range_of_pos @@ Token.position input) message
       end ;
     let root =
-      match Config.root_for filename with
-      | None -> Filename.dirname filename
+      match Config.root_for file with
+      | None -> Filename.dirname file
       | Some root -> root
     in
-    Hashtbl.remove sources filename ;
+    Hashtbl.remove sources file ;
     let config = Config.load_config ~root in
     let project = Wenv.init ~root config in
     let wenv = project.env in
     let henv = Axioms.init project in
-    let lib = library ~root ~filename in
-    let parser = Docref.source ~wenv ~henv ~lib ~root ~filename in
-    let src = Utils.input ~file:filename parser in
+    let _,path,lib = Wutil.filepath ~root ~file in
+    let cache = Cache.create ~root () in
+    let parser = Docref.source ~cache ~wenv ~henv ~lib ~root ~path ~file in
+    let src = Utils.input ~file:file parser in
     let types =
       Why3.Wstdlib.Mstr.fold
         (fun _ (t : Docref.theory) d ->
            Namespace.add_types ~lib:src.lib t.theory d)
         src.theories Namespace.empty in
-    let refs, symbols = Srcref.parse ~doc:false ~project ~src filename in
-    set_source ~filename project src refs types symbols ;
+    let refs, symbols = Srcref.parse ~doc:false ~project ~src file in
+    set_source ~filename:file project src refs types symbols ;
   with
   | Why3.Loc.Located(loc,exn) ->
-    let file,range = of_loc loc in
-    if file = filename then
+    let f,range = of_loc loc in
+    if f = file then
       let severity = `Error in
       let message = Printexc.to_string exn in
       let diag = Lspserver.diagnostic ~range ~severity ~message () in
@@ -458,6 +451,9 @@ let () = Lspserver.on_hover hover
 (* ---  Code Lenses                                                       --- *)
 (* -------------------------------------------------------------------------- *)
 
+let pp_outdated fmt outdated =
+  if outdated then Format.fprintf fmt " (outdated)"
+
 let lenses _channel ~uri =
   match Lspserver.to_file ~uri with
   | None -> raise Not_found
@@ -474,14 +470,17 @@ let lenses _channel ~uri =
           | Clone(_,ids) ->
             let cs = List.filter_map (get_proof source) ids in
             if cs <> [] then
-              let title = Format.asprintf "%a" Crc.pp_hints cs in
+              let title =
+                Format.asprintf "%a%a"
+                  Crc.pp_hints cs pp_outdated source.src.outdated in
               let cmd = Lspserver.Cmd { title ; command = "" ; args = [] } in
               pool := Lspserver.resolved pos cmd :: !pool
           | Def id ->
             match get_proof source id with
             | None -> ()
             | Some crc ->
-              let title = Format.asprintf "%a" Crc.pp_hint crc in
+              let title = Format.asprintf "%a%a"
+                  Crc.pp_hint crc pp_outdated source.src.outdated in
               let cmd = Lspserver.Cmd { title ; command = "" ; args = [] } in
               pool := Lspserver.resolved pos cmd :: !pool
       end source.refs ;
@@ -553,25 +552,36 @@ let () = Lspserver.on_open
       if not !watching then
         begin
           watching := true ;
-          ignore @@ Lspserver.watch channel ["**/proof.json"]
+          ignore @@ Lspserver.watch channel ["**/.why3find/crc/*.crc"] ;
+          ignore @@ Lspserver.watch channel ["**/why3find.proofs/*.json"] ;
         end
     end
+
+let watched file =
+  let dir = Filename.dirname file in
+  let root =
+    match Filename.basename dir with
+    | "crc" -> Filename.dirname @@ Filename.dirname dir
+    | "why3find.proofs" -> Filename.dirname dir
+    | _ -> raise Not_found in
+  let path = Filename.basename @@ Filename.chop_extension file in
+  let lib = String.split_on_char '.' path in
+  let src = List.fold_left Filename.concat root lib ^ ".mlw" in
+  Hashtbl.find sources src
 
 let () = Lspserver.on_file_event
     begin fun channel ~uri _evt ->
       match Lspserver.to_file ~uri with
       | None -> ()
       | Some file ->
-        let suffix = "/proof.json" in
-        if String.ends_with ~suffix file then
-          let n = String.length suffix in
-          let base = String.sub file 0 (String.length file - n) in
-          let file = base ^ ".mlw" in
-          match Hashtbl.find_opt sources file with
-          | None -> ()
-          | Some source ->
+        if Filename.check_suffix file ".json"
+        || Filename.check_suffix file ".crc"
+        then
+          try
+            let source = watched file in
             Docref.reload_proofs source.src ;
-            Lspserver.refresh_codelens channel
+            Lspserver.refresh_codelens channel ;
+          with _ -> ()
     end
 
 

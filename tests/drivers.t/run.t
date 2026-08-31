@@ -33,9 +33,6 @@
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>proofs</code></header>
-  <h1>Provers</h1>
-  <pre class="src">
-  </pre>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="A" href="drivers.A.html">drivers.A</a><span title="3 logic parameters, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src">

@@ -9,6 +9,8 @@
  - Automatic or on-demand download of missing provers (Cf. README, !212)
  - New CSS style for documentation generator (!210)
  - Support for Markdown maths equations with KaTeX (!211)
+ - Proof files are now stored in `why3find.proofs` directory;
+   rerun proofs or check config to automatically upgrade (!218)
 
 ### Command Line Interface
 
@@ -20,11 +22,14 @@
  - New option `--no-autoload` to not download missing provers (!212)
  - New option `--no-downloaded` to not use downloaded provers (!212)
  - Renamed option `--no-autodetect-provers` into `--no-autodetect` (!212)
+ - Commands `why3find prove` and `why3find config --check` automatically
+   move old proof files to their new location (!218)
 
 ### IDE Integration
 
  - Enhanced debugger with forward/backward steps and breakpoints (!201)
  - New command `Open Generated Document` from VSCode extension (!214)
+ - LSP now renders proof hints as `(outdated)` for updated files (!218)
 
 ### Bug Fixes
 

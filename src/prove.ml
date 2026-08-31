@@ -439,16 +439,17 @@ let process ~(project:Project.t)
         Log.error "invalid file name: %S" file ;
         exit 2
       end ;
-    let dir, lib = Wutil.filepath file in
+    let root = project.root in
+    let dir, path, lib = Wutil.filepath ~root ~file in
     let theories, format = Wutil.load_theories project.env file in
     let session = Session.create ~dir ~file ~format theories in
-    let jprofile, strategy = Proofs.load file in
-    let buffer = (* the proof strategy must be kept to stabilize crc files *)
-      if (mode = `Replay)
-      then None
-      else Some (Proofs.create ~file jprofile strategy) in
+    let move = mode <> `Replay in
+    let proof = Proofs.load ~move ~root ~path ~file () in
     let default = Calibration.default project in
-    let profile = Calibration.of_json ~default jprofile in
+    let profile = Calibration.of_json ~default proof.profile in
+    let buffer = (* the proof strategy must be kept to stabilize crc files *)
+      if mode = `Replay then None else
+        Some (Proofs.buffer ~profile:(Calibration.to_json profile) proof) in
     let force = (mode = `Force) in
     let hammer =
       Hammer.create
@@ -459,11 +460,11 @@ let process ~(project:Project.t)
         project in
     let* proofs =
       Fibers.all @@ List.map
-        (prove_theory ~hammer ~force ~gnames buffer strategy)
+        (prove_theory ~hammer ~force ~gnames buffer proof.strategy)
         (Session.theories session)
     in
     if save then Session.save session ;
-    Option.iter Proofs.save buffer ;
+    Option.iter (Proofs.save project.cache) buffer ;
     let henv =
       if axioms then
         Some (Axioms.init project)
@@ -600,20 +601,21 @@ let stats_theory env proofs (thy : Session.theory) =
     "children", Json.list_map (stats_goal env proofs) goals ;
   ]
 
-let statistics ~env ~files =
+let statistics ~root ~env ~files =
   begin
     let js = Json.list_map
         (fun file ->
            Utils.progress "%s" file ;
            let theories, format = Wutil.load_theories env file in
-           let dir, lib = Wutil.filepath file in
+           let dir, path, lib = Wutil.filepath ~root ~file in
            let session = Session.create ~dir ~file ~format theories in
-           let _, proofs = Proofs.load file in
+           let Proofs.{ strategy } =
+             Proofs.load ~move:false ~root ~path ~file () in
            let theories = Session.theories session in
            Json.assoc [
              "file", `String file ;
              "library", `String (String.concat "." lib) ;
-             "children", Json.list_map (stats_theory env proofs) theories ;
+             "children", Json.list_map (stats_theory env strategy) theories ;
            ]
         ) files in
     Utils.flush () ; js

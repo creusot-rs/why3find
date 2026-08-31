@@ -161,7 +161,7 @@ let rec iterpath ?(enter=ignore) ?(file=ignore) ?(leave=ignore)
 let rmpath p = iterpath ~file:Sys.remove ~leave:Sys.rmdir p
 
 let rec mkdirs = function
-  | "/" | "." -> ()
+  | "" | "." | ".." | "/" -> ()
   | path ->
     if not (Sys.file_exists path) then
       begin
@@ -169,11 +169,23 @@ let rec mkdirs = function
         Sys.mkdir path 0o755 ;
       end
 
-let copy ~src ~tgt =
-  mkdirs (F.dirname tgt) ;
+let rec rmdirs = function
+  | "" | "." | ".." | "/" -> ()
+  | path ->
+    if Sys.file_exists path
+    && Sys.is_directory path
+    && Array.length (Sys.readdir path) = 0
+    then
+      begin
+        Sys.rmdir path ;
+        rmdirs @@ Filename.dirname path ;
+      end
+
+let copy ~source ~target =
+  mkdirs (F.dirname target) ;
   let buffer = Bytes.create 2048 in
-  let inc = open_in src in
-  let out = open_out tgt in
+  let inc = open_in source in
+  let out = open_out target in
   let rec walk () =
     let n = Stdlib.input inc buffer 0 (Bytes.length buffer) in
     if n > 0 then
@@ -182,7 +194,7 @@ let copy ~src ~tgt =
 
 let rec lookup ~dir ~file ~path =
   match dir with
-  | "/" | "." -> None
+  | "" | "." | ".." | "/" -> None
   | _ ->
     if Sys.file_exists (F.concat dir file)
     then Some (dir,path)
@@ -264,6 +276,14 @@ let output ~file fn =
   let out = open_out file in
   try let r = fn out in close_out out ; r
   with exn -> close_out out ; raise exn
+
+(* -------------------------------------------------------------------------- *)
+(* --- File Access Time Utilities                                         --- *)
+(* -------------------------------------------------------------------------- *)
+
+let outdated ~source ~target =
+  try (Unix.stat source).st_mtime > (Unix.stat target).st_mtime
+  with _ -> true
 
 (* -------------------------------------------------------------------------- *)
 (* --- Time Utilities                                                     --- *)

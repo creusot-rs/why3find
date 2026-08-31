@@ -523,9 +523,12 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
               if Prover.select ~name ?version project.provers = None
               then retval := 1 ;
           in
-          let check f =
+          let check file =
             let iter = Why3.Wstdlib.Mstr.iter in
-            iter (fun _ -> iter (fun _ -> check_crc)) @@ snd @@ Proofs.load f
+            let root = "." in
+            let _,path,_ = Wutil.filepath ~root ~file in
+            iter (fun _ -> iter (fun _ -> check_crc))
+            @@ (Proofs.load ~root ~path ~file ()).strategy
           in
           Wenv.allfiles check "."
         end ;
@@ -735,9 +738,10 @@ let () = register ~name:"stats" ~args:"[OPTIONS] PATH..."
         end (add files) "generate JSON statistics" ;
       let config = Wenv.load_config () in
       let env = (Wenv.init config).env in
+      let root = "." in
       let files = if !files = [] then ["."] else !files in
       let files = Wenv.argfiles @@ List.rev files in
-      Json.to_file ~pretty_floats:true !out @@ Prove.statistics ~env ~files ;
+      Json.to_file ~pretty_floats:true !out @@ Prove.statistics ~root ~env ~files ;
       Log.message "Saved to %s" !out ;
     end
 
@@ -809,7 +813,8 @@ let () = register ~name:"print" ~args:"[OPTIONS] PATH..."
       let project = Wenv.init config in
       List.iter
         begin fun file ->
-          let lib = snd @@ Wutil.filepath file in
+          let root = project.root in
+          let _,_,lib = Wutil.filepath ~root ~file in
           Wutil.load_theories project.env file |> fst |>
           List.iter
             begin fun (thy : Why3.Theory.theory) ->
@@ -1010,12 +1015,12 @@ let () = register ~name:"install" ~args:"PKG PATH..."
       if not dune then Utils.mkdirs path ;
       let dunefiles = ref [] in
       let log ~kind src = Format.printf "install %-10s %s@." kind src in
-      let install ~kind ?tgt src =
-        let tgt = match tgt with Some p -> p | None -> src in
+      let install ~kind ?tgt source =
+        let tgt = match tgt with Some p -> p | None -> source in
         log ~kind tgt ;
         if dune
-        then dunefiles := (src,tgt) :: !dunefiles
-        else Utils.copy ~src ~tgt:(Filename.concat path tgt)
+        then dunefiles := (source,tgt) :: !dunefiles
+        else Utils.copy ~source ~target:(Filename.concat path tgt)
       in
       let allsrc = ref true in
       let pkg_prefix = String.starts_with ~prefix:(Filename.concat pkg "") in
@@ -1026,9 +1031,6 @@ let () = register ~name:"install" ~args:"PKG PATH..."
               src pkg ;
           allsrc := false ;
           Wenv.allfiles (install ~kind:"(source)") src ;
-          let proofs = Proofs.filename src in
-          if Sys.file_exists proofs then
-            install ~kind:"(proof)" proofs ;
         end in
       let config = Wenv.load_config () in
       ignore (Wenv.init config); (* So that all extensions get loaded *)

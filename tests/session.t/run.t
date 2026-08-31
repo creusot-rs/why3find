@@ -7,3 +7,13 @@
   <theory name="T" proved="true">
    <goal name="Add.com" proved="true">
    <goal name="Mul.com" proved="true">
+  $ why3find prove foo.mlw
+  Warning: Moving proof files to `./why3find.proofs
+  Theory foo.S: ✔ (-)
+  Theory foo.T: ✔ (2)
+  Proved (foo.mlw) ✔
+  Summary:
+  Warning: Moving proof files to `./why3find.proofs
+  Emitted 1 warning
+  $ ls why3find.proofs
+  foo.json

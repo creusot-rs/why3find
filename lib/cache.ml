@@ -64,14 +64,13 @@ type t = {
 
 let create =
   let table = Hashtbl.create 16 in
-  fun ~cdir ?(usecache=true) () ->
-    try Hashtbl.find table (Utils.absolute cdir, usecache) with
-    | Not_found ->
+  fun ~root ?(usecache=true) () ->
+    let cdir = Filename.concat (Utils.absolute root) ".why3find" in
+    try Hashtbl.find table (cdir, usecache) with Not_found ->
       let prepare = lazy (reformat ~cdir) in
       let results = Hash.create 0 in
-      let res = { cdir ; prepare ; usecache ; results } in
-      Hashtbl.add table (Utils.absolute cdir, usecache) res;
-      res
+      let cache = { cdir ; prepare ; usecache ; results } in
+      Hashtbl.add table (cdir, usecache) cache; cache
 
 let file cache task prover =
   Lazy.force cache.prepare ;
@@ -108,5 +107,26 @@ let set cache task prover result =
     | Valid _ | Unknown _ | Timeout _ ->
       Hash.replace cache.results entry consolidated ;
       write cache task prover consolidated
+
+let crc_file cache ~path =
+  let (//) = Filename.concat in cache.cdir // "crc" // path ^ ".crc"
+
+let crc_compute ~file ~proof =
+  let src = Digest.file file in
+  let crc = Digest.file proof in
+  Digest.to_hex src ^ Digest.to_hex crc
+
+let update cache ~path ~file ~proof =
+  try
+    let dst = crc_file cache ~path in
+    Utils.mkdirs @@ Filename.dirname dst ;
+    Utils.writefile ~file:dst (crc_compute ~file ~proof)
+  with _ -> ()
+
+let outdated cache ~path ~file ~proof =
+  try
+    let last = Utils.readfile ~file:(crc_file cache ~path) |> String.trim in
+    crc_compute ~file ~proof <> last
+  with _ -> true
 
 (* -------------------------------------------------------------------------- *)

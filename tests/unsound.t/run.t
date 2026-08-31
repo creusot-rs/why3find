@@ -68,9 +68,6 @@
   </head>
   <body>
   <header><a href="index.html">index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>proofs</code></header>
-  <h1>Provers</h1>
-  <pre class="src">
-  </pre>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="Dummy" href="unsound.Dummy.html">unsound.Dummy</a><span title="2 unsafe definitions" class="icon small failed icofont-warning"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src">
