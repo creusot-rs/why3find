@@ -92,8 +92,8 @@ let preprocess file diagnostics =
     set_source ~filename:file project src refs types symbols ;
   with
   | Why3.Loc.Located(loc,exn) ->
-    let file,range = of_loc loc in
-    if file = file then
+    let f,range = of_loc loc in
+    if f = file then
       let severity = `Error in
       let message = Printexc.to_string exn in
       let diag = Lspserver.diagnostic ~range ~severity ~message () in

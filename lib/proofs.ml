@@ -86,7 +86,7 @@ let load ?move ~root ~path ~file () =
   let strategy = jmap (jmap Crc.of_json) @@ Json.jfield "proofs" js in
   { path ; file ; proof ; profile ; strategy }
 
-type buffer = Buffer of {
+type buffer = {
     crc : crc_info ;
     profile : Json.t ;
     mutable proofs : strategy ;
@@ -96,7 +96,7 @@ type buffer = Buffer of {
 let dump =
   Timer.throttle @@
   Timer.timed ~name:"Proofs dump"
-    begin function Buffer b ->
+    begin fun b ->
       let proof = b.crc.proof in
       Utils.mkdirs (Filename.dirname proof) ;
       Json.to_file ~pretty_floats:true proof @@ `Assoc [
@@ -105,23 +105,22 @@ let dump =
       ]
     end
 
-let buffer ?profile crc =
-  Buffer {
+let buffer ?profile crc = {
     crc ;
     proofs = crc.strategy ;
     profile = Option.value ~default:crc.profile profile ;
     theories = Hashtbl.create 8 ;
   }
 
-let add theory goal crc (Buffer b as buffer) =
+let add theory goal crc buffer =
   let theory = Session.thy_name theory in
   let goal = Session.name goal in
-  let tasks = M.add goal crc @@ M.find_def M.empty theory b.proofs in
-  b.proofs <- M.add theory tasks b.proofs ; dump buffer
+  let tasks = M.add goal crc @@ M.find_def M.empty theory buffer.proofs in
+  buffer.proofs <- M.add theory tasks buffer.proofs ; dump buffer
 
-let init theory goals hints (Buffer b as buffer) =
+let init theory goals hints buffer =
   let theory = Session.thy_name theory in
-  Hashtbl.add b.theories theory ();
+  Hashtbl.add buffer.theories theory ();
   let results =
     if M.is_empty hints then M.empty else
       List.fold_left
@@ -131,12 +130,13 @@ let init theory goals hints (Buffer b as buffer) =
            | None -> rs
            | Some r -> M.add a r rs)
         M.empty goals
-  in b.proofs <- M.add theory results b.proofs ; dump buffer
+  in buffer.proofs <- M.add theory results buffer.proofs ; dump buffer
 
-let save cache (Buffer b as buffer) =
+let save cache buffer =
   begin
-    b.proofs <- M.filter (fun th _ -> Hashtbl.mem b.theories th) b.proofs ;
+    buffer.proofs <-
+      M.filter (fun th _ -> Hashtbl.mem buffer.theories th) buffer.proofs ;
     dump ~force:true buffer ;
-    let { path ; file ; proof } = b.crc in
+    let { path ; file ; proof } = buffer.crc in
     Cache.update cache ~path ~file ~proof ;
   end
