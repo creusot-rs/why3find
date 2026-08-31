@@ -728,25 +728,29 @@ let resolve env ?(infix=false) () =
     ~src:env.src ~theory:env.theory
     ~infix (Token.position env.input)
 
-let process_href env (href : Docref.href) s =
+let process_href env (href : Docref.href) ?(infix=false) s =
   match href with
 
   | Def(id,proof) ->
     env.declared <- Sid.add id.self env.declared ;
     env.cloning <- Cloning.init ;
+    if infix then Pdoc.printf env.out "(" ;
     if id.id_qid = [] then
-      Pdoc.pp env.out Pdoc.pp_html s
+      Pdoc.printf env.out "%a" Pdoc.pp_html s
     else
       Pdoc.printf env.out "<a id=\"%a\">%a</a>" Id.pp_aname id Pdoc.pp_html s ;
+    if infix then Pdoc.printf env.out ")" ;
     process_axioms env id ;
     process_proof env id proof
 
   | Ref id ->
     let { current ; package_url } = env in
+    if infix then Pdoc.printf env.out "(" ;
     Pdoc.printf env.out "<a title=\"%a\" href=\"%a\">%a</a>"
       Id.pp_title id
       (Id.pp_ahref ~current ~package_url) id
       Pdoc.pp_html s ;
+    if infix then Pdoc.printf env.out ")" ;
     process_clone_token env (`Id id.self)
 
   | NoRef ->
@@ -756,7 +760,10 @@ let process_href env (href : Docref.href) s =
       | "." -> process_clone_token env `Dot
       | _ -> process_clone_token env (`Name s)
     end ;
-    Pdoc.pp_html_s env.out s
+    if infix then
+      Pdoc.printf env.out "(%a)" Pdoc.pp_html s
+    else
+      Pdoc.pp_html_s env.out s
 
 (* -------------------------------------------------------------------------- *)
 (* --- Foldable Sections                                                  --- *)
@@ -1076,7 +1083,7 @@ let parse env =
     | Infix s ->
       text env ;
       let href = resolve env ~infix:true () in
-      process_href env href s
+      process_href env href ~infix:true s ;
   done
 
 (* -------------------------------------------------------------------------- *)
