@@ -336,7 +336,7 @@ let source ?cache ~wenv ~henv ~root ~lib ~path ~file inc =
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn
 
-let parse ~wenv ~henv ~root ~file =
+let parse ~cache ~wenv ~henv ~root ~file () =
   if not @@ String.ends_with ~suffix:".mlw" file then
     begin
       Log.error "invalid file name: %S" file ;
@@ -345,7 +345,7 @@ let parse ~wenv ~henv ~root ~file =
   let _,path,lib = Wutil.filepath ~root ~file in
   try
     let inc = open_in file in
-    let src = source ~wenv ~henv ~lib ~root ~path ~file inc in
+    let src = source ~cache ~wenv ~henv ~lib ~root ~path ~file inc in
     close_in inc ; src
   with exn ->
     Log.error "%s" (Printexc.to_string exn) ;

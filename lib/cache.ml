@@ -64,14 +64,13 @@ type t = {
 
 let create =
   let table = Hashtbl.create 16 in
-  fun ~cdir ?(usecache=true) () ->
-    try Hashtbl.find table (Utils.absolute cdir, usecache) with
-    | Not_found ->
+  fun ~root ?(usecache=true) () ->
+    let cdir = Filename.concat (Utils.absolute root) ".why3find" in
+    try Hashtbl.find table (cdir, usecache) with Not_found ->
       let prepare = lazy (reformat ~cdir) in
       let results = Hash.create 0 in
-      let res = { cdir ; prepare ; usecache ; results } in
-      Hashtbl.add table (Utils.absolute cdir, usecache) res;
-      res
+      let cache = { cdir ; prepare ; usecache ; results } in
+      Hashtbl.add table (cdir, usecache) cache; cache
 
 let file cache task prover =
   Lazy.force cache.prepare ;

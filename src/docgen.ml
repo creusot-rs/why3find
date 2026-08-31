@@ -1221,6 +1221,8 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
 (* -------------------------------------------------------------------------- *)
 
 let process_chapter_proofs out (src : Docref.source) =
+  if src.outdated then
+    Log.warning "%s: proof files might be outdated" src.file ;
   let (stuck,proved) =
     Docref.Mstr.fold
       (fun _ (thy : Docref.theory) acc ->
@@ -1280,11 +1282,11 @@ let shared ~out ~file =
   let target = Filename.concat out file in
   Utils.copy ~source ~target
 
-let preprocess ~root ~henv ~wenv ~senv file =
+let preprocess ~root ~cache ~henv ~wenv ~senv file =
   file ,
   if Filename.check_suffix file ".md" then None else
   if Filename.check_suffix file ".mlw" then
-    let src = Docref.parse ~root ~henv ~wenv ~file in
+    let src = Docref.parse ~cache ~root ~henv ~wenv ~file () in
     Soundness.register senv src ; Some src
   else
     Utils.failwith "Don't known what to do with %S" file
@@ -1311,7 +1313,8 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
     shared ~out ~file:"fonts/icofont.woff" ;
     shared ~out ~file:"fonts/icofont.woff2" ;
     (* Pre-processing *)
-    let sources = List.map (preprocess ~root ~wenv ~henv ~senv) files in
+    let cache = Cache.create ~root:project.root () in
+    let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
     (* Doc generation *)
     List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url) sources ;
     (* Indexing *)

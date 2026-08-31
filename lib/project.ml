@@ -46,8 +46,7 @@ let create
   let stdpath = Why3.Whyconf.(loadpath @@ get_main whyconf) in
   let loadpath = root :: pkg_path @ stdpath in
   let env = Why3.Env.create_env loadpath in
-  let cdir = Filename.concat root ".why3find" in
-  let cache = Cache.create ~cdir ~usecache () in
+  let cache = Cache.create ~root ~usecache () in
   let provers = Prover.provers whyconf env in
   { root ; config ; cache ; whyconf ; env ; pkgs ; provers }
 

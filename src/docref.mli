@@ -62,9 +62,11 @@ type source = {
 }
 
 val parse :
+  cache:Cache.t ->
   wenv:Why3.Env.env ->
   henv:Axioms.henv ->
-  root:string -> file:string -> source
+  root:string -> file:string ->
+  unit -> source
 
 val source :
   ?cache:Cache.t ->
