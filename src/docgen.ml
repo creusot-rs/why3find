@@ -157,15 +157,21 @@ let pop env =
   | Emph -> Pdoc.pp_print_string env.out "</em>" (* keep space *)
   | Bold -> Pdoc.pp_print_string env.out "</strong>" (* keep space *)
 
+let smartlines =
+  try Sys.getenv "WHY3FIND_LINEREFS" <> "no" with Not_found -> true
+
 let codeline env ?(offset=0) ?(indent=0) () =
-  let line = Token.line env.input + offset in
-  Pdoc.printf env.out
-    "\n\
-     <div id=\"_L%d\" class=\"lineanchor\">\
-     <div class=\"linenumber\">%d</div>\
-     <div class=\"linehover\"></div>\
-     </div>%s"
-    line line (String.make indent ' ')
+  if smartlines then
+    let line = Token.line env.input + offset in
+    Pdoc.printf env.out
+      "\n\
+       <div id=\"_L%d\" class=\"lineanchor\">\
+       <div class=\"linenumber\">%d</div>\
+       <div class=\"linehover\"></div>\
+       </div>%s"
+      line line (String.make indent ' ')
+  else
+    Pdoc.printf env.out "\n%s" (String.make indent ' ')
 
 let text env =
   match env.mode with
