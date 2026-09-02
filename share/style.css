@@ -7,22 +7,22 @@
 /* -------------------------------------------------------------------------- */
 
 a {
-    color: teal;
-    outline: none;
-    text-decoration: none;
+  color: teal;
+  outline: none;
+  text-decoration: none;
 }
 
 a:visited {
-    color: teal;
+  color: teal;
 }
 
 a:hover {
-    cursor: default;
-    background: #cec;
+  cursor: default;
+  background: #cec;
 }
 
 a:target {
-    background: #bce2d9;
+  background: #bce2d9;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -30,28 +30,46 @@ a:target {
 /* -------------------------------------------------------------------------- */
 
 header {
-    margin-left: 1cm;
-    max-width: 24cm;
-    padding: 4px ;
-    color: darkgrey ;
-    border-bottom: thin solid darkgray ;
+  margin-left: 1cm;
+  max-width: 24cm;
+  padding: 4px;
+  color: darkgrey;
+  border-bottom: thin solid darkgray;
 }
 
-header a { color: grey !important }
+header a {
+  color: grey !important
+}
 
 /* -------------------------------------------------------------------------- */
 /* --- Table Of Contents                                                  --- */
 /* -------------------------------------------------------------------------- */
 
-nav { display: none; }
+nav {
+  display: none;
+}
 
 /* -------------------------------------------------------------------------- */
 /* --- Documentation Styling                                              --- */
 /* -------------------------------------------------------------------------- */
 
-h1, h2, h3, h4, h5, h6 { font-family: math }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: math
+}
 
-h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: inherit }
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+  color: inherit
+}
 
 div.doc {
   min-width: 6cm;
@@ -66,11 +84,52 @@ div.doc {
 pre.src {
   margin-left: 2cm;
   padding-left: 0.5cm;
+  padding-bottom: 1px;
   border-left: solid thin lightgrey;
 }
 
+pre .lineanchor {
+  width: 0px;
+  height: 0px;
+  position: relative;
+  top: -128px;
+  overflow: visible;
+}
+
+pre .linenumber {
+  font-size: x-small;
+  color: lightgrey;
+  position: relative;
+  left: -24px;
+  top: +131px;
+  cursor: default;
+  overflow: visible;
+  direction: rtl;
+}
+
+pre .linehover {
+  visibility: hidden;
+  position: relative;
+  left: -14px;
+  top: +115px;
+  height: 19px;
+  width: 18cm;
+  background: lightgreen;
+  opacity: 0.2;
+  z-index: -1;
+}
+
+.lineanchor:target .linenumber {
+  color: orange;
+  font-weight: bold;
+}
+
+.lineanchor:target .linehover {
+  visibility: visible;
+}
+
 span.katex {
-  font-size: 0.9em ;
+  font-size: 0.9em;
 }
 
 div.maths {
@@ -79,23 +138,23 @@ div.maths {
 }
 
 .scope {
-    color: #3e7777;
+  color: #3e7777;
 }
 
 .keyword {
-    color: purple;
+  color: purple;
 }
 
 .admitted {
-    color: #DA2525;
+  color: #DA2525;
 }
 
 .attribute {
-    color: green;
+  color: green;
 }
 
 .comment {
-    color: grey;
+  color: grey;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -103,56 +162,72 @@ div.maths {
 /* -------------------------------------------------------------------------- */
 
 .icon {
-    margin-left: 2px ;
-    vertical-align: text-top ;
-    font-size: small ;
-    text-decoration: none ;
+  margin-left: 2px;
+  vertical-align: text-top;
+  font-size: small;
+  text-decoration: none;
 }
 
-.icon.small { font-size: x-small }
+.icon.small {
+  font-size: x-small
+}
 
-.valid { color: green !important }
-.failed { color: red !important }
-.warning { color: orange !important }
-.remark { color: lightgrey !important }
-.prover:hover { color: purple }
+.valid {
+  color: green !important
+}
+
+.failed {
+  color: red !important
+}
+
+.warning {
+  color: orange !important
+}
+
+.remark {
+  color: lightgrey !important
+}
+
+.prover:hover {
+  color: purple
+}
 
 /* -------------------------------------------------------------------------- */
 /* --- Foldable Section                                                   --- */
 /* -------------------------------------------------------------------------- */
 
-.section { }
+.section {}
 
 .section.level1:hover {
-    background: #fcfce1;
+  background: #fcfce1;
 }
 
 .section.level2:hover {
-    background: #e9ffe9;
+  background: #e9ffe9;
 }
 
 .section.level3:hover {
-    background: #fff6f6;
+  background: #fff6f6;
 }
 
 .section-toggle:hover {
-    background: lightgreen;
+  background: lightgreen;
 }
 
 .section-toggle {
-    cursor: zoom-in ;
+  cursor: zoom-in;
 }
 
 .section-toggle.active {
-    cursor: zoom-out ;
+  cursor: zoom-out;
 }
 
 .section-text {
-    display: none;
+  display: none;
 }
 
 .section-text.active {
-    display: inline;
+  display: inline;
 }
 
 /* -------------------------------------------------------------------------- */

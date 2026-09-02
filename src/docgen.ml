@@ -157,6 +157,16 @@ let pop env =
   | Emph -> Pdoc.pp_print_string env.out "</em>" (* keep space *)
   | Bold -> Pdoc.pp_print_string env.out "</strong>" (* keep space *)
 
+let codeline env ?(offset=0) ?(indent=0) () =
+  let line = Token.line env.input + offset in
+  Pdoc.printf env.out
+    "\n\
+     <div id=\"_L%d\" class=\"lineanchor\">\
+     <div class=\"linenumber\">%d</div>\
+     <div class=\"linehover\"></div>\
+     </div>%s"
+    line line (String.make indent ' ')
+
 let text env =
   match env.mode with
   | Body -> push env env.file ; bsync env
@@ -166,14 +176,14 @@ let text env =
   | Pre ->
     match env.indent with
     | Code -> ()
-    | Head n ->
+    | Head indent ->
       bsync env ;
-      Pdoc.pp_print_string env.out "<pre class=\"src\">\n" ;
-      Pdoc.pp_print_string env.out (String.make n ' ') ;
+      Pdoc.pp_print_string env.out "<pre class=\"src\">" ;
+      codeline env ~indent () ;
       env.indent <- Code
-    | Lines(l,n) ->
-      Pdoc.pp_print_string env.out (String.make l '\n') ;
-      Pdoc.pp_print_string env.out (String.make n ' ') ;
+    | Lines(lines,indent) ->
+      for offset = -lines+1 to -1 do codeline env ~offset () done ;
+      codeline env ~indent () ;
       env.indent <- Code
 
 let head env buffer level =
