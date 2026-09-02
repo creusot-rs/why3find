@@ -119,12 +119,16 @@ pre .linehover {
   z-index: -1;
 }
 
-.lineanchor:target .linenumber {
+.lineanchor:target .linenumber,
+.linenumber:hover
+{
   color: orange;
   font-weight: bold;
 }
 
-.lineanchor:target .linehover {
+.lineanchor:target .linehover,
+.linenumber:hover + .linehover
+{
   visibility: visible;
 }
 
