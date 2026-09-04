@@ -134,6 +134,9 @@ let null = `Null
 let int n  = `Int n
 let bool b = `Bool b
 let string s = `String s
+let optint n = if n <> 0 then `Int n else `Null
+let optstring s = if s <> "" then `String s else `Null
+let optbool b = if b then `Bool true else `Null
 
 let assoc ?(keepnull=false) ?(nullempty=false) fts =
   if keepnull then `Assoc fts

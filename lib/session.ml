@@ -81,9 +81,9 @@ let theory (Goal g) = Th.restore_theory (S.theory_name g.theory)
 let name g = Vc.task_name @@ task g
 
 let file (Goal g) =
-  match (T.task_goal g.task).pr_name.id_loc with
-  | Some loc -> let file,_,_,_,_ = Why3.Loc.get loc in file
-  | None -> String.concat Filename.dir_sep @@ Why3.Sysutil.decompose_path @@ S.file_path g.file
+  String.concat Filename.dir_sep @@
+  Why3.Sysutil.decompose_path @@
+  S.file_path g.file
 
 let target (Goal g) = Vc.target g.task
 
