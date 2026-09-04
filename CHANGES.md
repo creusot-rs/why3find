@@ -7,7 +7,7 @@
  - New command `why3find stats` to generate project JSON statistics (!209)
  - New command `why3find download` to download provers (!212)
  - Automatic or on-demand download of missing provers (Cf. README, !212)
- - New CSS style for documentation generator (!210)
+ - New CSS style for documentation generator (!210, !220)
  - Support for Markdown maths equations with KaTeX (!211)
  - Proof files are now stored in `why3find.proofs` directory;
    rerun proofs or check config to automatically upgrade (!218)
