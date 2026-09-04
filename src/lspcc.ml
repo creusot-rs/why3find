@@ -79,10 +79,10 @@ let preprocess file diagnostics =
     let project = Wenv.init ~root config in
     let wenv = project.env in
     let henv = Axioms.init project in
-    let _,path,lib = Wutil.filepath ~root ~file in
+    let dir,path,lib = Wutil.filepath ~root ~file in
     let cache = Cache.create ~root () in
-    let parser = Docref.source ~cache ~wenv ~henv ~lib ~root ~path ~file in
-    let src = Utils.input ~file:file parser in
+    let parser = Docref.source ~cache ~wenv ~henv ~root ~dir ~lib ~path ~file in
+    let src = Utils.input ~file parser in
     let types =
       Why3.Wstdlib.Mstr.fold
         (fun _ (t : Docref.theory) d ->

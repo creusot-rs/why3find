@@ -58,6 +58,7 @@ type source = {
   lib: string list ;
   theories: theory Mstr.t ;
   cache : Cache.t option ;
+  session : Session.session option ;
   mutable outdated : bool ;
 }
 
@@ -72,7 +73,7 @@ val source :
   ?cache:Cache.t ->
   wenv:Why3.Env.env ->
   henv:Axioms.henv ->
-  root:string -> lib:string list -> path:string -> file:string ->
+  root:string -> dir:string -> lib:string list -> path:string -> file:string ->
   in_channel -> source
 
 val empty : unit -> source

@@ -19,6 +19,7 @@ val filepath : root:string -> file:string -> string * string * string list
     - returns [( "foo/bar", "foo.bar", ["foo";"bar"] )]
 *)
 
+val list_theories : Theory.theory Wstdlib.Mstr.t -> Theory.theory list
 val load_theories : Env.env -> Env.filename -> Theory.theory list * Env.fformat
 
 (** Iterates over declared id. *)

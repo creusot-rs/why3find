@@ -83,6 +83,7 @@ type source = {
   lib: string list ;
   theories: theory Mstr.t ;
   cache: Cache.t option ;
+  session: Session.session option ;
   mutable outdated : bool ;
 }
 
@@ -292,15 +293,19 @@ let empty () = {
   cache = None ;
   lib = [] ; path = "" ; root = "" ;
   theories = Mstr.empty ;
+  session = None ;
   outdated = true ;
 }
 
-let source ?cache ~wenv ~henv ~root ~lib ~path ~file inc =
+let source ?cache ~wenv ~henv ~root ~dir ~lib ~path ~file inc =
   let globals = Why3.Debug.test_flag Why3.Glob.flag in
   try
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
     Why3.Glob.clear file ;
-    let thys = Why3.Env.read_channel Why3.Env.base_language wenv file inc in
+    let format = Why3.Env.get_format file in
+    let tmap = Why3.Env.read_channel Why3.Env.base_language wenv file inc in
+    let theories = Wutil.list_theories tmap in
+    let session = Some (Session.create ~dir ~file ~format theories) in
     let crc = Proofs.load ~move:false ~root ~path ~file () in
     let theories =
       Mstr.mapi
@@ -321,7 +326,7 @@ let source ?cache ~wenv ~henv ~root ~lib ~path ~file inc =
              instances = cenv.cloned ;
              iclones = List.sort by_order @@ List.rev cenv.clones ;
            }
-        ) thys
+        ) tmap
     in
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     let outdated =
@@ -331,7 +336,7 @@ let source ?cache ~wenv ~henv ~root ~lib ~path ~file inc =
         let Proofs.{ path ; file ; proof } = crc in
         Cache.outdated cache ~file ~path ~proof
     in
-    { file ; lib ; root ; path ; theories ; cache ; outdated }
+    { file ; lib ; root ; path ; theories ; cache ; session ; outdated }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn
@@ -342,10 +347,10 @@ let parse ~cache ~wenv ~henv ~root ~file () =
       Log.error "invalid file name: %S" file ;
       exit 2
     end ;
-  let _,path,lib = Wutil.filepath ~root ~file in
+  let dir,path,lib = Wutil.filepath ~root ~file in
   try
     let inc = open_in file in
-    let src = source ~cache ~wenv ~henv ~lib ~root ~path ~file inc in
+    let src = source ~cache ~wenv ~henv ~lib ~root ~path ~dir ~file inc in
     close_in inc ; src
   with exn ->
     Log.error "%s" (Printexc.to_string exn) ;
