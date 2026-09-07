@@ -40,10 +40,3 @@ val prove_files :
   files:string list ->
   gnames:string list ->
   outcome
-
-module M = Why3.Wstdlib.Mstr
-
-type jstats = { time : float ; stuck : int ; proved : int ; json : Json.t }
-val jmap : ('a -> jstats) -> 'a list -> jstats
-
-val statistics : root:string -> env:Why3.Env.env -> files:string list -> jstats

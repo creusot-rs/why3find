@@ -59,6 +59,7 @@ type source = {
   theories: theory Mstr.t ;
   cache : Cache.t option ;
   session : Session.session option ;
+  mutable strategy : Proofs.strategy ;
   mutable outdated : bool ;
 }
 

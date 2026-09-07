@@ -1214,8 +1214,8 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
 let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
     (src : Docref.source) =
   let title = Printf.sprintf "Library %s" src.path in
-  let href = src.path ^ ".index.html"in
-  let pref = src.path ^ ".proof.html"in
+  let href = src.path ^ ".index.html" in
+  let pref = src.path ^ ".proof.html" in
   let ofile = Filename.concat dir href in
   let pfile = Filename.concat dir pref in
   let out = Pdoc.output ~file:ofile ~title in

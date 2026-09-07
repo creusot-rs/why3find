@@ -84,6 +84,7 @@ type source = {
   theories: theory Mstr.t ;
   cache: Cache.t option ;
   session: Session.session option ;
+  mutable strategy : Proofs.strategy ;
   mutable outdated : bool ;
 }
 
@@ -269,6 +270,7 @@ let reload_proofs source =
   begin
     let { file ; root ; path } = source in
     let crc = Proofs.load ~move:false ~root ~path ~file () in
+    source.strategy <- crc.strategy ;
     Mstr.iter
       (fun _ (th : theory) ->
          let proofs = get_proofs th.theory crc.strategy in
@@ -293,6 +295,7 @@ let empty () = {
   cache = None ;
   lib = [] ; path = "" ; root = "" ;
   theories = Mstr.empty ;
+  strategy = Mstr.empty ;
   session = None ;
   outdated = true ;
 }
@@ -336,7 +339,8 @@ let source ?cache ~wenv ~henv ~root ~dir ~lib ~path ~file inc =
         let Proofs.{ path ; file ; proof } = crc in
         Cache.outdated cache ~file ~path ~proof
     in
-    { file ; lib ; root ; path ; theories ; cache ; session ; outdated }
+    { file ; lib ; root ; path ; theories ;
+      cache ; session ; strategy = crc.strategy ; outdated }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn
