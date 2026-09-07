@@ -30,15 +30,24 @@ a:target {
 /* -------------------------------------------------------------------------- */
 
 header {
-  margin-left: 1cm;
-  max-width: 24cm;
-  padding: 4px;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: +2;
+  padding: 8px 2cm 8px 2cm;
   color: darkgrey;
+  background: white;
   border-bottom: thin solid darkgray;
 }
 
 header a {
   color: grey !important
+}
+
+body {
+  margin-top: 2cm;
+  margin-bottom: 2cm;
 }
 
 /* -------------------------------------------------------------------------- */
