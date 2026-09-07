@@ -10,7 +10,7 @@
   <title>Module drivers.A</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>module A</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">A</span><a href="drivers.proof.html#A" title="3 logic parameters, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="drivers.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class="keyword">type</span> <a id="t">t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
@@ -32,7 +32,7 @@
   <title>Library drivers</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="A" href="drivers.A.html">drivers.A</a><span title="3 logic parameters, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src">

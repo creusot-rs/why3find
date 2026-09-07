@@ -13,7 +13,7 @@
   <title>Library a</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library a</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library a</code></header>
   <div class="doc">
   <p>Testing Empty Lines</p>
   </div>
@@ -31,7 +31,7 @@
   <title>Module a.A</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
   <div class="doc">
   <p>Module A</p>
   </div>

@@ -16,7 +16,7 @@
   <title>Module foo.A</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>module A</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">A</span><a href="foo.proof.html#A" title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></a><a href="foo.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class="keyword">type</span> <a id="a">a</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
@@ -36,7 +36,7 @@
   <title>Library foo</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library foo</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library foo</code></header>
   <pre class="src"><span class="keyword">module</span> <a title="foo.A" href="foo.A.html">A</a><a href="foo.proof.html#A" title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></a><a href="foo.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -50,7 +50,7 @@
   <title>Library foo</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="A" href="foo.A.html">foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src">
@@ -69,7 +69,7 @@
   <title>Module bar.B</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>module B</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>module B</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">B</span><a href="bar.proof.html#B" title="1 logic parameter" class="icon small remark icofont-question-circle"></a><a href="bar.proof.html#B" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class="keyword">use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -99,7 +99,7 @@
   <title>Library bar</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library bar</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library bar</code></header>
   <pre class="src"><span class="keyword">module</span> <a title="bar.B" href="bar.B.html">B</a><a href="bar.proof.html#B" title="1 logic parameter" class="icon small remark icofont-question-circle"></a><a href="bar.proof.html#B" title="Failed (no proof)" class="icon failed icofont-error"></a></pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -113,7 +113,7 @@
   <title>Library bar</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="B" href="bar.B.html">bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src">
@@ -129,7 +129,7 @@
   <title>Library bar</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="B" href="bar.B.html">bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src">
@@ -145,7 +145,7 @@
   <title>Library foo</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="A" href="foo.A.html">foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src">

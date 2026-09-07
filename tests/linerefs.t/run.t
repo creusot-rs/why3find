@@ -10,7 +10,7 @@
   <title>Module doc.LineNumbers</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="doc.index.html">doc</a></code> — <code>module LineNumbers</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="doc.index.html">doc</a></code> — <code>module LineNumbers</code></header>
   <pre class="src">
   <div id="_L1" class="lineanchor"><div class="linenumber">1</div><div class="linehover"></div></div><span class="keyword">module</span> <span class="scope">LineNumbers</span><a href="doc.proof.html#LineNumbers" title="Failed (no proof)" class="icon failed icofont-error"></a>
   <div id="_L2" class="lineanchor"><div class="linenumber">2</div><div class="linehover"></div></div>  <span class="keyword">goal</span> <a id="line2">line2</a><a href="doc.proof.html#LineNumbers.line2" title="Failed (no proof)" class="icon failed icofont-error"></a>: <span class="keyword">true</span>

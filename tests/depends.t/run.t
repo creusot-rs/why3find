@@ -10,10 +10,10 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <title></title>
+  <title>Index</title>
   </head>
   <body>
-  <header>index — </header>
+  <header>Index</header>
   <div class="doc">
   <h1>Development</h1>
   <ul>

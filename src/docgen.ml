@@ -58,6 +58,7 @@ let pp_block fmt = function
 type env = {
   dir : string ; (* destination directory *)
   src : Docref.source ; (* source file infos *)
+  title : string ; (* document title *)
   package_url : string option;
   input : Token.input ; (* input lexer *)
   out : Pdoc.output ; (* output buffer *)
@@ -846,11 +847,11 @@ let process_open_module env key =
     Pdoc.fork env.out ~file ~title ;
     Pdoc.printf env.out
       "<header>\
-       <a href=\"index.html\">index</a> — \
+       <a href=\"index.html\" title=\"Index\">%s</a> — \
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>module %s</code>\
        </header>@."
-      env.src.path path id ;
+      env.title env.src.path path id ;
     env.mode <- Body ;
     env.block <- Raw ;
     if prelude <> "" then
@@ -1157,19 +1158,13 @@ let package () =
 (* -------------------------------------------------------------------------- *)
 
 let document_header ~file ~page =
-    try
-      String.trim @@
-      let header = Utils.input ~file input_line in
-      let rec start p = if header.[p] = '#' then start (succ p) else p in
-      let p = start 0 in
-      if p > 0 then String.sub header p (String.length header - p) else header
-    with _ -> page
-
-let document_title ~title ~file ~page =
-  let header = document_header ~file ~page in
-  if title <> "" && title <> header then
-    Printf.sprintf "%s — %s" title header
-  else header
+  try
+    String.trim @@
+    let header = Utils.input ~file input_line in
+    let rec start p = if header.[p] = '#' then start (succ p) else p in
+    let p = start 0 in
+    if p > 0 then String.sub header p (String.length header - p) else header
+  with _ -> page
 
 (* -------------------------------------------------------------------------- *)
 (* --- Markdown File Processing                                           --- *)
@@ -1180,13 +1175,15 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
     let src = Docref.empty () in
     let input = Token.input ~doc:true file in
     let page = Filename.chop_extension @@ Filename.basename file in
-    let title = document_title ~title ~file ~page in
+    let header = document_header ~file ~page in
     let href = page ^ ".html" in
     let ofile = Filename.concat dir href in
-    let out = Pdoc.output ~file:ofile ~title in
+    let page_title = if title <> page then Printf.sprintf "%s — %s" title page else page in
+    let out = Pdoc.output ~file:ofile ~title:page_title in
     let crc = Pdoc.null () in
     let env = {
-      dir ; src ; package_url; input ; out ; crc ; wenv ; henv ; senv ;
+      dir ; src ; title ;
+      package_url; input ; out ; crc ; wenv ; henv ; senv ;
       space = false ;  indent = Code ;
       block = Raw; mode = Body ; file = Body ; stack = [] ;
       current = None ; theory = None ; instance = None ;
@@ -1199,8 +1196,9 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
     chapter ~href ~title () ;
     Pdoc.printf env.out
       "<header>\
-       <a href=\"index.html\">index</a> — %s
-       </header>@." title ;
+       <a href=\"index.html\" title=\"Index\">%s</a>%t
+       </header>@." title
+      (fun fmt -> if header <> title then Format.fprintf fmt " — %s" header) ;
     Pdoc.flush out ;
     push env Div ;
     parse env ;
@@ -1211,8 +1209,9 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
 (* --- MLW File Processing                                                --- *)
 (* -------------------------------------------------------------------------- *)
 
-let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
+let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
     (src : Docref.source) =
+  let titledoc = title in
   let title = Printf.sprintf "Library %s" src.path in
   let href = src.path ^ ".index.html" in
   let pref = src.path ^ ".proof.html" in
@@ -1222,7 +1221,8 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
   let crc = Pdoc.output ~file:pfile ~title in
   let input = Token.input file in
   let env = {
-    dir ; src ; package_url; input ; out ; crc ; wenv ; henv ; senv ;
+    dir ; src ; title = titledoc ;
+    package_url; input ; out ; crc ; wenv ; henv ; senv ;
     space = false ; indent = Code ;
     block = Raw ; mode = Body ; file = Body ; stack = [] ;
     current = None ; theory = None ; instance = None ;
@@ -1235,15 +1235,16 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
     chapter ~src ~href ~title () ;
     Pdoc.printf out
       "<header>\
-       <a href=\"index.html\">index</a> — <code>library %s</code>\
-       </header>@." src.path ;
+       <a href=\"index.html\" title=\"Index\">%s</a> — \
+       <code>library %s</code>\
+       </header>@." env.title src.path ;
     Pdoc.flush out ;
     Pdoc.printf crc
       "<header>\
-       <a href=\"index.html\">index</a> — \
+       <a href=\"index.html\" title=\"Index\">%s</a> — \
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>proofs</code>\
-       </header>@." src.path src.path ;
+       </header>@." env.title src.path src.path ;
     Pdoc.flush crc ;
     Pdoc.printf crc "<h1>Proofs</h1>@\n" ;
     parse env ;
@@ -1303,7 +1304,7 @@ let index ~out:dir ~senv ~title =
     begin
       let ofile = Filename.concat dir href in
       let out = Pdoc.output ~file:ofile ~title in
-      Pdoc.printf out "<header>index — %s</header>@\n" title ;
+      Pdoc.printf out "<header>%s</header>@\n" title ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
       Pdoc.flush out ;
@@ -1331,7 +1332,7 @@ let preprocess ~root ~cache ~henv ~wenv ~senv file =
 let process ~wenv ~henv ~out ~title (file,kind) =
   match kind with
   | None -> process_markdown ~wenv ~henv ~out ~title file
-  | Some src -> process_source ~wenv ~henv ~out file src
+  | Some src -> process_source ~wenv ~henv ~out ~title file src
 
 let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
   begin
@@ -1350,7 +1351,7 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
     shared ~out ~file:"fonts/icofont.woff" ;
     shared ~out ~file:"fonts/icofont.woff2" ;
     (* Pre-processing *)
-    let title = if title<>"" then title else document_header ~file:"README.md" ~page:"" in
+    let title = if title<>"" then title else document_header ~file:"README.md" ~page:"Index" in
     let cache = Cache.create ~root:project.root () in
     let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
     (* Doc generation *)

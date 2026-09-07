@@ -16,7 +16,7 @@
   <title>Module a.A</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">A</span><a href="a.proof.html#A" title="3 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#A" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class="keyword">use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
@@ -48,7 +48,7 @@
   <title>Module a.B</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module B</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module B</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">B</span><a href="a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class="keyword">use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -83,7 +83,7 @@
   <title>Module a.E</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module E</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module E</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">E</span><a href="a.proof.html#E" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class="keyword">use</span> <a title="a.B" href="a.B.html">B</a>
@@ -107,7 +107,7 @@
   <title>Module b.C</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="b.index.html">b</a></code> — <code>module C</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="b.index.html">b</a></code> — <code>module C</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">C</span><a href="b.proof.html#C" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class="keyword">use</span> a.<a title="a.B" href="a.B.html">B</a>

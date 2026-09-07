@@ -10,7 +10,7 @@
   <title>Module clones.A</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module A</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">A</span><a href="clones.proof.html#A" title="3 logic parameters, 2 hypotheses, 1 incomplete instance" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#A" title="Valid (one goal)" class="icon valid icofont-check"></a>
   
@@ -36,7 +36,7 @@
   <title>Module clones.B</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module B</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module B</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">B</span><a href="clones.proof.html#B" title="1 logic parameter, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#B" title="Valid (one goal)" class="icon valid icofont-check"></a>
     <span class="keyword">use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -67,7 +67,7 @@
   <title>Module certif.S</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>module S</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>module S</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">S</span><a href="certif.proof.html#S" title="Partial proof (6/10 goals)" class="icon warning icofont-error"></a>
   
@@ -119,7 +119,7 @@
   <title>Library clones</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="A" href="clones.A.html">clones.A</a><span title="3 logic parameters, 2 hypotheses, 1 incomplete instance" class="icon small warning icofont-warning-alt"></span><span title="Valid (one goal)" class="icon valid icofont-check"></span></pre>
   <pre class="src">
@@ -151,7 +151,7 @@
   <title>Library certif</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="S" href="certif.S.html">certif.S</a><span title="Partial proof (6/10 goals)" class="icon warning icofont-error"></span></pre>
   <pre class="src">

@@ -19,7 +19,7 @@
   <title>Module unsound.Dummy</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>module Dummy</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>module Dummy</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">Dummy</span><a href="unsound.proof.html#Dummy" title="2 unsafe definitions" class="icon small failed icofont-warning"></a><a href="unsound.proof.html#Dummy" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class="keyword">use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -53,7 +53,7 @@
   <title>Library unsound</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library unsound</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library unsound</code></header>
   <pre class="src"><span class="keyword">module</span> <a title="unsound.Dummy" href="unsound.Dummy.html">Dummy</a><a href="unsound.proof.html#Dummy" title="2 unsafe definitions" class="icon small failed icofont-warning"></a><a href="unsound.proof.html#Dummy" title="Failed (no proof)" class="icon failed icofont-error"></a></pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -67,7 +67,7 @@
   <title>Library unsound</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="Dummy" href="unsound.Dummy.html">unsound.Dummy</a><span title="2 unsafe definitions" class="icon small failed icofont-warning"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src">

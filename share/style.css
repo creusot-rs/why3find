@@ -38,11 +38,13 @@ header {
   padding: 8px 2cm 8px 2cm;
   color: darkgrey;
   background: white;
+  cursor: default;
   border-bottom: thin solid darkgray;
 }
 
 header a {
-  color: grey !important
+  color: grey !important;
+  cursor: link;
 }
 
 body {
