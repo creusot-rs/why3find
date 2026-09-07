@@ -28,13 +28,13 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <title>main</title>
+  <title>Main Document</title>
   </head>
   <body>
   <nav>
   <a class="toc1" href="#_1">Main Document</a>
   </nav>
-  <header><a href="index.html">index</a> — main
+  <header><a href="index.html">index</a> — Main Document
          </header>
   <div class="doc">
   <h1><a id="_1">Main Document</a></h1>

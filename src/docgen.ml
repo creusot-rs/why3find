@@ -1156,8 +1156,20 @@ let package () =
 (* --- Titling Document                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-let document_title ~title ~page =
-  if title <> "" then Printf.sprintf "%s — %s" title page else page
+let document_header ~file ~page =
+    try
+      String.trim @@
+      let header = Utils.input ~file input_line in
+      let rec start p = if header.[p] = '#' then start (succ p) else p in
+      let p = start 0 in
+      if p > 0 then String.sub header p (String.length header - p) else header
+    with _ -> page
+
+let document_title ~title ~file ~page =
+  let header = document_header ~file ~page in
+  if title <> "" && title <> header then
+    Printf.sprintf "%s — %s" title header
+  else header
 
 (* -------------------------------------------------------------------------- *)
 (* --- Markdown File Processing                                           --- *)
@@ -1168,7 +1180,7 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
     let src = Docref.empty () in
     let input = Token.input ~doc:true file in
     let page = Filename.chop_extension @@ Filename.basename file in
-    let title = document_title ~title ~page in
+    let title = document_title ~title ~file ~page in
     let href = page ^ ".html" in
     let ofile = Filename.concat dir href in
     let out = Pdoc.output ~file:ofile ~title in
@@ -1291,8 +1303,7 @@ let index ~out:dir ~senv ~title =
     begin
       let ofile = Filename.concat dir href in
       let out = Pdoc.output ~file:ofile ~title in
-      Pdoc.printf out
-        "<header>index — %s</header>@\n" title ;
+      Pdoc.printf out "<header>index — %s</header>@\n" title ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
       Pdoc.flush out ;
@@ -1339,6 +1350,7 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
     shared ~out ~file:"fonts/icofont.woff" ;
     shared ~out ~file:"fonts/icofont.woff2" ;
     (* Pre-processing *)
+    let title = if title<>"" then title else document_header ~file:"README.md" ~page:"" in
     let cache = Cache.create ~root:project.root () in
     let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
     (* Doc generation *)

@@ -10,13 +10,13 @@
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css" integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA==" crossorigin="anonymous" referrerpolicy="no-referrer">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js" integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <title>foo</title>
+  <title>Test for Maths</title>
   </head>
   <body>
   <nav>
   <a class="toc1" href="#_1">Test for Maths</a>
   </nav>
-  <header><a href="index.html">index</a> — foo
+  <header><a href="index.html">index</a> — Test for Maths
          </header>
   <div class="doc">
   <h1><a id="_1">Test for Maths</a></h1>
