@@ -1025,7 +1025,7 @@ let process_newline env =
 let process_reference ~wenv ~env r =
   try
     let { src ; current ; package_url } = env in
-    let name, id = Docref.reference ~wenv ~src ~current r in
+    let name, id = Docref.reference ~env:wenv ~src ~current r in
     let r = Id.resolve ~lib:src.lib id in
     text env ;
     Pdoc.printf env.out
@@ -1324,8 +1324,9 @@ let preprocess ~root ~cache ~henv ~wenv ~senv file =
   file ,
   if Filename.check_suffix file ".md" then None else
   if Filename.check_suffix file ".mlw" then
-    let src = Docref.parse ~cache ~root ~henv ~wenv ~file () in
-    Soundness.register senv src ; Some src
+    let src = Docref.parse ~cache ~root ~henv ~env:wenv ~file () in
+    Soundness.register senv src ;
+    Some src
   else
     Utils.failwith "Don't known what to do with %S" file
 

@@ -77,11 +77,11 @@ let preprocess file diagnostics =
     Hashtbl.remove sources file ;
     let config = Config.load_config ~root in
     let project = Wenv.init ~root config in
-    let wenv = project.env in
+    let env = project.env in
     let henv = Axioms.init project in
     let dir,path,lib = Wutil.filepath ~root ~file in
     let cache = Cache.create ~root () in
-    let parser = Docref.source ~cache ~wenv ~henv ~root ~dir ~lib ~path ~file in
+    let parser = Docref.source ~cache ~env ~henv ~root ~dir ~lib ~path ~file in
     let src = Utils.input ~file parser in
     let types =
       Why3.Wstdlib.Mstr.fold

@@ -58,21 +58,22 @@ type source = {
   lib: string list ;
   theories: theory Mstr.t ;
   cache : Cache.t option ;
-  session : Session.session option ;
+  session : (Why3.Env.env * Session.session) option ;
   mutable strategy : Proofs.strategy ;
+  mutable statistics : Proofstats.jstats ;
   mutable outdated : bool ;
 }
 
 val parse :
   cache:Cache.t ->
-  wenv:Why3.Env.env ->
+  env:Why3.Env.env ->
   henv:Axioms.henv ->
   root:string -> file:string ->
   unit -> source
 
 val source :
   ?cache:Cache.t ->
-  wenv:Why3.Env.env ->
+  env:Why3.Env.env ->
   henv:Axioms.henv ->
   root:string -> dir:string -> lib:string list -> path:string -> file:string ->
   in_channel -> source
@@ -99,7 +100,7 @@ val resolve :
   position -> href
 
 val reference :
-  wenv:Why3.Env.env ->
+  env:Why3.Env.env ->
   src:source -> current:string option ->
   string -> string * Id.t
 

@@ -83,8 +83,9 @@ type source = {
   lib: string list ;
   theories: theory Mstr.t ;
   cache: Cache.t option ;
-  session: Session.session option ;
+  session: (Why3.Env.env * Session.session) option ;
   mutable strategy : Proofs.strategy ;
+  mutable statistics : Proofstats.jstats ;
   mutable outdated : bool ;
 }
 
@@ -281,6 +282,11 @@ let reload_proofs source =
          let Proofs.{ file ; path ; proof } = crc in
          source.outdated <- Cache.outdated cache ~path ~file ~proof ;
       ) source.cache ;
+    Option.iter
+      (fun (env,session) ->
+         source.statistics <-
+           Proofstats.stats_session env ~path ~file crc.strategy session
+      ) source.session
   end
 
 (* -------------------------------------------------------------------------- *)
@@ -297,18 +303,19 @@ let empty () = {
   theories = Mstr.empty ;
   strategy = Mstr.empty ;
   session = None ;
+  statistics = Proofstats.empty ;
   outdated = true ;
 }
 
-let source ?cache ~wenv ~henv ~root ~dir ~lib ~path ~file inc =
+let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
   let globals = Why3.Debug.test_flag Why3.Glob.flag in
   try
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
     Why3.Glob.clear file ;
     let format = Why3.Env.get_format file in
-    let tmap = Why3.Env.read_channel Why3.Env.base_language wenv file inc in
+    let tmap = Why3.Env.read_channel Why3.Env.base_language env file inc in
     let theories = Wutil.list_theories tmap in
-    let session = Some (Session.create ~dir ~file ~format theories) in
+    let session = Session.create ~dir ~file ~format theories in
     let crc = Proofs.load ~move:false ~root ~path ~file () in
     let theories =
       Mstr.mapi
@@ -339,13 +346,17 @@ let source ?cache ~wenv ~henv ~root ~dir ~lib ~path ~file inc =
         let Proofs.{ path ; file ; proof } = crc in
         Cache.outdated cache ~file ~path ~proof
     in
+    let strategy = crc.strategy in
+    let statistics =
+      Proofstats.stats_session env ~path ~file strategy session in
+    let session = Some (env,session) in
     { file ; lib ; root ; path ; theories ;
-      cache ; session ; strategy = crc.strategy ; outdated }
+      cache ; session ; strategy ; outdated ; statistics }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn
 
-let parse ~cache ~wenv ~henv ~root ~file () =
+let parse ~cache ~env ~henv ~root ~file () =
   if not @@ String.ends_with ~suffix:".mlw" file then
     begin
       Log.error "invalid file name: %S" file ;
@@ -354,7 +365,7 @@ let parse ~cache ~wenv ~henv ~root ~file () =
   let dir,path,lib = Wutil.filepath ~root ~file in
   try
     let inc = open_in file in
-    let src = source ~cache ~wenv ~henv ~lib ~root ~path ~dir ~file inc in
+    let src = source ~cache ~env ~henv ~lib ~root ~path ~dir ~file inc in
     close_in inc ; src
   with exn ->
     Log.error "%s" (Printexc.to_string exn) ;
@@ -433,12 +444,12 @@ let find kind qid thy =
 
 let find_theory kind qid { theory } = find kind qid theory
 
-let find_decl wenv (src:source) (id : Id.id) =
+let find_decl env (src:source) (id : Id.id) =
   let thy =
     if id.id_lib = src.lib then
       (Mstr.find id.id_mod src.theories).theory
     else
-      try Why3.Env.read_theory wenv id.id_lib id.id_mod
+      try Why3.Env.read_theory env id.id_lib id.id_mod
       with _ -> raise Not_found
   in Id.find thy id.self
 
@@ -465,7 +476,7 @@ let select ~name ids =
 
 (* Global reference resolution *)
 
-let reference ~wenv ~src ~current r =
+let reference ~env ~src ~current r =
   let kind,name =
     let n = String.length r in
     if n >= 2 && r.[1] = ':'
@@ -483,7 +494,7 @@ let reference ~wenv ~src ~current r =
     select ~name @@ lookup ~scope:current ~theories:src.theories kind m qid
   else
     let thy =
-      try Why3.Env.read_theory wenv lp m
+      try Why3.Env.read_theory env lp m
       with _ ->
         Utils.failwith "unknown theory or module '%s.%s'"
           (String.concat "." lp) m

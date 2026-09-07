@@ -40,6 +40,8 @@ let jurl_loc ~file ~url ?name = function
 
 type jstats = { time : float ; stuck : int ; proved : int ; json : Json.t }
 
+let empty = { time = 0.0 ; stuck = 0 ; proved = 0 ; json = `Null }
+
 let jmap f xs =
   let time = ref 0.0 in
   let stuck = ref 0 in
@@ -56,7 +58,7 @@ let jmap f xs =
     time = !time ;
     stuck = !stuck ;
     proved = !proved ;
-    json = `List js ;
+    json = Json.list js ;
   }
 
 (* -------------------------------------------------------------------------- *)

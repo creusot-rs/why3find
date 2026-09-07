@@ -176,8 +176,8 @@ let process_clone_token doc token =
 let process_reference doc s =
   try
     let { src ; current } = doc in
-    let wenv = doc.project.env in
-    let _, id = Docref.reference ~wenv ~src ~current s in
+    let env = doc.project.env in
+    let _, id = Docref.reference ~env ~src ~current s in
     let id = Id.resolve ~lib:src.lib id in
     let pos = Token.position doc.input in
     doc.refs <- Rangemap.add (lexrange pos) (Ref id) doc.refs ;
