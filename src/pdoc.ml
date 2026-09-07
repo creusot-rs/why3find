@@ -175,32 +175,23 @@ let header out ~level ~title ?(toc=title) () =
   Format.fprintf out.current.fmt "<h%d><a id=\"%s\">%s</a></h%d>@\n"
     level name title level
 
-let head =
-  "<!DOCTYPE html>\n\
-   <html>\n\
-   <head>\n\
-   <meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n\
-  "
+let head = {html|
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" type="text/css" href="icofont.min.css">
+|html}
 
-let css =
-  "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n\
-   <link rel=\"stylesheet\" type=\"text/css\" href=\"icofont.min.css\">\n\
-  "
+let katex = {html|
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css" integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js" integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+|html}
 
-let katex =
-   "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css\" integrity=\"sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1\" crossorigin=\"anonymous\">\n\
-    <script src=\"https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js\" integrity=\"sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7\" crossorigin=\"anonymous\"></script>\n\
-   "
-
-let body =
-  "</title>\n\
-   </head>\n\
-   <body>\n"
-
-let foot =
-  "<script type=\"text/javascript\" src=\"script.js\"></script>\n\
-   </body>\n\
-   </html>\n"
+let foot = {html|<script type="text/javascript" src="script.js"></script>
+</body>
+</html>
+|html}
 
 let table_of_contents cout heads =
   if heads <> [] then
@@ -220,12 +211,12 @@ let close output =
   flush output ;
   let target = output.target in
   Utils.outputfile ~file:target.file begin fun cout ->
+    output_string cout "<!DOCTYPE html>" ;
     output_string cout head ;
-    output_string cout css ;
     if target.matheq > 0 then output_string cout katex ;
     output_string cout "<title>" ;
     output_string cout target.htitle ;
-    output_string cout body ;
+    output_string cout "</title>\n</head>\n<body>\n" ;
     table_of_contents cout (List.rev target.headers) ;
     Buffer.output_buffer cout target.contents;
     output_string cout foot
