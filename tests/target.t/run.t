@@ -18,7 +18,7 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="target.index.html">target</a></code> — <code>module B</code></header>
   <pre class="src">
-  <span class="keyword">module</span> <span class="scope">B</span><a href="target.proof.html#B" title="7 logic parameters, 9 hypotheses, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="target.proof.html#B" title="Failed (no proof)" class="icon failed icofont-error"></a>
+  <span class="keyword">module</span> <span class="scope">B</span><a href="target.proof.html#B" title="7 logic parameters, 9 hypotheses, no instance found" class="icon small warning icofont-warning-alt"></a><a href="target.proof.html#B" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class="keyword">use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
     <span class="keyword">use</span> <a title="target.Q" href="target.Q.html">Q</a>
     <span class="keyword">type</span> <a id="t">t</a> = int

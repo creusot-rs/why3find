@@ -239,7 +239,7 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Neutral</code></header>
   <pre class="src">
-  <span class="keyword">module</span> <span class="scope">Neutral</span><a href="clones.proof.html#Neutral" title="3 logic parameters, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#Neutral" title="Valid (no goals)" class="icon remark icofont-check"></a>
+  <span class="keyword">module</span> <span class="scope">Neutral</span><a href="clones.proof.html#Neutral" title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#Neutral" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class="keyword">clone</span> <span class="keyword">export</span> <a title="clones.Monoid" href="clones.Monoid.html">Monoid</a><span class="section">{<span class="section-toggle">#</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
         <span class="comment">(* cloned <a name="clone-3" href="clones.Monoid.html">clones.Monoid</a> *)</span>
@@ -268,7 +268,7 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library clones</code></header>
   <pre class="src"><span class="keyword">module</span> <a title="clones.Monoid" href="clones.Monoid.html">Monoid</a><a href="clones.proof.html#Monoid" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="clones.proof.html#Monoid" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
-  <pre class="src"><span class="keyword">module</span> <a title="clones.Neutral" href="clones.Neutral.html">Neutral</a><a href="clones.proof.html#Neutral" title="3 logic parameters, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#Neutral" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
+  <pre class="src"><span class="keyword">module</span> <a title="clones.Neutral" href="clones.Neutral.html">Neutral</a><a href="clones.proof.html#Neutral" title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#Neutral" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <pre class="src"><span class="keyword">module</span> <a title="clones.Commutative" href="clones.Commutative.html">Commutative</a><a href="clones.proof.html#Commutative" title="2 logic parameters, 1 hypothesis, 4 ground instances" class="icon small valid icofont-star"></a><a href="clones.proof.html#Commutative" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <pre class="src"><span class="keyword">module</span> <a title="clones.Associative" href="clones.Associative.html">Associative</a><a href="clones.proof.html#Associative" title="2 logic parameters, 1 hypothesis, 3 ground instances" class="icon small valid icofont-star"></a><a href="clones.proof.html#Associative" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <pre class="src"><span class="keyword">module</span> <a title="clones.AC" href="clones.AC.html">AC</a><a href="clones.proof.html#AC" title="2 logic parameters, 2 hypotheses, 1 ground instance" class="icon small valid icofont-star"></a><a href="clones.proof.html#AC" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
@@ -290,7 +290,7 @@
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
   <pre class="src"><span class="keyword">module</span> <a id="Monoid" href="clones.Monoid.html">clones.Monoid</a><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src"><span class="keyword">module</span> <a id="Neutral" href="clones.Neutral.html">clones.Neutral</a><span title="3 logic parameters, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src"><span class="keyword">module</span> <a id="Neutral" href="clones.Neutral.html">clones.Neutral</a><span title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src">
     <span class="keyword">axiom</span> <a id="Neutral.neutral" href="clones.Neutral.html#neutral">neutral</a><span title="uncloned hypothesis" class="icon small warning icofont-warning-alt"></span>
   </pre>

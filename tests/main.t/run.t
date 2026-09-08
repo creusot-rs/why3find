@@ -34,10 +34,11 @@
   </head>
   <body>
   <header>Index</header>
+  <div class="dashboard">
   <div class="doc">
   <h1>Development</h1>
   <ul>
-  <li><a href="p.a.index.html">Library p.a</a><span title="1 value parameter, 0 instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>
+  <li><a href="p.a.index.html">Library p.a</a><span title="1 value parameter, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>
   </ul>
   </div>
   <script type="text/javascript" src="script.js"></script>
@@ -64,7 +65,7 @@
   <div class="doc">
   <p>Before B</p>
   </div>
-  <pre class="src"><span class="keyword">module</span> <a title="p.a.B" href="p.a.B.html">B</a><a href="p.a.proof.html#B" title="1 value parameter, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="p.a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
+  <pre class="src"><span class="keyword">module</span> <a title="p.a.B" href="p.a.B.html">B</a><a href="p.a.proof.html#B" title="1 value parameter, no instance found" class="icon small warning icofont-warning-alt"></a><a href="p.a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <div class="doc">
   <p>After B</p>
   </div>
@@ -126,7 +127,7 @@
   <p>Introducing B</p>
   </div>
   <pre class="src">
-  <span class="keyword">module</span> <span class="scope">B</span><a href="p.a.proof.html#B" title="1 value parameter, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="p.a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
+  <span class="keyword">module</span> <span class="scope">B</span><a href="p.a.proof.html#B" title="1 value parameter, no instance found" class="icon small warning icofont-warning-alt"></a><a href="p.a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
   
     <span class="keyword">exception</span> <a id="Error">Error</a>
   

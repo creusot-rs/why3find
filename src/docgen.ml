@@ -456,7 +456,7 @@ let pp_axioms_link ?href fmt { prm ; hyp ; pvs ; unsafe ; sound } =
         | Unsound ->
           plural unsafe "1 unsound definition" @@
           Printf.sprintf "%d unsafe definitions"
-        | Unknown [] -> ["0 instance found"]
+        | Unknown [] -> ["no instance found"]
         | Unknown ns ->
           plural (List.length ns) "1 incomplete instance" @@
           Printf.sprintf "%d incomplete instances"

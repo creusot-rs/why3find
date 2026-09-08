@@ -38,7 +38,7 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module B</code></header>
   <pre class="src">
-  <span class="keyword">module</span> <span class="scope">B</span><a href="clones.proof.html#B" title="1 logic parameter, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#B" title="Valid (one goal)" class="icon valid icofont-check"></a>
+  <span class="keyword">module</span> <span class="scope">B</span><a href="clones.proof.html#B" title="1 logic parameter, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#B" title="Valid (one goal)" class="icon valid icofont-check"></a>
     <span class="keyword">use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
     <span class="keyword">clone</span> <a title="clones.A" href="clones.A.html">A</a><span class="section">{<span class="section-toggle">#</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
@@ -129,7 +129,7 @@
   </pre>
   <pre class="src">
     <span class="keyword">goal</span> <a id="A.neutral_com" href="clones.A.html#neutral_com">neutral_com</a><span title="Valid (one goal)" class="icon valid icofont-check"></span>
-      <span class="prover" title="alt-ergo@2.4.2">alt-ergo</span> 500ns</pre><pre class="src"><span class="keyword">module</span> <a id="B" href="clones.B.html">clones.B</a><span title="1 logic parameter, 1 hypothesis, 0 instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (one goal)" class="icon valid icofont-check"></span></pre>
+      <span class="prover" title="alt-ergo@2.4.2">alt-ergo</span> 500ns</pre><pre class="src"><span class="keyword">module</span> <a id="B" href="clones.B.html">clones.B</a><span title="1 logic parameter, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (one goal)" class="icon valid icofont-check"></span></pre>
   <pre class="src">
     <span class="keyword">axiom</span> <a id="B.A.neutral" href="clones.B.html#A.neutral">A.neutral</a><span title="uncloned hypothesis" class="icon small warning icofont-warning-alt"></span>
   </pre>
