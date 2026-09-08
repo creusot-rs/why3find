@@ -7,6 +7,33 @@
 (**************************************************************************)
 
 (* -------------------------------------------------------------------------- *)
+(* --- Prover Stats                                                       --- *)
+(* -------------------------------------------------------------------------- *)
+
+type pstats = (string,Stats.stats) Hashtbl.t
+
+let rec add_crc ps (crc : Crc.crc) =
+  match crc with
+  | Stuck -> ()
+  | Tactic { children } -> List.iter (add_crc ps) children
+  | Prover (p, _, t) ->
+    let s =
+      try Hashtbl.find ps p with Not_found ->
+        let s = Stats.create () in
+        Hashtbl.add ps p s ; s
+    in Stats.add s t
+
+let add_strategy ps proofs =
+  let module M = Why3.Wstdlib.Mstr in
+  M.iter (fun _ cs -> M.iter (fun _ c -> add_crc ps c) cs) proofs
+
+let iter f ps =
+  let rs = ref [] in
+  Hashtbl.iter (fun p s -> rs := (p,s) :: !rs) ps ;
+  List.iter (fun (p,s) -> f p s) @@
+  List.sort (fun (p,_) (q,_) -> String.compare p q) !rs
+
+(* -------------------------------------------------------------------------- *)
 (* --- JSON Utilities                                                     --- *)
 (* -------------------------------------------------------------------------- *)
 

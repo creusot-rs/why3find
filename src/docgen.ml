@@ -1261,6 +1261,88 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
   end
 
 (* -------------------------------------------------------------------------- *)
+(* --- Computing Statistics                                               --- *)
+(* -------------------------------------------------------------------------- *)
+
+let pp_count fmt n = Format.fprintf fmt "%4d" n
+let pp_title title pp fmt x =
+  Format.fprintf fmt "<span title=\"%s\">%a</span>" title pp x
+
+let process_statistics out sources =
+  let ps = Hashtbl.create 0 in
+  List.iter
+    (fun (_,s) ->
+       match s with
+       | None -> ()
+       | Some (src : Docref.source) -> Proofstats.add_strategy ps src.strategy
+    ) sources ;
+  if Hashtbl.length ps > 0 then
+    begin
+      Pdoc.printf out
+        "<h1>Statistics</h1>@\n\
+         <pre>@\n" ;
+      let w = ref 0 in
+      Proofstats.iter (fun p _ -> w := max !w (String.length p)) ps ;
+      Proofstats.iter
+        (fun p s ->
+           Pdoc.printf out "<b>%a</b> %a %a (%a — %a — %a)@\n"
+             (Utils.pp_left !w) p (pp_title "Proved goals" pp_count) (Stats.count s)
+             (pp_title "Total time" Utils.pp_rtime) (Stats.sum s)
+             (pp_title "Minimum time" Utils.pp_rtime) (Stats.min s)
+             (pp_title "Average time" Utils.pp_rtime) (Stats.average s)
+             (pp_title "Maximal time" Utils.pp_rtime) (Stats.max s)
+        ) ps ;
+      Pdoc.printf out "</pre>@." ;
+    end
+
+(* -------------------------------------------------------------------------- *)
+(* --- Generating Treemaps                                                --- *)
+(* -------------------------------------------------------------------------- *)
+
+let pp_jstats fmt (js : Proofstats.jstats) =
+  begin
+    if js.stuck = 0 then
+      Format.fprintf fmt
+        "<span title=\"Total number of goals (all proved)\">Proved (%d)"
+        js.proved
+    else if js.proved > 0 then
+      Format.fprintf fmt
+        "<span title=\"Valid/Total number of goals\">\
+         <b class=\"warning\">Partial</b> (%d/%d)</span>"
+        js.proved (js.proved + js.stuck)
+    else Format.fprintf fmt
+        "<span title=\"Total number of goals (all failed)\">\
+         <b class=\"failed\">Failed</b> %d</span>"
+        js.stuck ;
+    Format.fprintf fmt
+      " <span title=\"Cumulated proof time\">(%a)</span>"
+      Utils.pp_time js.time ;
+  end
+
+let process_treemap out sources =
+  let stats =
+    Proofstats.jmap
+      (fun (_,s) ->
+         match s with
+         | None -> Proofstats.empty
+         | Some (src : Docref.source) -> src.statistics
+      ) sources in
+  if stats.proved + stats.stuck > 0 && stats.json <> `Null then
+    begin
+      let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+      Pdoc.printf out
+        "<div class=\"tab\">@\n\
+         <div class=\"status\">%a</div>@\n\
+         <div class=\"statistics\" id=\"%s\"></div>@\n\
+         <script type=\"text/javascript\" defer>\
+         Why3findTreemap('#%s',800,400,{ children: %a });\
+         </script>@\n\
+         </div>@."
+        pp_jstats stats
+        id id Json.pretty stats.json ;
+    end
+
+(* -------------------------------------------------------------------------- *)
 (* --- Generating Index                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
@@ -1306,7 +1388,7 @@ let pp_chapters out ~senv ~title cs =
       Pdoc.printf out "</ul>@." ;
     end
 
-let index ~out:dir ~senv ~title ~stats =
+let process_index ~out:dir ~senv ~title sources =
   let href = "index.html" in
   if List.for_all (fun c -> c.href <> href) !chapters then
     begin
@@ -1316,56 +1398,12 @@ let index ~out:dir ~senv ~title ~stats =
       Pdoc.printf out "<div class=\"dashboard\">@\n<div class=\"tab\">@\n" ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
+      process_statistics out sources ;
       Pdoc.printf out "</div>@\n" ;
-      if treemaps then
-        Option.iter
-          begin fun (stats : Proofstats.jstats) ->
-            Pdoc.printf out "<div class=\"tab\">@\n<h1>Statistics</h1>@\n" ;
-            Pdoc.printf out "<div class=\"status\">@\n" ;
-            if stats.stuck = 0 then
-              Pdoc.printf out
-                "<span title=\"Total number of goals (all proved)\">Proved (%d)"
-                stats.proved
-            else if stats.proved > 0 then
-              Pdoc.printf out
-                "<span title=\"Valid/Total number of goals\">\
-                 <b class=\"warning\">Partial</b> (%d/%d)</span>"
-                stats.proved (stats.proved + stats.stuck)
-            else Pdoc.printf out
-                "<span title=\"Total number of goals (all failed)\">\
-                 <b class=\"failed\">Failed</b> %d</span>"
-                stats.stuck ;
-            Pdoc.printf out
-              " <span title=\"Cumulated proof time\">(%a)</span></div>@\n"
-              Utils.pp_time stats.time ;
-            let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
-            Pdoc.printf out "<div class=\"statistics\" id=\"%s\"></div>@\n" id ;
-            Pdoc.printf out
-              "<script type=\"text/javascript\" defer>\
-               Why3findTreemap('#%s',800,400,{ children: %a });\
-               </script>@\n</div>@\n"
-              id Json.pretty stats.json ;
-            Pdoc.printf out "</div>@\n" ; (* tab *)
-          end stats ;
+      if treemaps then process_treemap out sources ;
       Pdoc.flush out ;
       Pdoc.close_all out ;
     end
-
-(* -------------------------------------------------------------------------- *)
-(* --- Computing Statistics                                               --- *)
-(* -------------------------------------------------------------------------- *)
-
-let statistics sources =
-  let stats =
-    Proofstats.jmap
-      (fun (_,s) ->
-         match s with
-         | None -> Proofstats.empty
-         | Some (src : Docref.source) -> src.statistics
-      ) sources
-  in
-  if stats.proved + stats.stuck > 0 && stats.json <> `Null then
-    Some stats else None
 
 (* -------------------------------------------------------------------------- *)
 (* --- Main Doc Command                                                   --- *)
@@ -1412,12 +1450,10 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
     let title = if title<>"" then title else document_header ~file:"README.md" ~page:"Index" in
     let cache = Cache.create ~root:project.root () in
     let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
-    (* Statistics *)
-    let stats = statistics sources in
     (* Doc generation *)
     List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url) sources ;
     (* Indexing *)
-    index ~out ~senv ~title ~stats ;
+    process_index ~out ~senv ~title sources ;
     (* Final output *)
     Log.emit "Generated %s%s/index.html"
       (if url then "file://" else "") (Utils.absolute out) ;
