@@ -106,13 +106,14 @@ let rec stats_crc env ~file ~url (goal,crc) : Json.t =
 
 let stats_goal proofs ?env ~file ~path ~url (goal : Session.goal) =
   let name = Session.name goal in
+  let infix = Id.of_infix @@ name in
   let crc = Why3.Wstdlib.Mstr.find_def Crc.stuck name proofs in
   let status = Format.asprintf "%a" Crc.pp_hint crc in
   let loc = Session.target goal in
   let base = [
+    "goal" , `String name ;
+    "path" , `String (Printf.sprintf "%s.%s" path infix) ;
     "url" , jurl_loc ~file ~url loc ;
-    "path" , `String (Printf.sprintf "%s.%s" path name) ;
-    "goal" , `String (Session.name goal) ;
     "status", `String status ;
     "location", jsloc ~file loc ;
   ] in

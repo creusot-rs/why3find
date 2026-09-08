@@ -51,18 +51,18 @@
             "url": "foo.T.html#_L6",
             "children": [
               {
-                "url": "foo.T.html#_L3",
-                "path": "foo.T.Add.com",
                 "goal": "Add.com",
+                "path": "foo.T.Add.com",
+                "url": "foo.T.html#_L3",
                 "status": "Valid (alt-ergo)",
                 "location": { "line": 3, "column": 14, "end_column": 41 },
                 "time": 0.0004,
                 "proved": 1
               },
               {
-                "url": "foo.T.html#_L3",
-                "path": "foo.T.Mul.com",
                 "goal": "Mul.com",
+                "path": "foo.T.Mul.com",
+                "url": "foo.T.html#_L3",
                 "status": "Valid (alt-ergo)",
                 "location": { "line": 3, "column": 14, "end_column": 41 },
                 "time": 0.0004,
