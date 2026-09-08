@@ -38,13 +38,10 @@
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="duplicated.index.html">duplicated</a></code> — <code>module B</code></header>
   <pre class="src">
   <span class="keyword">module</span> <span class="scope">B</span><a href="duplicated.proof.html#B" title="1 logic parameter" class="icon small remark icofont-question-circle"></a><a href="duplicated.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
-    <span class="keyword">clone</span> <a title="duplicated.A" href="duplicated.A.html">A</a><span class="section">{<span class="section-toggle">#</span><span class="section-text">
+    <span class="keyword">clone</span> <a title="duplicated.A" href="duplicated.A.html">A</a> <span class="section">{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
         <span class="comment">(* cloned <a name="clone-2" href="duplicated.A.html">duplicated.A</a> *)</span>
-      <span class="comment section-toggle">end</span>
-    </span>}</span><span class="section">{<span class="section-toggle">…</span><span class="section-text">
-      <span class="comment section-toggle">begin</span>
-        <span class="keyword">val</span> <span class="attribute">function</span> <a id="A.op" href="duplicated.A.html#op" title="duplicated.B.A.op  (cloned from duplicated.A.op)">op</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int int : int
+        <span class="keyword">val</span> <span class="attribute">function</span> <a id="A.op" href="duplicated.A.html#op" title="duplicated.B.A.op  (cloned from duplicated.A.op)">A.op</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int int : int
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span> <span class="keyword">with</span> <span class="keyword">type</span> <a title="duplicated.A.t" href="duplicated.A.html#t">t</a> = int
   <span class="keyword">end</span>

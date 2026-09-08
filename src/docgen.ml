@@ -535,7 +535,7 @@ let declare env n kwd ?(attr=[]) ?(valid=false)
       (Id.pp_qpath ~local) tgt
       Id.pp_aname tgt pp_href src
       Id.pp_title tgt Id.pp_title src
-      Id.pp_qname tgt ;
+      Id.pp_local tgt ;
     process_axioms env tgt ;
     process_proof env tgt ~valid @@ Docref.find_proof tgt.self env.theory ;
     if not more then Pdoc.printf env.out "@\n" ;
@@ -675,8 +675,8 @@ let process_clone_section env ~local ~indent ~container ~kind clones =
     begin
       text env ;
       Pdoc.printf env.out
-        "<span class=\"section\">\
-         {<span class=\"section-toggle\">%s</span>\
+        " <span class=\"section\">\
+         {<span class=\"section-toggle\" title=\"Cloned symbols\">%s</span>\
          <span class=\"section-text\">@\n\
          %a<span class=\"comment section-toggle\">begin</span>@\n"
         kind Pdoc.pp_spaces (indent+2) ;
@@ -728,8 +728,7 @@ let process_clone env ~indent ~export id =
         let dclones = filter s.clones in
         let local = List.rev scope in
         let container = thy.theory in
-        process_clone_section env ~local ~indent ~container ~kind:"#" iclones ;
-        process_clone_section env ~local ~indent ~container ~kind:"…" dclones ;
+        process_clone_section env ~local ~indent ~container ~kind:"…" (iclones @ dclones) ;
         process_clone_axioms env dclones ;
         process_clone_proofs env dclones ;
         pp_space env ;

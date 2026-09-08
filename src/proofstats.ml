@@ -124,7 +124,7 @@ let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
   let base = [
     "goal" , `String name ;
     "path" , `String (Printf.sprintf "%s.%s" path infix) ;
-    "url" , jurl_loc ~file ~url loc ;
+    "url" , jurl_loc ~file ~url ~name loc ;
     "status", `String status ;
     "location", jsloc ~file loc ;
   ] in
