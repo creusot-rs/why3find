@@ -283,9 +283,9 @@ let reload_proofs source =
          source.outdated <- Cache.outdated cache ~path ~file ~proof ;
       ) source.cache ;
     Option.iter
-      (fun (env,session) ->
+      (fun (_,session) ->
          source.statistics <-
-           Proofstats.stats_session env ~path ~file crc.strategy session
+           Proofstats.stats_session ~path ~file crc.strategy session
       ) source.session
   end
 
@@ -347,8 +347,7 @@ let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
         Cache.outdated cache ~file ~path ~proof
     in
     let strategy = crc.strategy in
-    let statistics =
-      Proofstats.stats_session env ~path ~file strategy session in
+    let statistics = Proofstats.stats_session ~path ~file strategy session in
     let session = Some (env,session) in
     { file ; lib ; root ; path ; theories ;
       cache ; session ; strategy ; outdated ; statistics }

@@ -161,6 +161,10 @@ let pop env =
 let smartlines =
   try Sys.getenv "WHY3FIND_LINEREFS" <> "no" with Not_found -> true
 
+let treemaps =
+  try Sys.getenv "WHY3FIND_TREEMAPS" <> "no" with Not_found -> true
+
+
 let codeline env ?(offset=0) ?(indent=0) () =
   if smartlines then
     let line = Token.line env.input + offset in
@@ -1287,7 +1291,7 @@ let process_chapter_axioms out (senv : Soundness.env) (src : Docref.source) =
 let pp_chapters out ~senv ~title cs =
   if cs <> [] then
     begin
-      Pdoc.printf out "<div class=\"doc\">@\n<h1>%s</h1>@\n<ul>@\n" title ;
+      Pdoc.printf out "<h1>%s</h1>@\n<ul>@\n" title ;
       List.iter
         (fun c ->
            Pdoc.printf out "<li><a href=\"%s\">%s</a>" c.href c.title ;
@@ -1295,21 +1299,69 @@ let pp_chapters out ~senv ~title cs =
            Option.iter (process_chapter_proofs out) c.src ;
            Pdoc.printf out "</li>@\n" ;
         ) cs ;
-      Pdoc.printf out "</ul>@\n</div>@." ;
+      Pdoc.printf out "</ul>@." ;
     end
 
-let index ~out:dir ~senv ~title =
+let index ~out:dir ~senv ~title ~stats =
   let href = "index.html" in
   if List.for_all (fun c -> c.href <> href) !chapters then
     begin
       let ofile = Filename.concat dir href in
       let out = Pdoc.output ~file:ofile ~title in
       Pdoc.printf out "<header>%s</header>@\n" title ;
+      Pdoc.printf out "<div class=\"dashboard\">@\n<div class=\"doc\">@\n" ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
+      Pdoc.printf out "</div>@\n" ;
+      if treemaps then
+        Option.iter
+        begin fun (stats : Proofstats.jstats) ->
+          Pdoc.printf out "<div class=\"doc\">@\n<h1>Statistics</h1>@\n" ;
+          Pdoc.printf out "<div class=\"status\">@\n" ;
+          if stats.stuck = 0 then
+            Pdoc.printf out
+              "<span title=\"Total number of goals (all proved)\">Proved (%d)"
+              stats.proved
+          else if stats.proved > 0 then
+            Pdoc.printf out
+              "<span title=\"Valid/Total number of goals\">\
+               <b class=\"warning\">Partial</b> (%d/%d)</span>"
+              stats.proved (stats.proved + stats.stuck)
+          else Pdoc.printf out
+              "<span title=\"Total number of goals (all failed)\">\
+               <b class=\"failed\">Failed</b> %d</span>"
+              stats.stuck ;
+          Pdoc.printf out
+            " <span title=\"Cumulated proof time\">(%a)</span></div>@\n"
+            Utils.pp_time stats.time ;
+          let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+          Pdoc.printf out "<div class=\"statistics\" id=\"%s\"></div>@\n" id ;
+          Pdoc.printf out
+            "<script type=\"text/javascript\" defer>\
+             Why3findTreemap('#%s',800,400,{ children: %a });\
+             </script>@\n</div>@\n"
+             id Json.pretty stats.json ;
+          Pdoc.printf out "</div>@\n" ; (* tab *)
+        end stats ;
       Pdoc.flush out ;
       Pdoc.close_all out ;
     end
+
+(* -------------------------------------------------------------------------- *)
+(* --- Computing Statistics                                               --- *)
+(* -------------------------------------------------------------------------- *)
+
+let statistics sources =
+  let stats =
+    Proofstats.jmap
+      (fun (_,s) ->
+         match s with
+         | None -> Proofstats.empty
+         | Some (src : Docref.source) -> src.statistics
+      ) sources
+  in
+  if stats.proved + stats.stuck > 0 && stats.json <> `Null then
+    Some stats else None
 
 (* -------------------------------------------------------------------------- *)
 (* --- Main Doc Command                                                   --- *)
@@ -1351,14 +1403,17 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
     shared ~out ~file:"icofont.min.css" ;
     shared ~out ~file:"fonts/icofont.woff" ;
     shared ~out ~file:"fonts/icofont.woff2" ;
+    if treemaps then shared ~out ~file:"treemap.js" ;
     (* Pre-processing *)
     let title = if title<>"" then title else document_header ~file:"README.md" ~page:"Index" in
     let cache = Cache.create ~root:project.root () in
     let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
+    (* Statistics *)
+    let stats = statistics sources in
     (* Doc generation *)
     List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url) sources ;
     (* Indexing *)
-    index ~out ~senv ~title ;
+    index ~out ~senv ~title ~stats ;
     (* Final output *)
     Log.emit "Generated %s%s/index.html"
       (if url then "file://" else "") (Utils.absolute out) ;

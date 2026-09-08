@@ -82,7 +82,7 @@ let subgoals env ?goal id children =
 let rec stats_crc env ~file ~url (goal,crc) : Json.t =
   let loc = Option.bind goal Session.target in
   let base = [
-    "href" , jurl_loc ~file ~url loc ;
+    "url" , jurl_loc ~file ~url loc ;
     "location" , jsloc ~file loc ;
   ] in
   let stats =
@@ -104,43 +104,45 @@ let rec stats_crc env ~file ~url (goal,crc) : Json.t =
       ]
   in Json.assoc (base @ stats)
 
-let stats_goal env proofs ~file ~path ~url (goal : Session.goal) =
+let stats_goal proofs ?env ~file ~path ~url (goal : Session.goal) =
   let name = Session.name goal in
   let crc = Why3.Wstdlib.Mstr.find_def Crc.stuck name proofs in
   let status = Format.asprintf "%a" Crc.pp_hint crc in
   let loc = Session.target goal in
   let base = [
+    "url" , jurl_loc ~file ~url loc ;
     "path" , `String (Printf.sprintf "%s.%s" path name) ;
     "goal" , `String (Session.name goal) ;
     "status", `String status ;
-    "href" , jurl_loc ~file ~url loc ;
     "location", jsloc ~file loc ;
   ] in
   match crc with
   | Crc.Stuck ->
     { json = Json.assoc base ; stuck = 1 ; proved = 0 ; time = 0.0 }
-  | Crc.Prover(p,_,time) -> {
+  | Crc.Prover(_,_,time) -> {
       json = Json.assoc @@ base @ [
           "time", `Float time ;
           "proved", `Int 1 ;
-          "prover", `String p ;
         ] ;
       stuck = 0 ; proved = 1 ; time ;
     }
-  | Crc.Tactic { id ; time ; stuck ; proved ; children } -> {
+  | Crc.Tactic { time ; stuck ; proved ; id ; children } ->
+    let children =
+      match env with None -> `Null | Some env ->
+          Json.list_map
+            (stats_crc env ~url ~file)
+            (subgoals env ~goal id children)
+    in {
       json = Json.assoc @@ base @ [
           "time" , `Float time ;
           "stuck" , Json.optint stuck ;
           "proved" , Json.optint proved ;
-          "tactic", `String id ;
-          "children", Json.list_map
-            (stats_crc env ~url ~file)
-            (subgoals env ~goal id children) ;
+          "children" , children ;
         ] ;
       stuck ; proved ; time ;
     }
 
-let stats_theory env strategy ~file ~path (thy : Session.theory) =
+let stats_theory strategy ~file ~path (thy : Session.theory) =
   let name = Session.thy_name thy in
   let line =
     match (Session.thy thy).th_name.id_loc with
@@ -150,7 +152,7 @@ let stats_theory env strategy ~file ~path (thy : Session.theory) =
   let goals = Session.split thy in
   let path = Printf.sprintf "%s.%s" path name in
   let url = Printf.sprintf "%s.html" path in
-  let jstats = jmap (stats_goal env proofs ~file ~path ~url) goals in
+  let jstats = jmap (stats_goal proofs ~file ~path ~url) goals in
   let json =
     Json.assoc [
       "path", `String path ;
@@ -164,9 +166,9 @@ let stats_theory env strategy ~file ~path (thy : Session.theory) =
     ]
   in { jstats with json }
 
-let stats_session env ~file ~path strategy session =
+let stats_session ~file ~path strategy session =
   let theories = Session.theories session in
-  let jstats = jmap (stats_theory env strategy ~file ~path) theories in
+  let jstats = jmap (stats_theory strategy ~file ~path) theories in
   let url = Printf.sprintf "%s.html" path in
   let json = Json.assoc [
       "path", `String path ;
@@ -184,7 +186,7 @@ let stats_file env ~root ~file =
   let dir, path, _ = Wutil.filepath ~root ~file in
   let session = Session.create ~dir ~file ~format theories in
   let Proofs.{ strategy } = Proofs.load ~move:false ~root ~path ~file () in
-  stats_session env ~file ~path strategy session
+  stats_session ~file ~path strategy session
 
 let statistics ~root ~env ~files =
   let jstats = jmap (fun file -> stats_file env ~root ~file) files in

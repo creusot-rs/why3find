@@ -97,6 +97,7 @@ type target = {
   mutable hbase: int; (* base level *)
   mutable headers: header list; (* in reverse order *)
   mutable matheq: int ;
+  mutable treemap: int ;
   contents: Buffer.t;
   forked: target option;
 }
@@ -111,7 +112,7 @@ let output ~file ~title =
     target = {
       file ; htitle = title ; hbase = 0 ; headers = [] ;
       contents = Buffer.create 80 ;
-      forked = None ; matheq = 0 ;
+      forked = None ; matheq = 0 ; treemap = 0 ;
     } ;
     current = buffer () ;
   }
@@ -148,12 +149,17 @@ let fork out ~file ~title =
     file ; htitle = title ; hbase = 0 ; headers = [] ;
     contents = Buffer.create 80 ;
     forked = Some out.target ;
+    treemap = 0 ;
     matheq = 0 ;
   }
 
 let matheq out =
   let k = succ out.target.matheq in
   out.target.matheq <- k ; k
+
+let treemap out =
+  let k = succ out.target.treemap in
+  out.target.treemap <- k ; k
 
 let printf out msg = Format.fprintf out.current.fmt msg
 let pp out p v = p out.current.fmt v
@@ -184,9 +190,27 @@ let head = {html|
 |html}
 
 let katex = {html|
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css" integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js" integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css"
+    integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer">
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js"
+    integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 |html}
+
+let d3treemap = {html|
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"
+    integrity="sha512-vc58qvvBdrDR4etbxMdlTt4GBQk1qjvyORR2nrsPsFPyrs+/u5c3+1Ct6upOgdZoIl7eq6k3a1UPDSNAQi/32A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-graphviz/5.6.0/d3-graphviz.min.js"
+    integrity="sha512-Le8HpIpS2Tc7SDHLM6AOgAKq6ZR4uDwLhjPSR20DtXE5dFb9xECHRwgpc1nxxnU0Dv+j6FNMoSddky5gyvI3lQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript" src="treemap.js"></script>
+|html}
+
 
 let foot = {html|<script type="text/javascript" src="script.js"></script>
 </body>
@@ -214,6 +238,7 @@ let close output =
     output_string cout "<!DOCTYPE html>" ;
     output_string cout head ;
     if target.matheq > 0 then output_string cout katex ;
+    if target.treemap > 0 then output_string cout d3treemap ;
     output_string cout "<title>" ;
     output_string cout target.htitle ;
     output_string cout "</title>\n</head>\n<body>\n" ;

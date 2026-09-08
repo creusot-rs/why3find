@@ -8,8 +8,14 @@
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
   
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css" integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js" integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css"
+      integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js"
+      integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <title>Index — foo</title>
   </head>
   <body>
@@ -50,8 +56,14 @@
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
   
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css" integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js" integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css"
+      integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js"
+      integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <title>Module foo.Foo</title>
   </head>
   <body>

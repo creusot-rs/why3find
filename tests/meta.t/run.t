@@ -14,6 +14,7 @@
   install (html)     html/mypkg.foo.proof.html
   install (html)     html/script.js
   install (html)     html/style.css
+  install (html)     html/treemap.js
   install (meta)     META.json
   Generated $TESTCASE_ROOT/META.json
   Generated $TESTCASE_ROOT/dune.why3find
@@ -42,6 +43,7 @@
       (foo/mypkg.foo.proof.html as mypkg/html/mypkg.foo.proof.html)
       (foo/script.js as mypkg/html/script.js)
       (foo/style.css as mypkg/html/style.css)
+      (foo/treemap.js as mypkg/html/treemap.js)
       ))
   $ cat dune
   (include dune.why3find)

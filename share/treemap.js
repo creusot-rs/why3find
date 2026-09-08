@@ -1,4 +1,4 @@
-function Why3findTreeMap(id, width, height, data) {
+function Why3findTreemap(id, width, height, data) {
 
   // Color scale.
   const color = d3.scaleOrdinal(d3.schemeAccent);
@@ -10,7 +10,7 @@ function Why3findTreeMap(id, width, height, data) {
     .padding(0.1)
     .round(true)
     (d3.hierarchy(data, d => d.children)
-      .sum(d => d.time)
+      .sum(d => d.children ? 0 : d.time)
       .sort((a, b) => b.height - a.height || b.value - a.value));
 
   // Time format.
@@ -32,9 +32,7 @@ function Why3findTreeMap(id, width, height, data) {
       .attr("viewBox", [0, 0, width, height])
       .attr("width", width)
       .attr("height", height)
-      .attr("style",
-        "background: white; max-width: 100%; height: auto; font: 10px monospace;"
-    );
+      .attr("style", "font: 10px monospace;");
 
   // Add a cell for each leaf of the hierarchy.
   const leaf = svg.selectAll("g")
@@ -45,11 +43,10 @@ function Why3findTreeMap(id, width, height, data) {
 
   // Append a title.
   leaf.append("title").text(d => {
-    let title = path(d);
+    let title = d.data.path;
     if (d.data.status) title += '\n' + d.data.status;
-    const count = d.data.proved + d.data.stuck ;
-    if (d.data.tactic && count > 1)
-      title += `\nTotal (${count}) (${time(d.data.time)})`;
+    const count = (d.data.proved || 0) + (d.data.stuck || 0) ;
+    if (count > 1) title += `\nTotal (${count}) (${time(d.data.time)})`;
     return title;
   });
 
@@ -91,7 +88,7 @@ function Why3findTreeMap(id, width, height, data) {
     });
     if (buffer.length) lines.push(buffer);
   }
-  const is_path = /^[a-zA-Z._…]+$/;
+  const is_path = /^[a-zA-Z._]+/;
 
   // Set text
   leaf
@@ -106,8 +103,9 @@ function Why3findTreeMap(id, width, height, data) {
       if (lines.length < h) {
         const status = d.data.status;
         const stats = status ? status.split(' ').filter(d => d !== 'Valid') : [];
-        if (d.data.tactic && d.data.count > 1) {
-          stats.push(`(${d.data.count})`);
+        const count = (d.data.stuck || 0) + (d.data.proved || 0) ;
+        if (d.data.count > 1) {
+          stats.push(`(${count})`);
           stats.push(`(${time(d.data.time)})`);
         }
         layout(lines, w, stats, ' ');

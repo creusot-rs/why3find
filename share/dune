@@ -5,8 +5,7 @@
     hammer.cfg
     gitignore.template
     dune-project.template
-    style.css
-    script.js
+    style.css script.js treemap.js
     icofont.min.css
     (fonts/icofont.woff as fonts/icofont.woff)
     (fonts/icofont.woff2 as fonts/icofont.woff2)

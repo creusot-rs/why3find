@@ -14,6 +14,7 @@
   </head>
   <body>
   <header>Index</header>
+  <div class="dashboard">
   <div class="doc">
   <h1>Development</h1>
   <ul>

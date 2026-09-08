@@ -48,7 +48,7 @@ let to_file ?(pretty_floats=false) f js =
 
 let to_string ?(pretty_floats=false) js =
   let js = if pretty_floats then truncate_floats js else (js :> Yojson.t) in
-  Yojson.pretty_to_string ~std:true js
+  Yojson.to_string ~std:true js
 
 let pp_gen ?(pretty_floats=false) fmt js =
   Format.pp_print_string fmt @@ to_string ~pretty_floats js

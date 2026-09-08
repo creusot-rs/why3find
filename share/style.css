@@ -86,6 +86,12 @@ div.doc {
   min-width: 6cm;
   max-width: 16cm;
   margin-left: 2cm;
+  margin-right: 2cm;
+}
+
+div.dashboard {
+  display: flex;
+  flex-flow: wrap;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -131,15 +137,13 @@ pre .linehover {
 }
 
 .lineanchor:target .linenumber,
-.linenumber:hover
-{
+.linenumber:hover {
   color: orange;
   font-weight: bold;
 }
 
 .lineanchor:target .linehover,
-.linenumber:hover + .linehover
-{
+.linenumber:hover+.linehover {
   visibility: visible;
 }
 
@@ -151,6 +155,26 @@ div.maths {
   width: 0pt;
   margin-left: 1cm;
 }
+
+div.status {
+  cursor: default;
+  color: gray;
+  font-size: small;
+  font-family: monospace;
+  margin-left: 1cm;
+  margin-bottom: 8px;
+}
+
+div.statistics {
+  background: white;
+}
+
+div.statistics svg {
+  max-width: 100%;
+  height: auto;
+}
+
+div.statistics svg * { cursor: pointer }
 
 .scope {
   color: #3e7777;
@@ -210,8 +234,6 @@ div.maths {
 /* -------------------------------------------------------------------------- */
 /* --- Foldable Section                                                   --- */
 /* -------------------------------------------------------------------------- */
-
-.section {}
 
 .section.level1:hover {
   background: #fcfce1;
