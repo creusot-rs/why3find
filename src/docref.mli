@@ -59,6 +59,7 @@ type source = {
   theories: theory Mstr.t ;
   cache : Cache.t option ;
   session : (Why3.Env.env * Session.session) option ;
+  lenses : (int,string) Hashtbl.t ;
   mutable strategy : Proofs.strategy ;
   mutable statistics : Proofstats.jstats ;
   mutable outdated : bool ;

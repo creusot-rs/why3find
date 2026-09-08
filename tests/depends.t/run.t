@@ -15,7 +15,7 @@
   <body>
   <header>Index</header>
   <div class="dashboard">
-  <div class="doc">
+  <div class="tab">
   <h1>Development</h1>
   <ul>
   <li><a href="a.index.html">Library a</a><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>

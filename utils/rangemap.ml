@@ -31,6 +31,7 @@ let compare (a,b) (c,d) =
     compare b d
 
 let inside p (a,b) = a <<= p && p << b
+let inline l (a,b) = a.line <= l && l <= b.line
 
 let subset (a,b) (c,d) = c <<= a && b <<= d
 
@@ -41,20 +42,23 @@ let compare_entry x y =
   | None, Some _ -> (+1)
   | Some(a,_) , Some (b,_) -> compare a b
 
-let rec find_opt p = function
+let rec find_gen f = function
   | Empty -> None
   | Range { range ; value ; inner } ->
     begin
-      match find_opt p inner with
+      match find_gen f inner with
       | Some _ as r -> r
-      | None -> if inside p range then Some(range,value) else None
+      | None -> if f range then Some(range,value) else None
     end
   | Node { range ; left ; right } ->
-    if inside p range then
-      let l = find_opt p left in
-      let r = find_opt p right in
+    if f range then
+      let l = find_gen f left in
+      let r = find_gen f right in
       if compare_entry l r < 0 then l else r
     else None
+
+let find_opt p t = find_gen (inside p) t
+let find_line l t = find_gen (inline l) t
 
 let find p t = match find_opt p t with None -> raise Not_found | Some e -> e
 

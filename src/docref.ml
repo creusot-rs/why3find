@@ -84,6 +84,7 @@ type source = {
   theories: theory Mstr.t ;
   cache: Cache.t option ;
   session: (Why3.Env.env * Session.session) option ;
+  lenses : (int,string) Hashtbl.t ;
   mutable strategy : Proofs.strategy ;
   mutable statistics : Proofstats.jstats ;
   mutable outdated : bool ;
@@ -271,7 +272,9 @@ let reload_proofs source =
   begin
     let { file ; root ; path } = source in
     let crc = Proofs.load ~move:false ~root ~path ~file () in
+    Hashtbl.clear source.lenses ;
     source.strategy <- crc.strategy ;
+    source.statistics <- Proofstats.empty ;
     Mstr.iter
       (fun _ (th : theory) ->
          let proofs = get_proofs th.theory crc.strategy in
@@ -285,7 +288,8 @@ let reload_proofs source =
     Option.iter
       (fun (_,session) ->
          source.statistics <-
-           Proofstats.stats_session ~path ~file crc.strategy session
+           Proofstats.stats_session
+             ~lenses:source.lenses ~path ~file crc.strategy session
       ) source.session
   end
 
@@ -303,6 +307,7 @@ let empty () = {
   theories = Mstr.empty ;
   strategy = Mstr.empty ;
   session = None ;
+  lenses = Hashtbl.create 0 ;
   statistics = Proofstats.empty ;
   outdated = true ;
 }
@@ -347,9 +352,11 @@ let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
         Cache.outdated cache ~file ~path ~proof
     in
     let strategy = crc.strategy in
-    let statistics = Proofstats.stats_session ~path ~file strategy session in
+    let lenses = Hashtbl.create 0 in
+    let statistics =
+      Proofstats.stats_session ~path ~file ~lenses strategy session in
     let session = Some (env,session) in
-    { file ; lib ; root ; path ; theories ;
+    { file ; lib ; root ; path ; theories ; lenses ;
       cache ; session ; strategy ; outdated ; statistics }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;

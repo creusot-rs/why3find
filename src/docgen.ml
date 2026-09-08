@@ -158,25 +158,30 @@ let pop env =
   | Emph -> Pdoc.pp_print_string env.out "</em>" (* keep space *)
   | Bold -> Pdoc.pp_print_string env.out "</strong>" (* keep space *)
 
-let smartlines =
+let linerefs =
   try Sys.getenv "WHY3FIND_LINEREFS" <> "no" with Not_found -> true
 
 let treemaps =
   try Sys.getenv "WHY3FIND_TREEMAPS" <> "no" with Not_found -> true
 
-
 let codeline env ?(offset=0) ?(indent=0) () =
-  if smartlines then
-    let line = Token.line env.input + offset in
-    Pdoc.printf env.out
-      "\n\
-       <div id=\"_L%d\" class=\"lineanchor\">\
-       <div class=\"linenumber\">%d</div>\
-       <div class=\"linehover\"></div>\
-       </div>%s"
-      line line (String.make indent ' ')
+  let indent = String.make indent ' ' in
+  if linerefs then
+    begin
+      let line = Token.line env.input + offset in
+      Option.iter
+        (Pdoc.printf env.out "\n%s<span class=\"codelense\">%s</span>" indent)
+        (Hashtbl.find_opt env.src.lenses line) ;
+      Pdoc.printf env.out
+        "\n\
+         <div id=\"_L%d\" class=\"lineanchor\">\
+         <div class=\"linenumber\">%d</div>\
+         <div class=\"linehover\"></div>\
+         </div>%s"
+        line line indent ;
+    end
   else
-    Pdoc.printf env.out "\n%s" (String.make indent ' ')
+    Pdoc.printf env.out "\n%s" indent
 
 let text env =
   match env.mode with
@@ -1309,40 +1314,40 @@ let index ~out:dir ~senv ~title ~stats =
       let ofile = Filename.concat dir href in
       let out = Pdoc.output ~file:ofile ~title in
       Pdoc.printf out "<header>%s</header>@\n" title ;
-      Pdoc.printf out "<div class=\"dashboard\">@\n<div class=\"doc\">@\n" ;
+      Pdoc.printf out "<div class=\"dashboard\">@\n<div class=\"tab\">@\n" ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
       Pdoc.printf out "</div>@\n" ;
       if treemaps then
         Option.iter
-        begin fun (stats : Proofstats.jstats) ->
-          Pdoc.printf out "<div class=\"doc\">@\n<h1>Statistics</h1>@\n" ;
-          Pdoc.printf out "<div class=\"status\">@\n" ;
-          if stats.stuck = 0 then
+          begin fun (stats : Proofstats.jstats) ->
+            Pdoc.printf out "<div class=\"tab\">@\n<h1>Statistics</h1>@\n" ;
+            Pdoc.printf out "<div class=\"status\">@\n" ;
+            if stats.stuck = 0 then
+              Pdoc.printf out
+                "<span title=\"Total number of goals (all proved)\">Proved (%d)"
+                stats.proved
+            else if stats.proved > 0 then
+              Pdoc.printf out
+                "<span title=\"Valid/Total number of goals\">\
+                 <b class=\"warning\">Partial</b> (%d/%d)</span>"
+                stats.proved (stats.proved + stats.stuck)
+            else Pdoc.printf out
+                "<span title=\"Total number of goals (all failed)\">\
+                 <b class=\"failed\">Failed</b> %d</span>"
+                stats.stuck ;
             Pdoc.printf out
-              "<span title=\"Total number of goals (all proved)\">Proved (%d)"
-              stats.proved
-          else if stats.proved > 0 then
+              " <span title=\"Cumulated proof time\">(%a)</span></div>@\n"
+              Utils.pp_time stats.time ;
+            let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+            Pdoc.printf out "<div class=\"statistics\" id=\"%s\"></div>@\n" id ;
             Pdoc.printf out
-              "<span title=\"Valid/Total number of goals\">\
-               <b class=\"warning\">Partial</b> (%d/%d)</span>"
-              stats.proved (stats.proved + stats.stuck)
-          else Pdoc.printf out
-              "<span title=\"Total number of goals (all failed)\">\
-               <b class=\"failed\">Failed</b> %d</span>"
-              stats.stuck ;
-          Pdoc.printf out
-            " <span title=\"Cumulated proof time\">(%a)</span></div>@\n"
-            Utils.pp_time stats.time ;
-          let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
-          Pdoc.printf out "<div class=\"statistics\" id=\"%s\"></div>@\n" id ;
-          Pdoc.printf out
-            "<script type=\"text/javascript\" defer>\
-             Why3findTreemap('#%s',800,400,{ children: %a });\
-             </script>@\n</div>@\n"
-             id Json.pretty stats.json ;
-          Pdoc.printf out "</div>@\n" ; (* tab *)
-        end stats ;
+              "<script type=\"text/javascript\" defer>\
+               Why3findTreemap('#%s',800,400,{ children: %a });\
+               </script>@\n</div>@\n"
+              id Json.pretty stats.json ;
+            Pdoc.printf out "</div>@\n" ; (* tab *)
+          end stats ;
       Pdoc.flush out ;
       Pdoc.close_all out ;
     end

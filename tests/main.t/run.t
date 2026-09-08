@@ -35,7 +35,7 @@
   <body>
   <header>Index</header>
   <div class="dashboard">
-  <div class="doc">
+  <div class="tab">
   <h1>Development</h1>
   <ul>
   <li><a href="p.a.index.html">Library p.a</a><span title="1 value parameter, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>

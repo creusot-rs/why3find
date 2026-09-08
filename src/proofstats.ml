@@ -38,7 +38,12 @@ let jurl_loc ~file ~url ?name = function
 (* --- Proof Statistics                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-type jstats = { time : float ; stuck : int ; proved : int ; json : Json.t }
+type jstats = {
+  time : float ;
+  stuck : int ;
+  proved : int ;
+  json : Json.t ;
+}
 
 let empty = { time = 0.0 ; stuck = 0 ; proved = 0 ; json = `Null }
 
@@ -104,12 +109,18 @@ let rec stats_crc env ~file ~url (goal,crc) : Json.t =
       ]
   in Json.assoc (base @ stats)
 
-let stats_goal proofs ?env ~file ~path ~url (goal : Session.goal) =
+let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
   let name = Session.name goal in
-  let infix = Id.of_infix @@ name in
   let crc = Why3.Wstdlib.Mstr.find_def Crc.stuck name proofs in
+  let infix = Id.of_infix @@ name in
   let status = Format.asprintf "%a" Crc.pp_hint crc in
   let loc = Session.target goal in
+  begin match lenses , loc with
+    | None , _ | _ , None -> ()
+    | Some lenses , Some loc ->
+      let f,line,_,_,_ = Why3.Loc.get loc in
+      if f = file then Hashtbl.add lenses line status
+  end ;
   let base = [
     "goal" , `String name ;
     "path" , `String (Printf.sprintf "%s.%s" path infix) ;
@@ -143,7 +154,7 @@ let stats_goal proofs ?env ~file ~path ~url (goal : Session.goal) =
       stuck ; proved ; time ;
     }
 
-let stats_theory strategy ~file ~path (thy : Session.theory) =
+let stats_theory ?lenses ~file ~path strategy (thy : Session.theory) =
   let name = Session.thy_name thy in
   let line =
     match (Session.thy thy).th_name.id_loc with
@@ -153,7 +164,7 @@ let stats_theory strategy ~file ~path (thy : Session.theory) =
   let goals = Session.split thy in
   let path = Printf.sprintf "%s.%s" path name in
   let url = Printf.sprintf "%s.html" path in
-  let jstats = jmap (stats_goal proofs ~file ~path ~url) goals in
+  let jstats = jmap (stats_goal proofs ?lenses ~file ~path ~url) goals in
   let json =
     Json.assoc [
       "path", `String path ;
@@ -167,9 +178,9 @@ let stats_theory strategy ~file ~path (thy : Session.theory) =
     ]
   in { jstats with json }
 
-let stats_session ~file ~path strategy session =
+let stats_session ~file ~path ?lenses strategy session =
   let theories = Session.theories session in
-  let jstats = jmap (stats_theory strategy ~file ~path) theories in
+  let jstats = jmap (stats_theory ?lenses strategy ~file ~path) theories in
   let url = Printf.sprintf "%s.html" path in
   let json = Json.assoc [
       "path", `String path ;
