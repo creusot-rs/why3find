@@ -129,8 +129,13 @@ let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
     "location", jsloc ~file loc ;
   ] in
   match crc with
-  | Crc.Stuck ->
-    { json = Json.assoc base ; stuck = 1 ; proved = 0 ; time = 0.0 }
+  | Crc.Stuck -> {
+      json = Json.assoc @@ base @ [
+          "time", `Float 1.0 ; (* fake *)
+          "stuck" , `Int 1 ;
+      ] ;
+      stuck = 1 ; proved = 0 ; time = 0.0 ;
+    }
   | Crc.Prover(_,_,time) -> {
       json = Json.assoc @@ base @ [
           "time", `Float time ;
