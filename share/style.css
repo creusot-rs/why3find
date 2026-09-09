@@ -118,6 +118,11 @@ pre.src {
   border-left: solid thin lightgrey;
 }
 
+pre.src.crc {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
 pre .lineanchor {
   width: 0px;
   height: 0px;

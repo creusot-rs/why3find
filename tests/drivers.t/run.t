@@ -34,8 +34,8 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="A" href="drivers.A.html">drivers.A</a><span title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="A" href="drivers.A.html">drivers.A</a><span title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc">
     <span class="keyword">axiom</span> <a id="A.increasing" href="drivers.A.html#increasing">increasing</a><span title="uncloned hypothesis" class="icon small warning icofont-warning-alt"></span>
   </pre>
   <script type="text/javascript" src="script.js"></script>

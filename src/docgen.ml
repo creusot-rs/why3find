@@ -292,7 +292,7 @@ let rec child n fmt crc =
 
 let process_certif env id crc =
   Pdoc.printf env.crc
-    "<pre class=\"src\">@\n  %a <a id=\"%a\" href=\"%a\">%a</a>%a%t</pre>"
+    "<pre class=\"src crc\">@\n  %a <a id=\"%a\" href=\"%a\">%a</a>%a%t</pre>"
     Pdoc.pp_keyword "goal"
     Id.pp_proof_aname id
     (Id.pp_ahref ~current:None ~package_url:env.package_url) id
@@ -392,7 +392,7 @@ let process_module_axioms env =
   match env.theory with
   | None -> ()
   | Some thy ->
-    let pre = lazy (Pdoc.printf env.crc "<pre class=\"src\">") in
+    let pre = lazy (Pdoc.printf env.crc "<pre class=\"src crc\">") in
     let sound = Soundness.compute env.senv thy in
     Axioms.iter env.henv ~self:true
       (fun (p : Axioms.parameter) ->
@@ -844,7 +844,7 @@ let process_open_module env key =
       "<pre class=\"src\">%a <a title=\"%s.%s\" href=\"%s\">%s</a>"
       Pdoc.pp_keyword key path id url id ;
     Pdoc.printf env.crc
-      "<pre class=\"src\">%a <a id=\"%s\" href=\"%s\">%s.%s</a>"
+      "<pre class=\"src crc\">%a <a id=\"%s\" href=\"%s\">%s.%s</a>"
       Pdoc.pp_keyword key id url path id ;
     process_axioms_summary env id ~crc:true theory ; (* out & crc *)
     process_proofs_summary env id ~crc:true theory ; (* out & crc *)
@@ -1214,6 +1214,50 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
   end
 
 (* -------------------------------------------------------------------------- *)
+(* --- Generating Global Treemaps                                         --- *)
+(* -------------------------------------------------------------------------- *)
+
+let process_source_treemap crc (src : Docref.source) =
+  Option.iter begin fun (env,session) ->
+    let Docref.{ file ; path ; strategy } = src in
+    let stats =
+      Proofstats.stats_session ~env ~path ~file strategy session in
+    if not @@ Proofstats.is_empty stats then
+      begin
+        let id = Printf.sprintf "stats-%d" (Pdoc.treemap crc) in
+        Pdoc.printf crc
+          "<div class=\"tab\">@\n\
+           <div class=\"treemap\" id=\"%s\"></div>@\n\
+           <script type=\"text/javascript\" defer>\
+           Why3findTreemap('#%s',800,400, %a );\
+           </script>@\n\
+           </div>@."
+          id id Json.pretty stats.json ;
+      end
+  end src.session
+
+let process_global_treemap out sources =
+  let stats =
+    Proofstats.jmap
+      (fun (_,s) ->
+         match s with
+         | None -> Proofstats.empty
+         | Some (src : Docref.source) -> src.statistics
+      ) sources in
+  if not @@ Proofstats.is_empty stats then
+    begin
+      let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+      Pdoc.printf out
+        "<div class=\"tab\">@\n\
+         <div class=\"treemap\" id=\"%s\"></div>@\n\
+         <script type=\"text/javascript\" defer>\
+         Why3findTreemap('#%s',800,400,{ children: %a });\
+         </script>@\n\
+         </div>@."
+        id id Json.pretty stats.json ;
+    end
+
+(* -------------------------------------------------------------------------- *)
 (* --- MLW File Processing                                                --- *)
 (* -------------------------------------------------------------------------- *)
 
@@ -1255,6 +1299,7 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
        </header>@." env.title src.path src.path ;
     Pdoc.flush crc ;
     Pdoc.printf crc "<h1>Proofs</h1>@\n" ;
+    if treemaps then process_source_treemap crc env.src ;
     parse env ;
     Pdoc.close_all out ;
     Pdoc.close_all crc ;
@@ -1326,31 +1371,6 @@ let process_statistics out sources =
     end
 
 (* -------------------------------------------------------------------------- *)
-(* --- Generating Treemaps                                                --- *)
-(* -------------------------------------------------------------------------- *)
-
-let process_treemap out sources =
-  let stats =
-    Proofstats.jmap
-      (fun (_,s) ->
-         match s with
-         | None -> Proofstats.empty
-         | Some (src : Docref.source) -> src.statistics
-      ) sources in
-  if stats.proved + stats.stuck > 0 && stats.json <> `Null then
-    begin
-      let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
-      Pdoc.printf out
-        "<div class=\"tab\">@\n\
-         <div class=\"treemap\" id=\"%s\"></div>@\n\
-         <script type=\"text/javascript\" defer>\
-         Why3findTreemap('#%s',800,400,{ children: %a });\
-         </script>@\n\
-         </div>@."
-        id id Json.pretty stats.json ;
-    end
-
-(* -------------------------------------------------------------------------- *)
 (* --- Generating Index                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
@@ -1408,7 +1428,7 @@ let process_index ~out:dir ~senv ~title sources =
       pp_chapters out ~senv ~title:"Development" @@ package () ;
       process_statistics out sources ;
       Pdoc.printf out "</div>@\n" ;
-      if treemaps then process_treemap out sources ;
+      if treemaps then process_global_treemap out sources ;
       Pdoc.flush out ;
       Pdoc.close_all out ;
     end

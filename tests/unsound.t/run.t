@@ -69,16 +69,16 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="Dummy" href="unsound.Dummy.html">unsound.Dummy</a><span title="2 unsafe definitions" class="icon small failed icofont-warning"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="Dummy" href="unsound.Dummy.html">unsound.Dummy</a><span title="2 unsafe definitions" class="icon small failed icofont-warning"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
+  <pre class="src crc">
     <span class="keyword">unsound</span> <a id="Dummy.admit1" href="unsound.Dummy.html#admit1">admit1</a><span title="unsafe definition" class="icon small failed icofont-warning"></span>
     <span class="keyword">unsound</span> <a id="Dummy.admit2" href="unsound.Dummy.html#admit2">admit2</a><span title="unsafe definition" class="icon small failed icofont-warning"></span>
   </pre>
-  <pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.admit1" href="unsound.Dummy.html#admit1">admit1</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.admit2" href="unsound.Dummy.html#admit2">admit2</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.ok_any" href="unsound.Dummy.html#ok_any">ok_any</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.ok_unit" href="unsound.Dummy.html#ok_unit">ok_unit</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
+  <pre class="src crc">
+    <span class="keyword">goal</span> <a id="Dummy.admit1" href="unsound.Dummy.html#admit1">admit1</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
+    <span class="keyword">goal</span> <a id="Dummy.admit2" href="unsound.Dummy.html#admit2">admit2</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
+    <span class="keyword">goal</span> <a id="Dummy.ok_any" href="unsound.Dummy.html#ok_any">ok_any</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
+    <span class="keyword">goal</span> <a id="Dummy.ok_unit" href="unsound.Dummy.html#ok_unit">ok_unit</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
     <span class="keyword">goal</span> <a id="Dummy.ok_some" href="unsound.Dummy.html#ok_some">ok_some</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>

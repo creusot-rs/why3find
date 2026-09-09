@@ -52,8 +52,8 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="A" href="foo.A.html">foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="A" href="foo.A.html">foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc">
     <span class="keyword">axiom</span> <a id="A.refl" href="foo.A.html#refl">refl</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="bar.B.html#clone-4">bar.B</a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>
@@ -112,8 +112,8 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="B" href="bar.B.html">bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="B" href="bar.B.html">bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
+  <pre class="src crc">
     <span class="keyword">goal</span> <a id="B.A.refl" href="bar.B.html#A.refl">A.refl</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
@@ -128,8 +128,8 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="B" href="bar.B.html">bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="B" href="bar.B.html">bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
+  <pre class="src crc">
     <span class="keyword">goal</span> <a id="B.A.refl" href="bar.B.html#A.refl">A.refl</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
@@ -144,8 +144,8 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="A" href="foo.A.html">foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="A" href="foo.A.html">foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc">
     <span class="keyword">axiom</span> <a id="A.refl" href="foo.A.html#refl">refl</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="bar.B.html#clone-4">bar.B</a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>

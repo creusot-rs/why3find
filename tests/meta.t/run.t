@@ -1,4 +1,4 @@
-  $ why3find doc mypkg -o foo
+  $ WHY3FIND_TREEMAPS=yes why3find doc mypkg -o foo
   Generated $TESTCASE_ROOT/foo/index.html
   $ why3find install --dune --doc foo mypkg foo.cfg foo.drv
   Warning: won't install configuration file "foo.cfg"

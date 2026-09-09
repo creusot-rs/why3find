@@ -105,6 +105,9 @@ type jstats = {
 
 let empty = { time = 0.0 ; stuck = 0 ; proved = 0 ; json = `Null }
 
+let is_empty { stuck ; proved ; json } =
+  (stuck = 0 && proved = 0) || (json = `Null)
+
 let jmap f xs =
   let time = ref 0.0 in
   let stuck = ref 0 in
@@ -218,7 +221,7 @@ let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
       stuck ; proved ; time ;
     }
 
-let stats_theory ?lenses ~file ~path strategy (thy : Session.theory) =
+let stats_theory ?env ?lenses ~file ~path strategy (thy : Session.theory) =
   let name = Session.thy_name thy in
   let line =
     match (Session.thy thy).th_name.id_loc with
@@ -228,7 +231,7 @@ let stats_theory ?lenses ~file ~path strategy (thy : Session.theory) =
   let goals = Session.split thy in
   let path = Printf.sprintf "%s.%s" path name in
   let url = Printf.sprintf "%s.html" path in
-  let jstats = jmap (stats_goal proofs ?lenses ~file ~path ~url) goals in
+  let jstats = jmap (stats_goal proofs ?env ?lenses ~file ~path ~url) goals in
   let json =
     Json.assoc [
       "path", `String path ;
@@ -242,9 +245,9 @@ let stats_theory ?lenses ~file ~path strategy (thy : Session.theory) =
     ]
   in { jstats with json }
 
-let stats_session ~file ~path ?lenses strategy session =
+let stats_session ~file ~path ?env ?lenses strategy session =
   let theories = Session.theories session in
-  let jstats = jmap (stats_theory ?lenses strategy ~file ~path) theories in
+  let jstats = jmap (stats_theory ?env ?lenses strategy ~file ~path) theories in
   let url = Printf.sprintf "%s.html" path in
   let json = Json.assoc [
       "path", `String path ;

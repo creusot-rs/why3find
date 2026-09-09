@@ -75,8 +75,8 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="duplicated.index.html">duplicated</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="A" href="duplicated.A.html">duplicated.A</a><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src"><span class="keyword">module</span> <a id="B" href="duplicated.B.html">duplicated.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc"><span class="keyword">module</span> <a id="A" href="duplicated.A.html">duplicated.A</a><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc"><span class="keyword">module</span> <a id="B" href="duplicated.B.html">duplicated.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>

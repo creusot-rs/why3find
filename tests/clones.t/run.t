@@ -259,40 +259,40 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="Monoid" href="clones.Monoid.html">clones.Monoid</a><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src"><span class="keyword">module</span> <a id="Neutral" href="clones.Neutral.html">clones.Neutral</a><span title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="Monoid" href="clones.Monoid.html">clones.Monoid</a><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc"><span class="keyword">module</span> <a id="Neutral" href="clones.Neutral.html">clones.Neutral</a><span title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc">
     <span class="keyword">axiom</span> <a id="Neutral.neutral" href="clones.Neutral.html#neutral">neutral</a><span title="uncloned hypothesis" class="icon small warning icofont-warning-alt"></span>
   </pre>
-  <pre class="src"><span class="keyword">module</span> <a id="Commutative" href="clones.Commutative.html">clones.Commutative</a><span title="2 logic parameters, 1 hypothesis, 4 ground instances" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="Commutative" href="clones.Commutative.html">clones.Commutative</a><span title="2 logic parameters, 1 hypothesis, 4 ground instances" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc">
     <span class="keyword">axiom</span> <a id="Commutative.commutative" href="clones.Commutative.html#commutative">commutative</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="clones.IntAC.html#clone-5">clones.IntAC</a><span title="sound instance" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="clones.AC.html#clone-7">clones.AC</a><span title="sound instance" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="clones.IntC.html#clone-8">clones.IntC</a><span title="sound instance" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="clones.IntC.html#clone-4">clones.IntC</a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>
-  <pre class="src"><span class="keyword">module</span> <a id="Associative" href="clones.Associative.html">clones.Associative</a><span title="2 logic parameters, 1 hypothesis, 3 ground instances" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="Associative" href="clones.Associative.html">clones.Associative</a><span title="2 logic parameters, 1 hypothesis, 3 ground instances" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc">
     <span class="keyword">axiom</span> <a id="Associative.associative" href="clones.Associative.html#associative">associative</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="clones.IntAC.html#clone-9">clones.IntAC</a><span title="sound instance" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="clones.AC.html#clone-11">clones.AC</a><span title="sound instance" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="clones.IntA.html#clone-4">clones.IntA</a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>
-  <pre class="src"><span class="keyword">module</span> <a id="AC" href="clones.AC.html">clones.AC</a><span title="2 logic parameters, 2 hypotheses, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  <pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="AC" href="clones.AC.html">clones.AC</a><span title="2 logic parameters, 2 hypotheses, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
+  <pre class="src crc">
     <span class="keyword">axiom</span> <a id="AC.commutative" href="clones.AC.html#commutative">commutative</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
     <span class="keyword">axiom</span> <a id="AC.associative" href="clones.AC.html#associative">associative</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
     <span class="keyword">instance</span> <a href="clones.IntAC.html#clone-10">clones.IntAC</a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>
-  <pre class="src"><span class="keyword">module</span> <a id="IntC" href="clones.IntC.html">clones.IntC</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
-  <pre class="src">
-    <span class="keyword">goal</span> <a id="IntC.S.commutative" href="clones.IntC.html#S.commutative">S.commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
-    <span class="keyword">goal</span> <a id="IntC.P.commutative" href="clones.IntC.html#P.commutative">P.commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src"><span class="keyword">module</span> <a id="IntA" href="clones.IntA.html">clones.IntA</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
-  <pre class="src">
-    <span class="keyword">goal</span> <a id="IntA.Associative.associative" href="clones.IntA.html#Associative.associative">Associative.associative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src"><span class="keyword">module</span> <a id="IntAC" href="clones.IntAC.html">clones.IntAC</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
-  <pre class="src">
-    <span class="keyword">goal</span> <a id="IntAC.commutative" href="clones.IntAC.html#commutative">commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
+  <pre class="src crc"><span class="keyword">module</span> <a id="IntC" href="clones.IntC.html">clones.IntC</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
+  <pre class="src crc">
+    <span class="keyword">goal</span> <a id="IntC.S.commutative" href="clones.IntC.html#S.commutative">S.commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
+    <span class="keyword">goal</span> <a id="IntC.P.commutative" href="clones.IntC.html#P.commutative">P.commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc"><span class="keyword">module</span> <a id="IntA" href="clones.IntA.html">clones.IntA</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
+  <pre class="src crc">
+    <span class="keyword">goal</span> <a id="IntA.Associative.associative" href="clones.IntA.html#Associative.associative">Associative.associative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc"><span class="keyword">module</span> <a id="IntAC" href="clones.IntAC.html">clones.IntAC</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
+  <pre class="src crc">
+    <span class="keyword">goal</span> <a id="IntAC.commutative" href="clones.IntAC.html#commutative">commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
     <span class="keyword">goal</span> <a id="IntAC.associative" href="clones.IntAC.html#associative">associative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
