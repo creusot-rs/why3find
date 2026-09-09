@@ -1265,32 +1265,62 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
 (* -------------------------------------------------------------------------- *)
 
 let pp_count fmt n = Format.fprintf fmt "%4d" n
+let pp_partial fmt (p,n) = Format.fprintf fmt "%d/%d" p n
 let pp_title title pp fmt x =
   Format.fprintf fmt "<span title=\"%s\">%a</span>" title pp x
 
 let process_statistics out sources =
-  let ps = Hashtbl.create 0 in
+  let ps = Proofstats.create () in
   List.iter
     (fun (_,s) ->
        match s with
        | None -> ()
        | Some (src : Docref.source) -> Proofstats.add_strategy ps src.strategy
     ) sources ;
-  if Hashtbl.length ps > 0 then
+  let total = Proofstats.total ps in
+  if total > 0 then
     begin
       Pdoc.printf out
         "<h1>Statistics</h1>@\n\
          <pre>@\n" ;
       let w = ref 0 in
-      Proofstats.iter (fun p _ -> w := max !w (String.length p)) ps ;
-      Proofstats.iter
-        (fun p s ->
-           Pdoc.printf out "<b>%a</b> %a %a (%a — %a — %a)@\n"
-             (Utils.pp_left !w) p (pp_title "Proved goals" pp_count) (Stats.count s)
-             (pp_title "Total time" Utils.pp_rtime) (Stats.sum s)
+      let wsize a _ = w := max !w (String.length a) in
+      let proved = Proofstats.proved ps in
+      let depth = Proofstats.depth ps in
+      let time = Proofstats.time ps in
+      if proved = total then wsize "Proved" ()
+      else if proved = 0 then wsize "No Proofs" ()
+      else wsize "Partial xxxx/" () ;
+      Proofstats.iter_provers wsize ps ;
+      Proofstats.iter_tactics wsize ps ;
+      if proved = total then
+        Pdoc.printf out "<b>%a</b>   (%a)" (Utils.pp_left !w) "Proved"
+          (pp_title "Total goals (all proved)" pp_count) proved
+        else if proved > 0 then
+          Pdoc.printf out "<b class=\"warning\">%a</b>   (%a)"
+          (Utils.pp_left (!w - 5)) "Partial"
+          (pp_title "Proved/Total goals" pp_partial) (proved,total)
+      else
+        Pdoc.printf out "<b class=\"error\">No Proofs</b>   (%a)"
+          (pp_title "Total goals (none proved)" Format.pp_print_int) total ;
+      if time > 1e-3 then Pdoc.printf out " (%a)"
+          (pp_title "Cumulated time" Utils.pp_rtime) time ;
+      if depth > 0 then Pdoc.printf out " (depth %a)"
+          (pp_title "Maximal depth" Format.pp_print_int) depth ;
+      Pdoc.printf out "@\n" ;
+      Proofstats.iter_provers
+        (fun prv s ->
+           Pdoc.printf out "- <b>%a</b> (%a) (%a) (%a — %a — %a)@\n"
+             (Utils.pp_left !w) prv (pp_title "Proved goals" pp_count) (Stats.count s)
+             (pp_title "Cumulated time" Utils.pp_rtime) (Stats.sum s)
              (pp_title "Minimum time" Utils.pp_rtime) (Stats.min s)
              (pp_title "Average time" Utils.pp_rtime) (Stats.average s)
              (pp_title "Maximal time" Utils.pp_rtime) (Stats.max s)
+        ) ps ;
+      Proofstats.iter_tactics
+        (fun tac n ->
+           Pdoc.printf out "- <b>%a</b> (%a)@\n"
+             (Utils.pp_left !w) tac (pp_title "Tactic occurrences" pp_count) n
         ) ps ;
       Pdoc.printf out "</pre>@." ;
     end
@@ -1298,26 +1328,6 @@ let process_statistics out sources =
 (* -------------------------------------------------------------------------- *)
 (* --- Generating Treemaps                                                --- *)
 (* -------------------------------------------------------------------------- *)
-
-let pp_jstats fmt (js : Proofstats.jstats) =
-  begin
-    if js.stuck = 0 then
-      Format.fprintf fmt
-        "<span title=\"Total number of goals (all proved)\">Proved (%d)"
-        js.proved
-    else if js.proved > 0 then
-      Format.fprintf fmt
-        "<span title=\"Valid/Total number of goals\">\
-         <b class=\"warning\">Partial</b> (%d/%d)</span>"
-        js.proved (js.proved + js.stuck)
-    else Format.fprintf fmt
-        "<span title=\"Total number of goals (all failed)\">\
-         <b class=\"failed\">Failed</b> %d</span>"
-        js.stuck ;
-    Format.fprintf fmt
-      " <span title=\"Cumulated proof time\">(%a)</span>"
-      Utils.pp_time js.time ;
-  end
 
 let process_treemap out sources =
   let stats =
@@ -1332,13 +1342,11 @@ let process_treemap out sources =
       let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
       Pdoc.printf out
         "<div class=\"tab\">@\n\
-         <div class=\"status\">%a</div>@\n\
-         <div class=\"statistics\" id=\"%s\"></div>@\n\
+         <div class=\"treemap\" id=\"%s\"></div>@\n\
          <script type=\"text/javascript\" defer>\
          Why3findTreemap('#%s',800,400,{ children: %a });\
          </script>@\n\
          </div>@."
-        pp_jstats stats
         id id Json.pretty stats.json ;
     end
 

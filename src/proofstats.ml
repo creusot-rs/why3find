@@ -10,28 +10,59 @@
 (* --- Prover Stats                                                       --- *)
 (* -------------------------------------------------------------------------- *)
 
-type pstats = (string,Stats.stats) Hashtbl.t
+type pstats = {
+  mutable failed : int ;
+  mutable proved : int ;
+  mutable time : float ;
+  mutable depth : int ;
+  tactics : (string,int) Hashtbl.t ;
+  provers : (string,Stats.stats) Hashtbl.t ;
+}
+
+let create () = {
+  failed = 0 ;
+  proved = 0 ;
+  time = 0.0 ;
+  depth = 0 ;
+  tactics = Hashtbl.create 0 ;
+  provers = Hashtbl.create 0 ;
+}
 
 let rec add_crc ps (crc : Crc.crc) =
   match crc with
-  | Stuck -> ()
-  | Tactic { children } -> List.iter (add_crc ps) children
+  | Stuck -> ps.failed <- succ ps.failed
   | Prover (p, _, t) ->
+    ps.time <- t +. ps.time;
+    ps.proved <- succ ps.proved ;
     let s =
-      try Hashtbl.find ps p with Not_found ->
+      try Hashtbl.find ps.provers p with Not_found ->
         let s = Stats.create () in
-        Hashtbl.add ps p s ; s
+        Hashtbl.add ps.provers p s ; s
     in Stats.add s t
+  | Tactic { id ; children ; depth } ->
+    ps.depth <- max ps.depth depth ;
+    let n = try Hashtbl.find ps.tactics id with Not_found -> 0 in
+    Hashtbl.replace ps.tactics id (succ n) ;
+    List.iter (add_crc ps) children
 
 let add_strategy ps proofs =
   let module M = Why3.Wstdlib.Mstr in
   M.iter (fun _ cs -> M.iter (fun _ c -> add_crc ps c) cs) proofs
 
-let iter f ps =
+let failed ps = ps.failed
+let proved ps = ps.proved
+let total ps = ps.failed + ps.proved
+let time ps = ps.time
+let depth ps = ps.depth
+
+let iter f hs =
   let rs = ref [] in
-  Hashtbl.iter (fun p s -> rs := (p,s) :: !rs) ps ;
+  Hashtbl.iter (fun p s -> rs := (p,s) :: !rs) hs ;
   List.iter (fun (p,s) -> f p s) @@
   List.sort (fun (p,_) (q,_) -> String.compare p q) !rs
+
+let iter_tactics f ps = iter f ps.tactics
+let iter_provers f ps = iter f ps.provers
 
 (* -------------------------------------------------------------------------- *)
 (* --- JSON Utilities                                                     --- *)
@@ -160,7 +191,7 @@ let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
       json = Json.assoc @@ base @ [
           "time", `Float 1.0 ; (* fake *)
           "stuck" , `Int 1 ;
-      ] ;
+        ] ;
       stuck = 1 ; proved = 0 ; time = 0.0 ;
     }
   | Crc.Prover(_,_,time) -> {
@@ -170,18 +201,19 @@ let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
         ] ;
       stuck = 0 ; proved = 1 ; time ;
     }
-  | Crc.Tactic { time ; stuck ; proved ; id ; children } ->
+  | Crc.Tactic { time ; stuck ; proved ; depth ; id ; children } ->
     let children =
       match env with None -> `Null | Some env ->
-          Json.list_map
-            (stats_crc env ~url ~file)
-            (subgoals env ~goal id children)
+        Json.list_map
+          (stats_crc env ~url ~file)
+          (subgoals env ~goal id children)
     in {
       json = Json.assoc @@ base @ [
           "time" , `Float time ;
           "stuck" , Json.optint stuck ;
           "proved" , Json.optint proved ;
           "children" , children ;
+          "depth" , Json.optint depth ;
         ] ;
       stuck ; proved ; time ;
     }

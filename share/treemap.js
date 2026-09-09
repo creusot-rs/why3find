@@ -46,7 +46,8 @@ function Why3findTreemap(id, width, height, data) {
     let title = d.data.path;
     if (d.data.status) title += '\n' + d.data.status;
     const count = (d.data.proved || 0) + (d.data.stuck || 0) ;
-    if (count > 1) title += `\nTotal (${count}) (${time(d.data.time)})`;
+    if (d.data.depth || count > 1)
+      title += `\nTotal (${count}) (${time(d.data.time)})`;
     return title;
   });
 

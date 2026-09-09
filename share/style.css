@@ -17,7 +17,6 @@ a:visited {
 }
 
 a:hover {
-  cursor: default;
   background: #cec;
 }
 
@@ -98,6 +97,7 @@ div.dashboard {
 div.tab {
   margin-left: 2cm;
   margin-right: 2cm;
+  margin-bottom: 1cm;
 }
 
 div.tab pre {
@@ -185,16 +185,16 @@ div.status {
   margin-bottom: 8px;
 }
 
-div.statistics {
+div.treemap {
   background: white;
 }
 
-div.statistics svg {
+div.treemap svg {
   max-width: 100%;
   height: auto;
 }
 
-div.statistics svg * {
+div.treemap svg * {
   cursor: pointer
 }
 

@@ -6,10 +6,17 @@
 (*                                                                        *)
 (**************************************************************************)
 
-type pstats = (string,Stats.stats) Hashtbl.t
+type pstats
+val create : unit -> pstats
 val add_crc : pstats -> Crc.crc -> unit
 val add_strategy : pstats -> Proofs.strategy -> unit
-val iter : (string -> Stats.stats -> unit) -> pstats -> unit
+val failed : pstats -> int
+val proved : pstats -> int
+val total : pstats -> int
+val time : pstats -> float
+val depth : pstats -> int
+val iter_tactics:  (string -> int -> unit) -> pstats -> unit
+val iter_provers : (string -> Stats.stats -> unit) -> pstats -> unit
 
 type jstats = {
   time : float ;
