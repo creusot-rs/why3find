@@ -142,14 +142,13 @@ pre .lineanchor {
 
 pre .codelense {
   font-size: x-small;
-  opacity: 0.5;
-  color: gray;
+  color: #888;
   cursor: default;
 }
 
 pre .linenumber {
   font-size: x-small;
-  color: lightgrey;
+  color: #888;
   position: relative;
   left: -24px;
   top: +131px;

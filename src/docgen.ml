@@ -260,7 +260,7 @@ let pp_verdict_raw href fmt r =
     let title = "Failed (no proof)" in
     pp_mark ?href ~title ~cla:icon_failed fmt
 
-let pp_verdict = pp_verdict_raw None
+let pp_verdict_mark = pp_verdict_raw None
 let pp_vlink ~href fmt r = pp_verdict_raw (Some href) fmt r
 
 let process_proofs_summary env ~crc id = function
@@ -273,7 +273,7 @@ let process_proofs_summary env ~crc id = function
     let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.path id in
     let r = Crc.nverdict ~stuck ~proved in
     Pdoc.pp env.out (pp_vlink ~href) r ;
-    if crc then Pdoc.pp env.crc pp_verdict r
+    if crc then Pdoc.pp env.crc pp_verdict_mark r
 
 let rec child n fmt crc =
   Format.fprintf fmt "@\n%a" Pdoc.pp_spaces n ;
@@ -287,7 +287,7 @@ let rec child n fmt crc =
     Format.fprintf fmt "<span class=prover title=\"%s@%s\">%s</span> %a"
       p v p Utils.pp_time t
   | Crc.Tactic { id ; children ; stuck ; proved } ->
-    Format.fprintf fmt "%s%a" id pp_verdict (Crc.nverdict ~stuck ~proved) ;
+    Format.fprintf fmt "%s%a" id pp_verdict_mark (Crc.nverdict ~stuck ~proved) ;
     List.iter (child (n+2) fmt) children
 
 let process_certif env id crc =
@@ -298,7 +298,7 @@ let process_certif env id crc =
     (Id.pp_ahref ~current:None ~package_url:env.package_url) id
     Id.pp_proof_aname id
     Id.pp_local id
-    pp_verdict (Crc.verdict crc)
+    pp_verdict_mark (Crc.verdict crc)
     begin fun fmt ->
       match crc with
       | Crc.Stuck -> ()
@@ -313,6 +313,10 @@ let process_proof env id ?(valid=false) = function
     let href fmt = Id.pp_proof_ahref fmt id in
     Pdoc.pp env.out (pp_vlink ~href) (Crc.verdict crc) ;
     process_certif env id crc
+
+let process_status env indent crc =
+  Pdoc.pp env.out Pdoc.pp_spaces indent ;
+  Pdoc.printf env.out "<span class=codelense>%a</span>@\n" Crc.pp_hint crc
 
 (* -------------------------------------------------------------------------- *)
 (* --- Axioms & Parameter                                                 --- *)
@@ -530,10 +534,13 @@ let declare env n kwd ?(attr=[]) ?(valid=false)
     let { package_url ; current ; src = { lib } } = env in
     let tgt = Id.resolve ~lib target in
     let src = Id.resolve ~lib source in
-    let pp_href = Id.pp_ahref ~package_url ~current in    Pdoc.printf env.out "%a%a " Pdoc.pp_spaces n Pdoc.pp_keyword kwd ;
+    let pp_href = Id.pp_ahref ~package_url ~current in
+    let proof = Docref.find_proof tgt.self env.theory in
+    Option.iter (process_status env n) proof ;
+    Pdoc.printf env.out "%a%a " Pdoc.pp_spaces n Pdoc.pp_keyword kwd ;
     List.iter (Pdoc.printf env.out "%a " Pdoc.pp_attribute) attr ;
     Pdoc.printf env.out
-      "%a<a href=\"%a\" title=\"%a  (cloned from %a)\">\
+      "%a<a href=\"%a\" title=\"%a&#013;(cloned from %a)\">\
        <div class=anchor id=\"%a\"></div>%a</a>"
       (Id.pp_qpath ~local) tgt
       pp_href src
@@ -542,7 +549,7 @@ let declare env n kwd ?(attr=[]) ?(valid=false)
       Id.pp_aname tgt
       Id.pp_local tgt ;
     process_axioms env tgt ;
-    process_proof env tgt ~valid @@ Docref.find_proof tgt.self env.theory ;
+    process_proof env tgt ~valid proof ;
     if not more then Pdoc.printf env.out "@\n" ;
   end
 
@@ -646,7 +653,8 @@ let instance env n order (cloned : Why3.Theory.theory) =
 (* -------------------------------------------------------------------------- *)
 
 let process_clone_proofs env clones =
-  let stuck,proved = List.fold_left
+  let stuck,proved =
+    List.fold_left
       (fun (s,p) clone ->
          match clone with
          | Docref.Inst _ -> s,p
@@ -654,10 +662,9 @@ let process_clone_proofs env clones =
            match Docref.find_proof target env.theory with
            | None -> (s,p)
            | Some c -> s + Crc.get_stuck c, p + Crc.get_proved c
-      ) (0,0) clones
-  in
+      ) (0,0) clones in
   if stuck + proved <> 0 then
-    Pdoc.pp env.out pp_verdict (Crc.nverdict ~stuck ~proved)
+    Pdoc.pp env.out pp_verdict_mark (Crc.nverdict ~stuck ~proved)
 
 let process_clone_axioms env clones =
   match env.theory with
@@ -1304,10 +1311,15 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>proofs</code>\
        </header>@." env.title src.path src.path ;
+    Pdoc.printf crc
+      "<h1>Proofs</h1>@\n\
+       <div class=dashboard>@\n\
+       <div class=tab>@\n" ;
     Pdoc.flush crc ;
-    Pdoc.printf crc "<h1>Proofs</h1>@\n" ;
-    if treemaps then process_source_treemap crc env.src ;
     parse env ;
+    Pdoc.printf crc "</div>@\n" ; (* proof tab *)
+    if treemaps then process_source_treemap crc env.src ;
+    Pdoc.printf crc "</div>@\n" ; (* proof dashboard *)
     Pdoc.close_all out ;
     Pdoc.close_all crc ;
   end
@@ -1396,7 +1408,7 @@ let process_chapter_proofs out (src : Docref.source) =
               proved + Crc.get_proved crc
            ) thy.proofs acc
       ) src.theories (0,0)
-  in Pdoc.pp out pp_verdict (Crc.nverdict ~stuck ~proved)
+  in Pdoc.pp out pp_verdict_mark (Crc.nverdict ~stuck ~proved)
 
 let process_chapter_axioms out (senv : Soundness.env) (src : Docref.source) =
   let hs =
