@@ -30,7 +30,9 @@ val is_empty : jstats -> bool
 val jmap : ('a -> jstats) -> 'a list -> jstats
 
 val stats_session :
-  file:string -> path:string ->
+  file:string ->
+  path:string ->
+  ?local:bool ->
   ?env:Why3.Env.env ->
   ?lenses:(int,string) Hashtbl.t ->
   Proofs.strategy -> Session.session -> jstats

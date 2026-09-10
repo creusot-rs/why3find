@@ -12,17 +12,20 @@
   }
 
   function toggleActiveElement() {
-    var h, elts, e, tk, i;
-    h = window.location.hash;
-    e = document.getElementById(h.substring(1));
+    var e, toggled = false;
+    const h = window.location.hash;
+    const root = e = document.getElementById(h.substring(1));
+    const es = [];
     while (e) {
-      tk = e.classList;
-      if (tk.contains("section-text") && !tk.contains("active")) {
-        toggle(e);
-        break;
-      }
+      if (e.classList.contains("section-text")) es.push(e);
       e = e.parentElement;
     }
+    while (e = es.pop())
+      if (!e.classList.contains("active")) {
+        toggle(e);
+        toggled = true;
+      }
+    if (toggled) root.scrollIntoView();
   }
 
   function onKeyPressed(evt) {

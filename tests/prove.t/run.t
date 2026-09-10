@@ -32,9 +32,6 @@
   {
     "files": [
       {
-        "path": "foo",
-        "file": "foo.mlw",
-        "url": "foo.html",
         "children": [
           {
             "path": "foo.S",
@@ -45,10 +42,6 @@
             "time": 0.0
           },
           {
-            "path": "foo.T",
-            "file": "foo.mlw",
-            "line": 6,
-            "url": "foo.T.html#_L6",
             "children": [
               {
                 "goal": "Add.com",
@@ -68,13 +61,9 @@
                 "time": 0.0004,
                 "proved": 1
               }
-            ],
-            "time": 0.0008,
-            "proved": 2
+            ]
           }
-        ],
-        "time": 0.0008,
-        "proved": 2
+        ]
       }
     ],
     "time": 0.0008,
