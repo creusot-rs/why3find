@@ -112,7 +112,7 @@ let bsync ?wanted env =
       (* Need for opening *)
       begin match wanted with
         | Raw -> ()
-        | Doc -> Pdoc.pp_print_string env.out "<div class=\"doc\">\n"
+        | Doc -> Pdoc.pp_print_string env.out "<div class=doc>\n"
         | Src -> env.indent <- Head 0
       end ;
     end
@@ -170,13 +170,13 @@ let codeline env ?(offset=0) ?(indent=0) () =
     begin
       let line = Token.line env.input + offset in
       Option.iter
-        (Pdoc.printf env.out "\n%s<span class=\"codelense\">%s</span>" indent)
+        (Pdoc.printf env.out "\n%s<span class=codelense>%s</span>" indent)
         (Hashtbl.find_opt env.src.lenses line) ;
       Pdoc.printf env.out
         "\n\
-         <div id=\"_L%d\" class=\"lineanchor\">\
-         <div class=\"linenumber\">%d</div>\
-         <div class=\"linehover\"></div>\
+         <div id=\"_L%d\" class=lineanchor>\
+         <div class=linenumber>%d</div>\
+         <div class=linehover></div>\
          </div>%s"
         line line indent ;
     end
@@ -194,7 +194,7 @@ let text env =
     | Code -> ()
     | Head indent ->
       bsync env ;
-      Pdoc.pp_print_string env.out "<pre class=\"src\">" ;
+      Pdoc.pp_print_string env.out "<pre class=src>" ;
       codeline env ~indent () ;
       env.indent <- Code
     | Lines(lines,indent) ->
@@ -281,10 +281,10 @@ let rec child n fmt crc =
   | Crc.Stuck ->
     Format.fprintf fmt "stuck<span class=\"%s\"></span>" icon_failed
   | Crc.Prover(p,None,t) ->
-    Format.fprintf fmt "<span class=\"prover\" title=\"%s\">%s</span> %a"
+    Format.fprintf fmt "<span class=prover title=\"%s\">%s</span> %a"
       p p Utils.pp_time t
   | Crc.Prover(p,Some v,t) ->
-    Format.fprintf fmt "<span class=\"prover\" title=\"%s@%s\">%s</span> %a"
+    Format.fprintf fmt "<span class=prover title=\"%s@%s\">%s</span> %a"
       p v p Utils.pp_time t
   | Crc.Tactic { id ; children ; stuck ; proved } ->
     Format.fprintf fmt "%s%a" id pp_verdict (Crc.nverdict ~stuck ~proved) ;
@@ -630,7 +630,7 @@ let instance env n order (cloned : Why3.Theory.theory) =
     let { current ; package_url } = env in
     let pp_href = Id.pp_ahref ~current ~package_url in
     Pdoc.printf env.out
-      "%a<span class=\"comment\">\
+      "%a<span class=comment>\
        (* cloned <a name=\"clone-%d\" href=\"%a\">%s</a> *)\
        </span>@\n"
       Pdoc.pp_spaces n order pp_href r title
@@ -675,7 +675,7 @@ let process_clone_section env ~local ~indent ~container ~kind clones =
     begin
       text env ;
       Pdoc.printf env.out
-        " <span class=\"section\">\
+        " <span class=section>\
          {<span class=\"section-toggle\" title=\"Cloned symbols\">%s</span>\
          <span class=\"section-text\">@\n\
          %a<span class=\"comment section-toggle\">begin</span>@\n"
@@ -805,10 +805,10 @@ let process_open_section env ~active title =
   env.active <- active ;
   Pdoc.printf env.out
     "<span class=\"section level%d\">\
-     <span class=\"comment\">{</span>\
+     <span class=comment>{</span>\
      <span class=\"attribute section-toggle\">%s</span>\
      <span class=\"comment section-text%a\">…</span>\
-     <span class=\"comment\">}</span>\
+     <span class=comment>}</span>\
      <span class=\"section-text%a\">"
     (min env.section 3) title pp_active (not active) pp_active active
 
@@ -818,9 +818,9 @@ let process_close_section env title =
   env.context <- List.tl env.context ;
   text env ;
   Pdoc.printf env.out
-    "<span class=\"comment\">{</span>\
+    "<span class=comment>{</span>\
      <span class=\"attribute section-toggle\">%s</span>\
-     <span class=\"comment\">}</span>\
+     <span class=comment>}</span>\
      </span></span>"
     (if title = "" then "…" else title)
 
@@ -841,7 +841,7 @@ let process_open_module env key =
     let theory = Docref.Mstr.find_opt id env.src.theories in
     bsync ~wanted:Raw env ;
     Pdoc.printf env.out
-      "<pre class=\"src\">%a <a title=\"%s.%s\" href=\"%s\">%s</a>"
+      "<pre class=src>%a <a title=\"%s.%s\" href=\"%s\">%s</a>"
       Pdoc.pp_keyword key path id url id ;
     Pdoc.printf env.crc
       "<pre class=\"src crc\">%a <a id=\"%s\" href=\"%s\">%s.%s</a>"
@@ -1037,7 +1037,7 @@ let process_reference ~wenv ~env r =
     let r = Id.resolve ~lib:src.lib id in
     text env ;
     Pdoc.printf env.out
-      "<code class=\"src\"><a title=\"%a\" href=\"%a\">%s</a></code>"
+      "<code class=src><a title=\"%a\" href=\"%a\">%s</a></code>"
       (* markdown reference might be emitted from any file *)
       Id.pp_title r (Id.pp_ahref ~current:None ~package_url) r name
   with
@@ -1068,7 +1068,7 @@ let parse env =
           Pdoc.pp_html_s out ~className:"comment" s ;
         end
     | Verb s ->
-      text env ; Pdoc.printf out "<code class=\"src\">%a</code>" Pdoc.pp_html s
+      text env ; Pdoc.printf out "<code class=src>%a</code>" Pdoc.pp_html s
     | Math s ->
       text env ;
       let id = Pdoc.matheq out in
@@ -1079,7 +1079,7 @@ let parse env =
     | Equation s ->
       text env ;
       let id = Pdoc.matheq out in
-      Pdoc.printf out "<div class=\"maths\" id=\"math%d\">…</div>" id ;
+      Pdoc.printf out "<div class=maths id=\"math%d\">…</div>" id ;
       Pdoc.printf out "<script>katex.render(%S, math%d,\
                        { throwOnError: false, displayMode: true });\
                        </script>" s id
@@ -1226,8 +1226,8 @@ let process_source_treemap crc (src : Docref.source) =
       begin
         let id = Printf.sprintf "stats-%d" (Pdoc.treemap crc) in
         Pdoc.printf crc
-          "<div class=\"tab\">@\n\
-           <div class=\"treemap\" id=\"%s\"></div>@\n\
+          "<div class=tab>@\n\
+           <div class=treemap id=\"%s\"></div>@\n\
            <script type=\"text/javascript\" defer>\
            Why3findTreemap('#%s',800,400, %a );\
            </script>@\n\
@@ -1248,8 +1248,8 @@ let process_global_treemap out sources =
     begin
       let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
       Pdoc.printf out
-        "<div class=\"tab\">@\n\
-         <div class=\"treemap\" id=\"%s\"></div>@\n\
+        "<div class=tab>@\n\
+         <div class=treemap id=\"%s\"></div>@\n\
          <script type=\"text/javascript\" defer>\
          Why3findTreemap('#%s',800,400,{ children: %a });\
          </script>@\n\
@@ -1342,11 +1342,11 @@ let process_statistics out sources =
         Pdoc.printf out "<b>%a</b>   (%a)" (Utils.pp_left !w) "Proved"
           (pp_title "Total goals (all proved)" pp_count) proved
         else if proved > 0 then
-          Pdoc.printf out "<b class=\"warning\">%a</b>   (%a)"
+          Pdoc.printf out "<b class=warning>%a</b>   (%a)"
           (Utils.pp_left (!w - 5)) "Partial"
           (pp_title "Proved/Total goals" pp_partial) (proved,total)
       else
-        Pdoc.printf out "<b class=\"error\">No Proofs</b>   (%a)"
+        Pdoc.printf out "<b class=error>No Proofs</b>   (%a)"
           (pp_title "Total goals (none proved)" Format.pp_print_int) total ;
       if time > 1e-3 then Pdoc.printf out " (%a)"
           (pp_title "Cumulated time" Utils.pp_rtime) time ;
@@ -1423,7 +1423,7 @@ let process_index ~out:dir ~senv ~title sources =
       let ofile = Filename.concat dir href in
       let out = Pdoc.output ~file:ofile ~title in
       Pdoc.printf out "<header>%s</header>@\n" title ;
-      Pdoc.printf out "<div class=\"dashboard\">@\n<div class=\"tab\">@\n" ;
+      Pdoc.printf out "<div class=dashboard>@\n<div class=tab>@\n" ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
       process_statistics out sources ;

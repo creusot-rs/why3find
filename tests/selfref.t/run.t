@@ -11,10 +11,10 @@
   </head>
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>module A</code></header>
-  <pre class="src">
-  <span class="keyword">module</span> <span class="scope">A</span><a href="bar.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
-    <span class="keyword">use</span> foo.<a title="foo.A" href="foo.A.html">A</a>
-  <span class="keyword">end</span>
+  <pre class=src>
+  <span class=keyword>module</span> <span class=scope>A</span><a href="bar.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
+    <span class=keyword>use</span> foo.<a title="foo.A" href="foo.A.html">A</a>
+  <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
   </body>

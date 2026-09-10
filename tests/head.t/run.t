@@ -22,7 +22,7 @@
   <a class="toc2" href="#_6">Title F</a>
   </nav>
   <header><a href="index.html" title="Index">Index</a> — <code>library a</code></header>
-  <div class="doc">
+  <div class=doc>
   <p>Testing Headings.</p>
   <h1><a id="_1">Title A</a></h1>
   <p>Section 1</p>
