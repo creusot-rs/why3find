@@ -41,16 +41,16 @@ let pp_html = Why3.Pp.html_string
 let to_html = Format.asprintf "%a" pp_html
 
 let pp_scope fmt s =
-  Format.fprintf fmt "<span class=\"scope\">%s</span>" s
+  Format.fprintf fmt "<span class=scope>%s</span>" s
 
 let pp_keyword fmt s =
-  Format.fprintf fmt "<span class=\"keyword\">%s</span>" s
+  Format.fprintf fmt "<span class=keyword>%s</span>" s
 
 let pp_admitted fmt s =
-  Format.fprintf fmt "<span class=\"admitted\">%s</span>" s
+  Format.fprintf fmt "<span class=admitted>%s</span>" s
 
 let pp_attribute fmt s =
-  Format.fprintf fmt "<span class=\"attribute\">%s</span>" s
+  Format.fprintf fmt "<span class=attribute>%s</span>" s
 
 let pp_spaces fmt n =
   for _ = 1 to n do
@@ -97,6 +97,7 @@ type target = {
   mutable hbase: int; (* base level *)
   mutable headers: header list; (* in reverse order *)
   mutable matheq: int ;
+  mutable treemap: int ;
   contents: Buffer.t;
   forked: target option;
 }
@@ -111,7 +112,7 @@ let output ~file ~title =
     target = {
       file ; htitle = title ; hbase = 0 ; headers = [] ;
       contents = Buffer.create 80 ;
-      forked = None ; matheq = 0 ;
+      forked = None ; matheq = 0 ; treemap = 0 ;
     } ;
     current = buffer () ;
   }
@@ -148,12 +149,17 @@ let fork out ~file ~title =
     file ; htitle = title ; hbase = 0 ; headers = [] ;
     contents = Buffer.create 80 ;
     forked = Some out.target ;
+    treemap = 0 ;
     matheq = 0 ;
   }
 
 let matheq out =
   let k = succ out.target.matheq in
   out.target.matheq <- k ; k
+
+let treemap out =
+  let k = succ out.target.treemap in
+  out.target.treemap <- k ; k
 
 let printf out msg = Format.fprintf out.current.fmt msg
 let pp out p v = p out.current.fmt v
@@ -172,35 +178,45 @@ let header out ~level ~title ?(toc=title) () =
   if target.hbase <= 0 then target.hbase <- level ;
   let level = 1 + level - target.hbase in
   target.headers <- { level ; name ; title = toc } :: target.headers ;
-  Format.fprintf out.current.fmt "<h%d><a id=\"%s\">%s</a></h%d>@\n"
+  Format.fprintf out.current.fmt
+    "<h%d><a><div class=anchor id=\"%s\"></div>%s</a></h%d>@\n"
     level name title level
 
-let head =
-  "<!DOCTYPE html>\n\
-   <html>\n\
-   <head>\n\
-   <meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\">\n\
-  "
+let head = {html|
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" type="text/css" href="icofont.min.css">
+|html}
 
-let css =
-  "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">\n\
-   <link rel=\"stylesheet\" type=\"text/css\" href=\"icofont.min.css\">\n\
-  "
+let katex = {html|
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.css"
+    integrity="sha512-eLvr2vghJzBvLDxpgIyx3qrDj1chzZfD4SPOE4otnJPa6GsyJ/lBDGFhZO8OsmyYNnqqjqXOSjHAV1cBax33oA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer">
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js"
+    integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+|html}
 
-let katex =
-   "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.css\" integrity=\"sha384-1vdNCNel6Tx/NQa8IR1mGOGKsbGreCkOPfbtPPnUURJ5Tu2PRVfQ/7KLZC+Pi1p1\" crossorigin=\"anonymous\">\n\
-    <script src=\"https://cdn.jsdelivr.net/npm/katex@0.18.1/dist/katex.min.js\" integrity=\"sha384-ycJ6GAwiS15LoUPipwJOrWTvkUHl/YqELValBwI5I4awP1EeEQJYarj+w85ntcz7\" crossorigin=\"anonymous\"></script>\n\
-   "
+let d3treemap = {html|
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"
+    integrity="sha512-vc58qvvBdrDR4etbxMdlTt4GBQk1qjvyORR2nrsPsFPyrs+/u5c3+1Ct6upOgdZoIl7eq6k3a1UPDSNAQi/32A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-graphviz/5.6.0/d3-graphviz.min.js"
+    integrity="sha512-Le8HpIpS2Tc7SDHLM6AOgAKq6ZR4uDwLhjPSR20DtXE5dFb9xECHRwgpc1nxxnU0Dv+j6FNMoSddky5gyvI3lQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript" src="treemap.js"></script>
+|html}
 
-let body =
-  "</title>\n\
-   </head>\n\
-   <body>\n"
 
-let foot =
-  "<script type=\"text/javascript\" src=\"script.js\"></script>\n\
-   </body>\n\
-   </html>\n"
+let foot = {html|<script type="text/javascript" src="script.js"></script>
+</body>
+</html>
+|html}
 
 let table_of_contents cout heads =
   if heads <> [] then
@@ -220,12 +236,13 @@ let close output =
   flush output ;
   let target = output.target in
   Utils.outputfile ~file:target.file begin fun cout ->
+    output_string cout "<!DOCTYPE html>" ;
     output_string cout head ;
-    output_string cout css ;
     if target.matheq > 0 then output_string cout katex ;
+    if target.treemap > 0 then output_string cout d3treemap ;
     output_string cout "<title>" ;
     output_string cout target.htitle ;
-    output_string cout body ;
+    output_string cout "</title>\n</head>\n<body>\n" ;
     table_of_contents cout (List.rev target.headers) ;
     Buffer.output_buffer cout target.contents;
     output_string cout foot

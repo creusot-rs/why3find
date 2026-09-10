@@ -86,6 +86,9 @@ val close : output -> unit
 (** Provides a fresh math identifier. *)
 val matheq : output -> int
 
+(** Provides a fresh treemap identifier. *)
+val treemap : output -> int
+
 (** Prints (sanitized) contents. *)
 val printf : output -> 'a printf
 

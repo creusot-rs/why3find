@@ -17,5 +17,6 @@ val add : range -> 'a -> 'a t -> 'a t
 val union : 'a t -> 'a t -> 'a t
 val find : pos -> 'a t -> range * 'a
 val find_opt : pos -> 'a t -> (range * 'a) option
+val find_line : int -> 'a t -> (range * 'a) option
 
 val iter : (range -> 'a -> unit) -> 'a t -> unit

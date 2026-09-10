@@ -741,7 +741,11 @@ let () = register ~name:"stats" ~args:"[OPTIONS] PATH..."
       let root = "." in
       let files = if !files = [] then ["."] else !files in
       let files = Wenv.argfiles @@ List.rev files in
-      Json.to_file ~pretty_floats:true !out @@ Prove.statistics ~root ~env ~files ;
+      let jstats = Proofstats.statistics ~root ~env ~files in
+      Json.to_file ~pretty_floats:true !out jstats.json ;
+      Log.message "Proofs %d/%d %a"
+        jstats.proved (jstats.proved + jstats.stuck)
+        Utils.pp_time jstats.time ;
       Log.message "Saved to %s" !out ;
     end
 

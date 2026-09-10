@@ -44,7 +44,7 @@ let filepath ~root ~file =
   in
   String.concat "/" dir, String.concat "." dir, dir
 
-let load_theories (env : Why3.Env.env) file =
+let list_theories tmap =
   let byloc a b =
     match a.Theory.th_name.id_loc , b.Theory.th_name.id_loc with
     | None,None -> 0
@@ -52,8 +52,11 @@ let load_theories (env : Why3.Env.env) file =
     | None,Some _ -> (+1)
     | Some la, Some lb -> Why3.Loc.compare la lb
   in
+  Wstdlib.Mstr.bindings tmap |> List.map snd |> List.sort byloc
+
+let load_theories (env : Why3.Env.env) file =
   let tmap,format = Why3.Env.(read_file base_language env file) in
-  Wstdlib.Mstr.bindings tmap |> List.map snd |> List.sort byloc , format
+  list_theories tmap, format
 
 (* -------------------------------------------------------------------------- *)
 (* --- Iterators                                                          --- *)

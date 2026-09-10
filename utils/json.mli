@@ -69,3 +69,6 @@ val assoc : ?keepnull:bool -> ?nullempty:bool -> (string * t) list -> t
 val list : ?keepnull:bool -> ?nullempty:bool -> t list -> t
 val list_map : ?keepnull:bool -> ?nullempty:bool -> ('a -> t) -> 'a list -> t
 val option_map : ('a -> t) -> 'a option -> t
+val optint : int -> t
+val optstring : string -> t
+val optbool : bool -> t

@@ -17,12 +17,20 @@ a:visited {
 }
 
 a:hover {
-  cursor: default;
   background: #cec;
 }
 
-a:target {
+a:target,
+a:has(.anchor:target) {
   background: #bce2d9;
+}
+
+.anchor {
+  display: inline-block;
+  width: 0px;
+  height: 0px;
+  position: relative;
+  top: -128px;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -30,15 +38,26 @@ a:target {
 /* -------------------------------------------------------------------------- */
 
 header {
-  margin-left: 1cm;
-  max-width: 24cm;
-  padding: 4px;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: +2;
+  padding: 8px 2cm 8px 2cm;
   color: darkgrey;
+  background: white;
+  cursor: default;
   border-bottom: thin solid darkgray;
 }
 
 header a {
-  color: grey !important
+  color: grey !important;
+  cursor: link;
+}
+
+body {
+  margin-top: 2cm;
+  margin-bottom: 2cm;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -75,6 +94,26 @@ div.doc {
   min-width: 6cm;
   max-width: 16cm;
   margin-left: 2cm;
+  margin-right: 2cm;
+}
+
+div.dashboard {
+  display: flex;
+  flex-flow: wrap;
+  width: 100%;
+}
+
+div.tab {
+  margin-left: 2cm;
+  margin-right: 2cm;
+  margin-bottom: 1cm;
+}
+
+div.tab pre {
+  color: gray;
+  width: auto;
+  margin-left: 0.5cm;
+  margin-right: 0px;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -88,6 +127,11 @@ pre.src {
   border-left: solid thin lightgrey;
 }
 
+pre.src.crc {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
 pre .lineanchor {
   width: 0px;
   height: 0px;
@@ -96,9 +140,15 @@ pre .lineanchor {
   overflow: visible;
 }
 
+pre .codelense {
+  font-size: x-small;
+  color: #888;
+  cursor: default;
+}
+
 pre .linenumber {
   font-size: x-small;
-  color: lightgrey;
+  color: #888;
   position: relative;
   left: -24px;
   top: +131px;
@@ -120,15 +170,13 @@ pre .linehover {
 }
 
 .lineanchor:target .linenumber,
-.linenumber:hover
-{
+.linenumber:hover {
   color: orange;
   font-weight: bold;
 }
 
 .lineanchor:target .linehover,
-.linenumber:hover + .linehover
-{
+.linenumber:hover+.linehover {
   visibility: visible;
 }
 
@@ -139,6 +187,28 @@ span.katex {
 div.maths {
   width: 0pt;
   margin-left: 1cm;
+}
+
+div.status {
+  cursor: default;
+  color: gray;
+  font-size: small;
+  font-family: monospace;
+  margin-left: 1cm;
+  margin-bottom: 8px;
+}
+
+div.treemap {
+  background: white;
+}
+
+div.treemap svg {
+  max-width: 100%;
+  height: auto;
+}
+
+div.treemap svg * {
+  cursor: pointer
 }
 
 .scope {
@@ -199,8 +269,6 @@ div.maths {
 /* -------------------------------------------------------------------------- */
 /* --- Foldable Section                                                   --- */
 /* -------------------------------------------------------------------------- */
-
-.section {}
 
 .section.level1:hover {
   background: #fcfce1;

@@ -21,20 +21,20 @@
   <a class="toc3" href="#_5">Title E</a>
   <a class="toc2" href="#_6">Title F</a>
   </nav>
-  <header><a href="index.html">index</a> — <code>library a</code></header>
-  <div class="doc">
+  <header><a href="index.html" title="Index">Index</a> — <code>library a</code></header>
+  <div class=doc>
   <p>Testing Headings.</p>
-  <h1><a id="_1">Title A</a></h1>
+  <h1><a><div class=anchor id="_1"></div>Title A</a></h1>
   <p>Section 1</p>
-  <h2><a id="_2">Title B</a></h2>
+  <h2><a><div class=anchor id="_2"></div>Title B</a></h2>
   <p>Section 1</p>
-  <h2><a id="_3">Title C</a></h2>
+  <h2><a><div class=anchor id="_3"></div>Title C</a></h2>
   <p>Section 2</p>
-  <h3><a id="_4">Title D</a></h3>
+  <h3><a><div class=anchor id="_4"></div>Title D</a></h3>
   <p>Section 1</p>
-  <h3><a id="_5">Title E</a></h3>
+  <h3><a><div class=anchor id="_5"></div>Title E</a></h3>
   <p>Section 2</p>
-  <h2><a id="_6">Title F</a></h2>
+  <h2><a><div class=anchor id="_6"></div>Title F</a></h2>
   <p>Section 3</p>
   </div>
   <script type="text/javascript" src="script.js"></script>

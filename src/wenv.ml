@@ -205,11 +205,11 @@ let options ?(packages=false) ?(provers=false) ?(drivers=false) ?(download=false
   List.filter_map
     (fun (opt,name,spec,descr) ->
        if match opt with
-          | `All -> true
-          | `Download -> download
-          | `Package -> default || packages
-          | `Prover -> default || provers
-          | `Driver -> default || drivers
+         | `All -> true
+         | `Download -> download
+         | `Package -> default || packages
+         | `Prover -> default || provers
+         | `Driver -> default || drivers
        then Some(name,spec,descr)
        else None
     ) alloptions

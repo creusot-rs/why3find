@@ -83,6 +83,10 @@ type source = {
   lib: string list ;
   theories: theory Mstr.t ;
   cache: Cache.t option ;
+  session: (Why3.Env.env * Session.session) option ;
+  lenses : (int,string) Hashtbl.t ;
+  mutable strategy : Proofs.strategy ;
+  mutable statistics : Proofstats.jstats ;
   mutable outdated : bool ;
 }
 
@@ -167,6 +171,10 @@ let find_clone ?instance ?source ?target () =
 (* -------------------------------------------------------------------------- *)
 (* --- Instances                                                          --- *)
 (* -------------------------------------------------------------------------- *)
+
+let by_instance (Instance a) (Instance b) =
+  let cmp = String.compare a.container b.container in
+  if cmp <> 0 then cmp else Int.compare a.order b.order
 
 let skey scope = String.concat "<" scope
 
@@ -268,6 +276,9 @@ let reload_proofs source =
   begin
     let { file ; root ; path } = source in
     let crc = Proofs.load ~move:false ~root ~path ~file () in
+    Hashtbl.clear source.lenses ;
+    source.strategy <- crc.strategy ;
+    source.statistics <- Proofstats.empty ;
     Mstr.iter
       (fun _ (th : theory) ->
          let proofs = get_proofs th.theory crc.strategy in
@@ -278,6 +289,12 @@ let reload_proofs source =
          let Proofs.{ file ; path ; proof } = crc in
          source.outdated <- Cache.outdated cache ~path ~file ~proof ;
       ) source.cache ;
+    Option.iter
+      (fun (_,session) ->
+         source.statistics <-
+           Proofstats.stats_session
+             ~lenses:source.lenses ~path ~file crc.strategy session
+      ) source.session
   end
 
 (* -------------------------------------------------------------------------- *)
@@ -292,15 +309,22 @@ let empty () = {
   cache = None ;
   lib = [] ; path = "" ; root = "" ;
   theories = Mstr.empty ;
+  strategy = Mstr.empty ;
+  session = None ;
+  lenses = Hashtbl.create 0 ;
+  statistics = Proofstats.empty ;
   outdated = true ;
 }
 
-let source ?cache ~wenv ~henv ~root ~lib ~path ~file inc =
+let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
   let globals = Why3.Debug.test_flag Why3.Glob.flag in
   try
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
     Why3.Glob.clear file ;
-    let thys = Why3.Env.read_channel Why3.Env.base_language wenv file inc in
+    let format = Why3.Env.get_format file in
+    let tmap = Why3.Env.read_channel Why3.Env.base_language env file inc in
+    let theories = Wutil.list_theories tmap in
+    let session = Session.create ~dir ~file ~format theories in
     let crc = Proofs.load ~move:false ~root ~path ~file () in
     let theories =
       Mstr.mapi
@@ -321,7 +345,7 @@ let source ?cache ~wenv ~henv ~root ~lib ~path ~file inc =
              instances = cenv.cloned ;
              iclones = List.sort by_order @@ List.rev cenv.clones ;
            }
-        ) thys
+        ) tmap
     in
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     let outdated =
@@ -331,21 +355,27 @@ let source ?cache ~wenv ~henv ~root ~lib ~path ~file inc =
         let Proofs.{ path ; file ; proof } = crc in
         Cache.outdated cache ~file ~path ~proof
     in
-    { file ; lib ; root ; path ; theories ; cache ; outdated }
+    let strategy = crc.strategy in
+    let lenses = Hashtbl.create 0 in
+    let statistics =
+      Proofstats.stats_session ~path ~file ~lenses strategy session in
+    let session = Some (env,session) in
+    { file ; lib ; root ; path ; theories ; lenses ;
+      cache ; session ; strategy ; outdated ; statistics }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn
 
-let parse ~cache ~wenv ~henv ~root ~file () =
+let parse ~cache ~env ~henv ~root ~file () =
   if not @@ String.ends_with ~suffix:".mlw" file then
     begin
       Log.error "invalid file name: %S" file ;
       exit 2
     end ;
-  let _,path,lib = Wutil.filepath ~root ~file in
+  let dir,path,lib = Wutil.filepath ~root ~file in
   try
     let inc = open_in file in
-    let src = source ~cache ~wenv ~henv ~lib ~root ~path ~file inc in
+    let src = source ~cache ~env ~henv ~lib ~root ~path ~dir ~file inc in
     close_in inc ; src
   with exn ->
     Log.error "%s" (Printexc.to_string exn) ;
@@ -424,12 +454,12 @@ let find kind qid thy =
 
 let find_theory kind qid { theory } = find kind qid theory
 
-let find_decl wenv (src:source) (id : Id.id) =
+let find_decl env (src:source) (id : Id.id) =
   let thy =
     if id.id_lib = src.lib then
       (Mstr.find id.id_mod src.theories).theory
     else
-      try Why3.Env.read_theory wenv id.id_lib id.id_mod
+      try Why3.Env.read_theory env id.id_lib id.id_mod
       with _ -> raise Not_found
   in Id.find thy id.self
 
@@ -456,7 +486,7 @@ let select ~name ids =
 
 (* Global reference resolution *)
 
-let reference ~wenv ~src ~current r =
+let reference ~env ~src ~current r =
   let kind,name =
     let n = String.length r in
     if n >= 2 && r.[1] = ':'
@@ -474,7 +504,7 @@ let reference ~wenv ~src ~current r =
     select ~name @@ lookup ~scope:current ~theories:src.theories kind m qid
   else
     let thy =
-      try Why3.Env.read_theory wenv lp m
+      try Why3.Env.read_theory env lp m
       with _ ->
         Utils.failwith "unknown theory or module '%s.%s'"
           (String.concat "." lp) m

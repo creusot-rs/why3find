@@ -10,11 +10,12 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <title></title>
+  <title>Index</title>
   </head>
   <body>
-  <header>index — </header>
-  <div class="doc">
+  <header>Index</header>
+  <div class=dashboard>
+  <div class=tab>
   <h1>Development</h1>
   <ul>
   <li><a href="a.index.html">Library a</a><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>
