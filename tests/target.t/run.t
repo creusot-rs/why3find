@@ -25,7 +25,7 @@
     <span class=keyword>predicate</span> <a><div class=anchor id="p"></div>p</a> (x : int) = x <a title="int.Int.(>)" href="https://www.why3.org/stdlib/int.html#infix%20%3E_24">&gt;</a> 0
     <span class=keyword>clone</span> <a title="target.A" href="target.A.html">A</a> <span class=keyword>as</span> A0 <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-8" href="target.A.html">target.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-8" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A0.r&#013;(cloned from target.A.r)"><div class=anchor id="A0.r"></div>A0.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A0.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A0.pq"></div>A0.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
         <span class=keyword>axiom</span> <a href="target.A.html#qr" title="target.B.A0.qr&#013;(cloned from target.A.qr)"><div class=anchor id="A0.qr"></div>A0.qr</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
@@ -33,7 +33,7 @@
     </span>}</span><span title="1 logic parameter, 2 hypotheses" class="icon small warning icofont-warning-alt"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>, <span class=keyword>axiom</span> .
     <span class=keyword>clone</span> <a title="target.A" href="target.A.html">A</a> <span class=keyword>as</span> A1 <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-14" href="target.A.html">target.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-14" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A1.r&#013;(cloned from target.A.r)"><div class=anchor id="A1.r"></div>A1.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A1.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A1.pq"></div>A1.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
         <span class=codelense>No proof</span>
@@ -42,7 +42,7 @@
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>
     <span class=keyword>clone</span> <a title="target.A" href="target.A.html">A</a> <span class=keyword>as</span> A2 <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-20" href="target.A.html">target.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-20" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A2.r&#013;(cloned from target.A.r)"><div class=anchor id="A2.r"></div>A2.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A2.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A2.pq"></div>A2.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
         <span class=codelense>No proof</span>
@@ -51,7 +51,7 @@
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>
     <span class=keyword>clone</span> <a title="target.A" href="target.A.html">A</a> <span class=keyword>as</span> A3 <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-26" href="target.A.html">target.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-26" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A3.r&#013;(cloned from target.A.r)"><div class=anchor id="A3.r"></div>A3.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A3.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A3.pq"></div>A3.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
         <span class=codelense>No proof</span>
@@ -60,7 +60,7 @@
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>
     <span class=keyword>clone</span> <a title="target.A" href="target.A.html">A</a> <span class=keyword>as</span> A4 <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-32" href="target.A.html">target.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-32" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A4.r&#013;(cloned from target.A.r)"><div class=anchor id="A4.r"></div>A4.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A4.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A4.pq"></div>A4.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
         <span class=codelense>No proof</span>
@@ -69,7 +69,7 @@
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a> <span class="comment">(* spaced *)</span>
     <span class=keyword>clone</span> <a title="target.A" href="target.A.html">A</a> <span class=keyword>as</span> A5 <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-38" href="target.A.html">target.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-38" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A5.r&#013;(cloned from target.A.r)"><div class=anchor id="A5.r"></div>A5.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A5.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A5.pq"></div>A5.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
         <span class=codelense>No proof</span>
@@ -78,7 +78,7 @@
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int
     <span class=keyword>clone</span> <a title="target.A" href="target.A.html">A</a> <span class=keyword>as</span> A6 <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-44" href="target.A.html">target.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-44" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A6.r&#013;(cloned from target.A.r)"><div class=anchor id="A6.r"></div>A6.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A6.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A6.pq"></div>A6.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
         <span class=keyword>axiom</span> <a href="target.A.html#qr" title="target.B.A6.qr&#013;(cloned from target.A.qr)"><div class=anchor id="A6.qr"></div>A6.qr</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>

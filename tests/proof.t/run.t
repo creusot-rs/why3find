@@ -42,7 +42,7 @@
     <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
     <span class=keyword>clone</span> <a title="clones.A" href="clones.A.html">A</a> <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-8" href="clones.A.html">clones.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-8" href="clones.A.html">clones.A</a> *)</span>
         <span class=keyword>function</span> <a href="clones.A.html#e" title="clones.B.A.e&#013;(cloned from clones.A.e)"><div class=anchor id="A.e"></div>A.e</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : int
         <span class=keyword>axiom</span> <a href="clones.A.html#neutral" title="clones.B.A.neutral&#013;(cloned from clones.A.neutral)"><div class=anchor id="A.neutral"></div>A.neutral</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
         <span class=codelense>Valid (alt-ergo)</span>
@@ -118,7 +118,7 @@
   </head>
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
-  <h1>Proofs</h1>
+  <div class=doc><h1>Proofs</h1></div>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.A.html"><div class=anchor id="A"></div>clones.A</a><span title="3 logic parameters, 2 hypotheses, 1 incomplete instance" class="icon small warning icofont-warning-alt"></span><span title="Valid (one goal)" class="icon valid icofont-check"></span></pre>
   <pre class="src crc">
     <span class=keyword>axiom</span> <a href="clones.A.html#neutral"><div class=anchor id="A.neutral"></div>neutral</a><span title="uncloned hypothesis" class="icon small warning icofont-warning-alt"></span>
@@ -150,7 +150,7 @@
   </head>
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>proofs</code></header>
-  <h1>Proofs</h1>
+  <div class=doc><h1>Proofs</h1></div>
   <pre class="src crc"><span class=keyword>module</span> <a href="certif.S.html"><div class=anchor id="S"></div>certif.S</a><span title="Partial proof (6/10 goals)" class="icon warning icofont-error"></span></pre>
   <pre class="src crc">
     <span class=keyword>goal</span> <a href="certif.S.html#mixfix%20%5B%5D"><div class=anchor id="S.mixfix%20%5B%5D"></div>([])</a><span title="Partial proof (3/5 goals)" class="icon warning icofont-error"></span>

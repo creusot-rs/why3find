@@ -56,7 +56,7 @@
     <span class=keyword>let</span> <span class=keyword>constant</span> <a><div class=anchor id="zero"></div>zero</a> = 0
     <span class=keyword>clone</span> <span class=keyword>export</span> <a title="a.A" href="a.A.html">A</a> <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class=comment>(* cloned <a name="clone-4" href="a.A.html">a.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-4" href="a.A.html">a.A</a> *)</span>
         <span class=keyword>let</span> <a href="a.A.html#square" title="a.B.square&#013;(cloned from a.A.square)"><div class=anchor id="square"></div>square</a> int : int
         <span class=keyword>let</span> <a href="a.A.html#assoc" title="a.B.assoc&#013;(cloned from a.A.assoc)"><div class=anchor id="assoc"></div>assoc</a> (<a title="list.List.list" href="https://www.why3.org/stdlib/list.html#list_8">list</a> int) : int
       <span class="comment section-toggle">end</span>

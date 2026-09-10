@@ -25,7 +25,7 @@
         toggle(e);
         toggled = true;
       }
-    if (toggled) root.scrollIntoView();
+    if (root) root.scrollIntoView();
   }
 
   function onKeyPressed(evt) {

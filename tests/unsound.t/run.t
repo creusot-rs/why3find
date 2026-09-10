@@ -68,7 +68,7 @@
   </head>
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>proofs</code></header>
-  <h1>Proofs</h1>
+  <div class=doc><h1>Proofs</h1></div>
   <pre class="src crc"><span class=keyword>module</span> <a href="unsound.Dummy.html"><div class=anchor id="Dummy"></div>unsound.Dummy</a><span title="2 unsafe definitions" class="icon small failed icofont-warning"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src crc">
     <span class=keyword>unsound</span> <a href="unsound.Dummy.html#admit1"><div class=anchor id="Dummy.admit1"></div>admit1</a><span title="unsafe definition" class="icon small failed icofont-warning"></span>

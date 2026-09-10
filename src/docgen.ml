@@ -665,7 +665,7 @@ let instance env n order (cloned : Why3.Theory.theory) =
     let pp_href = Id.pp_ahref ~current ~package_url in
     Pdoc.printf env.out
       "%a<span class=comment>\
-       (* cloned <a name=\"clone-%d\" href=\"%a\">%s</a> *)\
+       (* cloned <a id=\"clone-%d\" href=\"%a\">%s</a> *)\
        </span>@\n"
       Pdoc.pp_spaces n order pp_href r cloned
   end
@@ -1334,7 +1334,7 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>proofs</code>\
        </header>@." env.title src.path src.path ;
-    Pdoc.printf crc "<h1>Proofs</h1>@\n" ;
+    Pdoc.printf crc "<div class=doc><h1>Proofs</h1></div>@\n" ;
     Pdoc.flush crc ;
     parse env ;
     if treemaps then process_source_treemap out env.src ;
