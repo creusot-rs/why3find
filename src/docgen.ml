@@ -292,10 +292,11 @@ let rec child n fmt crc =
 
 let process_certif env id crc =
   Pdoc.printf env.crc
-    "<pre class=\"src crc\">@\n  %a <a id=\"%a\" href=\"%a\">%a</a>%a%t</pre>"
+    "<pre class=\"src crc\">\
+     @\n  %a <a href=\"%a\"><div class=anchor id=\"%a\"></div>%a</a>%a%t</pre>"
     Pdoc.pp_keyword "goal"
-    Id.pp_proof_aname id
     (Id.pp_ahref ~current:None ~package_url:env.package_url) id
+    Id.pp_proof_aname id
     Id.pp_local id
     pp_verdict (Crc.verdict crc)
     begin fun fmt ->
@@ -374,10 +375,10 @@ let process_hypothesis env (s : Soundness.soundness) (p : Axioms.parameter) =
           pp_mark ~cla:icon_hypothesis ~title:"uncloned hypothesis" fmt
     in
     Pdoc.printf env.crc
-      "@\n  %a <a id=\"%a\" href=\"%a\">%a</a>%t"
+      "@\n  %a <a href=\"%a\"><div class=anchor id=\"%a\"></div>%a</a>%t"
       Pdoc.pp_keyword key
-      Id.pp_proof_aname id
       (Id.pp_ahref ~current:None ~package_url:env.package_url) id
+      Id.pp_proof_aname id
       Id.pp_local id qualif
   with Not_found -> ()
 
@@ -487,11 +488,12 @@ let pp_ident ~env ~local ?anchor ?attr fmt id =
   match Id.resolve ~lib:env.src.lib id with
   | id ->
     Format.fprintf fmt "%a<a" (Id.pp_qpath ~local) id ;
-    Option.iter (Format.fprintf fmt " id=\"%s\"") anchor ;
     Option.iter (Format.fprintf fmt " class=\"%s\"") attr ;
-    Format.fprintf fmt " title=\"%a\" href=\"%a\">%a</a>"
-      Id.pp_title id
-      (Id.pp_ahref ~current:None ~package_url:env.package_url) id
+    Format.fprintf fmt " title=\"%a\" href=\"%a\">"
+    Id.pp_title id
+    (Id.pp_ahref ~current:None ~package_url:env.package_url) id ;
+    Option.iter (Format.fprintf fmt "<div class=anchor id=\"%s\"></div>") anchor ;
+    Format.fprintf fmt "%a</a>"
       Id.pp_qname id
   | exception Not_found ->
     (* builtin *)
@@ -531,10 +533,13 @@ let declare env n kwd ?(attr=[]) ?(valid=false)
     let pp_href = Id.pp_ahref ~package_url ~current in    Pdoc.printf env.out "%a%a " Pdoc.pp_spaces n Pdoc.pp_keyword kwd ;
     List.iter (Pdoc.printf env.out "%a " Pdoc.pp_attribute) attr ;
     Pdoc.printf env.out
-      "%a<a id=\"%a\" href=\"%a\" title=\"%a  (cloned from %a)\">%a</a>"
+      "%a<a href=\"%a\" title=\"%a  (cloned from %a)\">\
+       <div class=anchor id=\"%a\"></div>%a</a>"
       (Id.pp_qpath ~local) tgt
-      Id.pp_aname tgt pp_href src
-      Id.pp_title tgt Id.pp_title src
+      pp_href src
+      Id.pp_title tgt
+      Id.pp_title src
+      Id.pp_aname tgt
       Id.pp_local tgt ;
     process_axioms env tgt ;
     process_proof env tgt ~valid @@ Docref.find_proof tgt.self env.theory ;
@@ -763,7 +768,8 @@ let process_href env (href : Docref.href) ?(infix=false) s =
     if id.id_qid = [] then
       Pdoc.printf env.out "%a" Pdoc.pp_html s
     else
-      Pdoc.printf env.out "<a id=\"%a\">%a</a>" Id.pp_aname id Pdoc.pp_html s ;
+      Pdoc.printf env.out "<a><div class=anchor id=\"%a\"></div>%a</a>"
+        Id.pp_aname id Pdoc.pp_html s ;
     if infix then Pdoc.printf env.out ")" ;
     process_axioms env id ;
     process_proof env id proof
@@ -844,8 +850,9 @@ let process_open_module env key =
       "<pre class=src>%a <a title=\"%s.%s\" href=\"%s\">%s</a>"
       Pdoc.pp_keyword key path id url id ;
     Pdoc.printf env.crc
-      "<pre class=\"src crc\">%a <a id=\"%s\" href=\"%s\">%s.%s</a>"
-      Pdoc.pp_keyword key id url path id ;
+      "<pre class=\"src crc\">%a <a href=\"%s\">\
+       <div class=anchor id=\"%s\"></div>%s.%s</a>"
+      Pdoc.pp_keyword key url id path id ;
     process_axioms_summary env id ~crc:true theory ; (* out & crc *)
     process_proofs_summary env id ~crc:true theory ; (* out & crc *)
     Pdoc.printf env.out "</pre>@." ;
@@ -1341,8 +1348,8 @@ let process_statistics out sources =
       if proved = total then
         Pdoc.printf out "<b>%a</b>   (%a)" (Utils.pp_left !w) "Proved"
           (pp_title "Total goals (all proved)" pp_count) proved
-        else if proved > 0 then
-          Pdoc.printf out "<b class=warning>%a</b>   (%a)"
+      else if proved > 0 then
+        Pdoc.printf out "<b class=warning>%a</b>   (%a)"
           (Utils.pp_left (!w - 5)) "Partial"
           (pp_title "Proved/Total goals" pp_partial) (proved,total)
       else

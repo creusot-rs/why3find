@@ -43,25 +43,25 @@
   <p>More doc</p>
   </div>
   <pre class=src>
-    <span class=keyword>type</span> <a id="t">t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
   </pre>
   <div class=doc>
   <p>Some doc</p>
   <p>More doc</p>
   </div>
   <pre class=src>
-    <span class=keyword>type</span> <a id="u">u</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>type</span> <a><div class=anchor id="u"></div>u</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
   
-    <span class=keyword>type</span> <a id="w">w</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
-    <span class=keyword>type</span> <a id="k">k</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>type</span> <a><div class=anchor id="w"></div>w</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>type</span> <a><div class=anchor id="k"></div>k</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
   
-    <span class=keyword>type</span> <a id="r">r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>type</span> <a><div class=anchor id="r"></div>r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
   </pre>
   <div class=doc>
   <p>Doc between</p>
   </div>
   <pre class=src>
-    <span class=keyword>type</span> <a id="s">s</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>type</span> <a><div class=anchor id="s"></div>s</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
   </pre>
   <div class=doc>
   <p>End doc</p>

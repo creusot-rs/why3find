@@ -37,7 +37,7 @@
   <header><a href="index.html" title="Index">Index</a> — Main Document
          </header>
   <div class=doc>
-  <h1><a id="_1">Main Document</a></h1>
+  <h1><a><div class=anchor id="_1"></div>Main Document</a></h1>
   <p>This package contains one [unique](a.index.html) library, which consists of:</p>
   <ul>
   <li>Theory <code class=src><a title="a.A" href="a.A.html">a.A</a></code></li>
@@ -91,8 +91,8 @@
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
   <pre class=src>
   <span class=keyword>theory</span> <span class=scope>A</span><a href="a.proof.html#A" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
-    <span class=keyword>type</span> <a id="t">t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
-    <span class=keyword>function</span> <a id="op">op</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> <a title="a.A.t" href="#t">t</a> <a title="a.A.t" href="#t">t</a> : <a title="a.A.t" href="#t">t</a>
+    <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>function</span> <a><div class=anchor id="op"></div>op</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> <a title="a.A.t" href="#t">t</a> <a title="a.A.t" href="#t">t</a> : <a title="a.A.t" href="#t">t</a>
   <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
@@ -114,8 +114,8 @@
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module B</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>B</span><a href="a.proof.html#B" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
-    <span class=keyword>type</span> <a id="t">t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
-    <span class=keyword>val</span> <a id="binop">binop</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> <a title="a.B.t" href="#t">t</a> <a title="a.B.t" href="#t">t</a> : <a title="a.B.t" href="#t">t</a>
+    <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>val</span> <a><div class=anchor id="binop"></div>binop</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> <a title="a.B.t" href="#t">t</a> <a title="a.B.t" href="#t">t</a> : <a title="a.B.t" href="#t">t</a>
   </pre>
   <div class=doc>
   <p>B reference <code class=src><a title="a.B.t" href="a.B.html#t">t</a></code></p>
@@ -144,10 +144,10 @@
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>C</span><a href="a.proof.html#C" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#C" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
-    <span class=keyword>type</span> <a id="t">t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
-    <span class=keyword>function</span> <a id="value">value</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> <a title="a.C.t" href="#t">t</a> : int
-    <span class=keyword>predicate</span> (<a id="infix%20%3C%3C">&lt;&lt;</a>) (x y : <a title="a.C.t" href="#t">t</a>) = <a title="a.C.value" href="#value">value</a> x <a title="int.Int.(<)" href="https://www.why3.org/stdlib/int.html#infix%20%3C_21">&lt;</a> <a title="a.C.value" href="#value">value</a> y
-    <span class=keyword>predicate</span> (<a id="infix%20%21%3D">!=</a>) (x y : <a title="a.C.t" href="#t">t</a>) = x <a title="a.C.(<<)" href="#infix%20%3C%3C">&lt;&lt;</a> y \/ y <a title="a.C.(<<)" href="#infix%20%3C%3C">&lt;&lt;</a> x
+    <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>function</span> <a><div class=anchor id="value"></div>value</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> <a title="a.C.t" href="#t">t</a> : int
+    <span class=keyword>predicate</span> (<a><div class=anchor id="infix%20%3C%3C"></div>&lt;&lt;</a>) (x y : <a title="a.C.t" href="#t">t</a>) = <a title="a.C.value" href="#value">value</a> x <a title="int.Int.(<)" href="https://www.why3.org/stdlib/int.html#infix%20%3C_21">&lt;</a> <a title="a.C.value" href="#value">value</a> y
+    <span class=keyword>predicate</span> (<a><div class=anchor id="infix%20%21%3D"></div>!=</a>) (x y : <a title="a.C.t" href="#t">t</a>) = x <a title="a.C.(<<)" href="#infix%20%3C%3C">&lt;&lt;</a> y \/ y <a title="a.C.(<<)" href="#infix%20%3C%3C">&lt;&lt;</a> x
   <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>

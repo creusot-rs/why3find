@@ -178,7 +178,8 @@ let header out ~level ~title ?(toc=title) () =
   if target.hbase <= 0 then target.hbase <- level ;
   let level = 1 + level - target.hbase in
   target.headers <- { level ; name ; title = toc } :: target.headers ;
-  Format.fprintf out.current.fmt "<h%d><a id=\"%s\">%s</a></h%d>@\n"
+  Format.fprintf out.current.fmt
+    "<h%d><a><div class=anchor id=\"%s\"></div>%s</a></h%d>@\n"
     level name title level
 
 let head = {html|

@@ -20,8 +20,17 @@ a:hover {
   background: #cec;
 }
 
-a:target {
+a:target,
+a:has(.anchor:target) {
   background: #bce2d9;
+}
+
+.anchor {
+  display: inline-block;
+  width: 0px;
+  height: 0px;
+  position: relative;
+  top: -128px;
 }
 
 /* -------------------------------------------------------------------------- */

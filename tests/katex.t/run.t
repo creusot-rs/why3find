@@ -25,7 +25,7 @@
   <header><a href="index.html" title="Index">Index</a> — Test for Maths
          </header>
   <div class=doc>
-  <h1><a id="_1">Test for Maths</a></h1>
+  <h1><a><div class=anchor id="_1"></div>Test for Maths</a></h1>
   <p>Einstein says <span id="math1">…</span><script>katex.render("e = mc^2", math1,{ throwOnError: false });</script>.</p>
   <p>Equations:</p>
   <p><div class=maths id="math2">…</div><script>katex.render(" \\int_a^b \\frac{\\partial f}{\\partial x} = f(b) - f(a)", math2,{ throwOnError: false, displayMode: true });</script></p>
@@ -72,8 +72,8 @@
   <span class=keyword>module</span> <span class=scope>Foo</span><a href="foo.proof.html#Foo" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="foo.proof.html#Foo" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>use</span> real.<a title="real.Real" href="https://www.why3.org/stdlib/real.html#Real_">Real</a>
     <span class=keyword>use</span> real.<a title="real.Square" href="https://www.why3.org/stdlib/real.html#Square_">Square</a>
-    <span class=keyword>constant</span> <a id="m">m</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : real
-    <span class=keyword>constant</span> <a id="c">c</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : real
+    <span class=keyword>constant</span> <a><div class=anchor id="m"></div>m</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : real
+    <span class=keyword>constant</span> <a><div class=anchor id="c"></div>c</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : real
   </pre>
   <div class=doc>
   <p>Enstein&#39;s famous <span id="math1">…</span><script>katex.render("e = mc^2", math1,{ throwOnError: false });</script>.</p>
@@ -83,7 +83,7 @@
   </ul>
   </div>
   <pre class=src>
-    <span class=keyword>function</span> <a id="e">e</a> : real = <a title="foo.Foo.m" href="#m">m</a> <a title="real.Real.(*)" href="https://www.why3.org/stdlib/real.html#infix%20*_20">*</a> <a title="real.Square.sqr" href="https://www.why3.org/stdlib/real.html#sqr_213">sqr</a> <a title="foo.Foo.c" href="#c">c</a>
+    <span class=keyword>function</span> <a><div class=anchor id="e"></div>e</a> : real = <a title="foo.Foo.m" href="#m">m</a> <a title="real.Real.(*)" href="https://www.why3.org/stdlib/real.html#infix%20*_20">*</a> <a title="real.Square.sqr" href="https://www.why3.org/stdlib/real.html#sqr_213">sqr</a> <a title="foo.Foo.c" href="#c">c</a>
   
   <span class=keyword>end</span>
   </pre>
