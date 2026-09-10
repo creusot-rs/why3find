@@ -386,12 +386,34 @@ let process_hypothesis env (s : Soundness.soundness) (p : Axioms.parameter) =
       Id.pp_local id qualif
   with Not_found -> ()
 
-let process_instance env ~ok (Docref.Instance s) =
-  Pdoc.printf env.crc "@\n  %a <a href=\"%s.html#clone-%d\">%s</a>"
-    Pdoc.pp_keyword "instance" s.container s.order s.container ;
+let pp_rank fmt = function None -> () | Some (k,n) ->
+  if k > 0 then Format.fprintf fmt " <span class=codelense>(#%d/%d)</span>" k n
+
+let process_instance env ~ok ~rank (Docref.Instance s) =
+  Pdoc.printf env.crc "@\n  %a <a href=\"%s.html#clone-%d\">%s%a</a>"
+    Pdoc.pp_keyword "instance" s.container s.order s.container pp_rank rank ;
   let title = (if ok then "sound" else "incomplete") ^ " instance" in
   let cla = if ok then icon_complete else icon_hypothesis in
   Pdoc.ppt env.crc @@ pp_mark ~title ~cla
+
+let process_instances env ~ok ns =
+  let get index (Docref.Instance a) =
+    try Hashtbl.find index a.container with Not_found -> 0 in
+  let next index (Docref.Instance a as n) =
+    let k = succ @@ get index n in
+    Hashtbl.replace index a.container k ; k in
+  let add index a = ignore (next index a) in
+  let size = Hashtbl.create 0 in
+  let curr = Hashtbl.create 0 in
+  let ns = List.sort Docref.by_instance ns in
+  List.iter (add size) ns ;
+  List.iter
+    (fun a ->
+       let n = get size a in
+       let k = next curr a in
+       let rank = if n > 1 then Some (k,n) else None in
+       process_instance env ~ok ~rank a
+    ) ns
 
 let process_module_axioms env =
   match env.theory with
@@ -411,9 +433,9 @@ let process_module_axioms env =
     begin match sound with
       | Unsound | Sound [] | Unknown [] -> ()
       | Sound ns ->
-        Lazy.force pre ; List.iter (process_instance env ~ok:true) ns
+        Lazy.force pre ; process_instances env ~ok:true ns
       | Unknown ns ->
-        Lazy.force pre ; List.iter (process_instance env ~ok:false) ns
+        Lazy.force pre ; process_instances env ~ok:false ns
     end ;
     if Lazy.is_val pre then Pdoc.printf env.crc "@\n</pre>@."
 
@@ -638,14 +660,14 @@ let instance env n order (cloned : Why3.Theory.theory) =
   begin
     env.cloned <- max order env.cloned ;
     let r = Id.resolve ~lib:env.src.lib cloned.th_name in
-    let title = Format.asprintf "%a" Id.pp_title r in
+    let cloned = Format.asprintf "%a" Id.pp_title r in
     let { current ; package_url } = env in
     let pp_href = Id.pp_ahref ~current ~package_url in
     Pdoc.printf env.out
       "%a<span class=comment>\
        (* cloned <a name=\"clone-%d\" href=\"%a\">%s</a> *)\
        </span>@\n"
-      Pdoc.pp_spaces n order pp_href r title
+      Pdoc.pp_spaces n order pp_href r cloned
   end
 
 (* -------------------------------------------------------------------------- *)
@@ -1231,21 +1253,22 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
 (* --- Generating Global Treemaps                                         --- *)
 (* -------------------------------------------------------------------------- *)
 
-let process_source_treemap crc (src : Docref.source) =
+let process_source_treemap out (src : Docref.source) =
   Option.iter begin fun (env,session) ->
     let Docref.{ file ; path ; strategy } = src in
     let stats =
       Proofstats.stats_session ~env ~path ~local:true ~file strategy session in
     if not @@ Proofstats.is_empty stats then
       begin
-        let id = Printf.sprintf "stats-%d" (Pdoc.treemap crc) in
-        Pdoc.printf crc
-          "<div class=tab>@\n\
+        let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+        Pdoc.printf out
+          "<div class=doc><h1>Proofs</h1></div>@\n\
+           <div class=dashboard>@\n<div class=tab>@\n\
            <div class=treemap id=\"%s\"></div>@\n\
            <script type=\"text/javascript\" defer>\
            Why3findTreemap('#%s',800,400, %a );\
            </script>@\n\
-           </div>@."
+           </div>@\n</div>@."
           id id Json.pretty stats.json ;
       end
   end src.session
@@ -1311,15 +1334,10 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>proofs</code>\
        </header>@." env.title src.path src.path ;
-    Pdoc.printf crc
-      "<h1>Proofs</h1>@\n\
-       <div class=dashboard>@\n\
-       <div class=tab>@\n" ;
+    Pdoc.printf crc "<h1>Proofs</h1>@\n" ;
     Pdoc.flush crc ;
     parse env ;
-    Pdoc.printf crc "</div>@\n" ; (* proof tab *)
-    if treemaps then process_source_treemap crc env.src ;
-    Pdoc.printf crc "</div>@\n" ; (* proof dashboard *)
+    if treemaps then process_source_treemap out env.src ;
     Pdoc.close_all out ;
     Pdoc.close_all crc ;
   end

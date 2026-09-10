@@ -264,8 +264,6 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <div class=dashboard>
-  <div class=tab>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.Monoid.html"><div class=anchor id="Monoid"></div>clones.Monoid</a><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.Neutral.html"><div class=anchor id="Neutral"></div>clones.Neutral</a><span title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc">
@@ -274,17 +272,17 @@
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.Commutative.html"><div class=anchor id="Commutative"></div>clones.Commutative</a><span title="2 logic parameters, 1 hypothesis, 4 ground instances" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc">
     <span class=keyword>axiom</span> <a href="clones.Commutative.html#commutative"><div class=anchor id="Commutative.commutative"></div>commutative</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
-    <span class=keyword>instance</span> <a href="clones.IntAC.html#clone-5">clones.IntAC</a><span title="sound instance" class="icon small valid icofont-star"></span>
     <span class=keyword>instance</span> <a href="clones.AC.html#clone-7">clones.AC</a><span title="sound instance" class="icon small valid icofont-star"></span>
-    <span class=keyword>instance</span> <a href="clones.IntC.html#clone-8">clones.IntC</a><span title="sound instance" class="icon small valid icofont-star"></span>
-    <span class=keyword>instance</span> <a href="clones.IntC.html#clone-4">clones.IntC</a><span title="sound instance" class="icon small valid icofont-star"></span>
+    <span class=keyword>instance</span> <a href="clones.IntAC.html#clone-5">clones.IntAC</a><span title="sound instance" class="icon small valid icofont-star"></span>
+    <span class=keyword>instance</span> <a href="clones.IntC.html#clone-4">clones.IntC <span class=codelense>(#1/2)</span></a><span title="sound instance" class="icon small valid icofont-star"></span>
+    <span class=keyword>instance</span> <a href="clones.IntC.html#clone-8">clones.IntC <span class=codelense>(#2/2)</span></a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.Associative.html"><div class=anchor id="Associative"></div>clones.Associative</a><span title="2 logic parameters, 1 hypothesis, 3 ground instances" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc">
     <span class=keyword>axiom</span> <a href="clones.Associative.html#associative"><div class=anchor id="Associative.associative"></div>associative</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
-    <span class=keyword>instance</span> <a href="clones.IntAC.html#clone-9">clones.IntAC</a><span title="sound instance" class="icon small valid icofont-star"></span>
     <span class=keyword>instance</span> <a href="clones.AC.html#clone-11">clones.AC</a><span title="sound instance" class="icon small valid icofont-star"></span>
     <span class=keyword>instance</span> <a href="clones.IntA.html#clone-4">clones.IntA</a><span title="sound instance" class="icon small valid icofont-star"></span>
+    <span class=keyword>instance</span> <a href="clones.IntAC.html#clone-9">clones.IntAC</a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.AC.html"><div class=anchor id="AC"></div>clones.AC</a><span title="2 logic parameters, 2 hypotheses, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc">
@@ -300,9 +298,7 @@
     <span class=keyword>goal</span> <a href="clones.IntA.html#Associative.associative"><div class=anchor id="IntA.Associative.associative"></div>Associative.associative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc"><span class=keyword>module</span> <a href="clones.IntAC.html"><div class=anchor id="IntAC"></div>clones.IntAC</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src crc">
     <span class=keyword>goal</span> <a href="clones.IntAC.html#commutative"><div class=anchor id="IntAC.commutative"></div>commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
-    <span class=keyword>goal</span> <a href="clones.IntAC.html#associative"><div class=anchor id="IntAC.associative"></div>associative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre></div>
-  </div>
-  <script type="text/javascript" src="script.js"></script>
+    <span class=keyword>goal</span> <a href="clones.IntAC.html#associative"><div class=anchor id="IntAC.associative"></div>associative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
 --------------------------------------------------------------------------

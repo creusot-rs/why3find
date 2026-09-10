@@ -75,12 +75,8 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="duplicated.index.html">duplicated</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <div class=dashboard>
-  <div class=tab>
   <pre class="src crc"><span class=keyword>module</span> <a href="duplicated.A.html"><div class=anchor id="A"></div>duplicated.A</a><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc"><span class=keyword>module</span> <a href="duplicated.B.html"><div class=anchor id="B"></div>duplicated.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
-  </div>
-  </div>
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>

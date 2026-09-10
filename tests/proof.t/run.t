@@ -119,8 +119,6 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <div class=dashboard>
-  <div class=tab>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.A.html"><div class=anchor id="A"></div>clones.A</a><span title="3 logic parameters, 2 hypotheses, 1 incomplete instance" class="icon small warning icofont-warning-alt"></span><span title="Valid (one goal)" class="icon valid icofont-check"></span></pre>
   <pre class="src crc">
     <span class=keyword>axiom</span> <a href="clones.A.html#neutral"><div class=anchor id="A.neutral"></div>neutral</a><span title="uncloned hypothesis" class="icon small warning icofont-warning-alt"></span>
@@ -138,9 +136,7 @@
       <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 400ns</pre><pre class="src crc"><span class=keyword>module</span> <a href="clones.C.html"><div class=anchor id="C"></div>clones.C</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src crc">
     <span class=keyword>goal</span> <a href="clones.C.html#A.neutral"><div class=anchor id="C.A.neutral"></div>A.neutral</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
-    <span class=keyword>goal</span> <a href="clones.C.html#A.commutative"><div class=anchor id="C.A.commutative"></div>A.commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre></div>
-  </div>
-  <script type="text/javascript" src="script.js"></script>
+    <span class=keyword>goal</span> <a href="clones.C.html#A.commutative"><div class=anchor id="C.A.commutative"></div>A.commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
   $ cat html/certif.proof.html | sed s/569ms/570ms/ # x86-32
@@ -155,8 +151,6 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <div class=dashboard>
-  <div class=tab>
   <pre class="src crc"><span class=keyword>module</span> <a href="certif.S.html"><div class=anchor id="S"></div>certif.S</a><span title="Partial proof (6/10 goals)" class="icon warning icofont-error"></span></pre>
   <pre class="src crc">
     <span class=keyword>goal</span> <a href="certif.S.html#mixfix%20%5B%5D"><div class=anchor id="S.mixfix%20%5B%5D"></div>([])</a><span title="Partial proof (3/5 goals)" class="icon warning icofont-error"></span>
@@ -174,8 +168,6 @@
         <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 4ms
         stuck<span class="icon failed icofont-error"></span>
         <span class=prover title="cvc4@1.8">cvc4</span> 70ms</pre><pre class="src crc">
-    <span class=keyword>goal</span> <a href="certif.S.html#wrong"><div class=anchor id="S.wrong"></div>wrong</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre></div>
-  </div>
-  <script type="text/javascript" src="script.js"></script>
+    <span class=keyword>goal</span> <a href="certif.S.html#wrong"><div class=anchor id="S.wrong"></div>wrong</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>

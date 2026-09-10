@@ -172,6 +172,10 @@ let find_clone ?instance ?source ?target () =
 (* --- Instances                                                          --- *)
 (* -------------------------------------------------------------------------- *)
 
+let by_instance (Instance a) (Instance b) =
+  let cmp = String.compare a.container b.container in
+  if cmp <> 0 then cmp else Int.compare a.order b.order
+
 let skey scope = String.concat "<" scope
 
 let has_instance index ~scope id =

@@ -52,15 +52,11 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <div class=dashboard>
-  <div class=tab>
   <pre class="src crc"><span class=keyword>module</span> <a href="foo.A.html"><div class=anchor id="A"></div>foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc">
     <span class=keyword>axiom</span> <a href="foo.A.html#refl"><div class=anchor id="A.refl"></div>refl</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
     <span class=keyword>instance</span> <a href="bar.B.html#clone-4">bar.B</a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>
-  </div>
-  </div>
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
@@ -117,13 +113,9 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <div class=dashboard>
-  <div class=tab>
   <pre class="src crc"><span class=keyword>module</span> <a href="bar.B.html"><div class=anchor id="B"></div>bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src crc">
-    <span class=keyword>goal</span> <a href="bar.B.html#A.refl"><div class=anchor id="B.A.refl"></div>A.refl</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre></div>
-  </div>
-  <script type="text/javascript" src="script.js"></script>
+    <span class=keyword>goal</span> <a href="bar.B.html#A.refl"><div class=anchor id="B.A.refl"></div>A.refl</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
   <!DOCTYPE html>
@@ -137,13 +129,9 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="bar.index.html">bar</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <div class=dashboard>
-  <div class=tab>
   <pre class="src crc"><span class=keyword>module</span> <a href="bar.B.html"><div class=anchor id="B"></div>bar.B</a><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src crc">
-    <span class=keyword>goal</span> <a href="bar.B.html#A.refl"><div class=anchor id="B.A.refl"></div>A.refl</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre></div>
-  </div>
-  <script type="text/javascript" src="script.js"></script>
+    <span class=keyword>goal</span> <a href="bar.B.html#A.refl"><div class=anchor id="B.A.refl"></div>A.refl</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
   <!DOCTYPE html>
@@ -157,15 +145,11 @@
   <body>
   <header><a href="index.html" title="Index">Index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>proofs</code></header>
   <h1>Proofs</h1>
-  <div class=dashboard>
-  <div class=tab>
   <pre class="src crc"><span class=keyword>module</span> <a href="foo.A.html"><div class=anchor id="A"></div>foo.A</a><span title="2 logic parameters, 1 hypothesis, 1 ground instance" class="icon small valid icofont-star"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc">
     <span class=keyword>axiom</span> <a href="foo.A.html#refl"><div class=anchor id="A.refl"></div>refl</a><span title="witnessed hypothesis" class="icon small valid icofont-star"></span>
     <span class=keyword>instance</span> <a href="bar.B.html#clone-4">bar.B</a><span title="sound instance" class="icon small valid icofont-star"></span>
   </pre>
-  </div>
-  </div>
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>

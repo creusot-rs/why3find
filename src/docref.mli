@@ -36,6 +36,8 @@ type instance = Instance of {
     clones : clone list ; (* clone substitution *)
   }
 
+val by_instance : instance -> instance -> int
+
 type instances
 val find_clone : ?instance:instance -> ?source:Id.t -> ?target:Id.t -> unit -> clone option
 val find_instance : instances -> scope:string list -> Id.t -> instance option
