@@ -12,7 +12,7 @@
 
 type crc =
   | Stuck
-  | Prover of string * string option * float
+  | Prover of string * string * float
   | Tactic of {
       id : string ;
       children : crc list ;
@@ -24,9 +24,7 @@ type crc =
 let stuck = Stuck
 
 let prover (p : Prover.prover) time =
-  let name = p.desc.name in
-  let vers = if p.relaxed then None else Some p.desc.version in
-  Prover(name,vers,time)
+  Prover(p.desc.name,p.desc.version,time)
 
 let get_stuck = function
   | Stuck -> 1
@@ -101,8 +99,7 @@ let pp_checked fmt ~stuck:s ~proved:p =
 
 let pp_status fmt = function
   | Tactic { id } -> Format.pp_print_string fmt id
-  | Prover(p,None,_) -> Format.pp_print_string fmt p
-  | Prover(p,Some v,_) -> Format.fprintf fmt "%s@%s" p v
+  | Prover(p,v,_) -> Format.fprintf fmt "%s@%s" p v
   | Stuck -> Format.pp_print_string fmt "stuck"
 
 let pretty fmt crc =
@@ -186,9 +183,7 @@ let pp_hints fmt = function
 let rec to_json (a : crc) : Json.t =
   match a with
   | Stuck -> `Null
-  | Prover(p,None,t) ->
-    `Assoc [ "prover", `String p ; "time", `Float t]
-  | Prover(p,Some v,t) ->
+  | Prover(p,v,t) ->
     let pv = Printf.sprintf "%s@%s" p v in
     `Assoc [ "prover", `String pv ; "time", `Float t]
   | Tactic { id ; children } ->
@@ -204,7 +199,7 @@ let rec of_json (js : Json.t) : crc =
       let p = List.assoc "prover" fds |> Json.jstring in
       let t = List.assoc "time" fds |> Json.jfloat in
       let p,v = Prover.pattern_of_string p in
-      Prover(p,v,t)
+      Prover(p,Option.value ~default:".0" v,t)
     | `Assoc fds when List.mem_assoc "tactic" fds ->
       let tr = List.assoc "tactic" fds |> Json.jstring in
       let xs = List.assoc "children" fds |> Json.jlist in

@@ -520,7 +520,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             | Crc.Stuck -> ()
             | Tactic { children; _ } -> List.iter check_crc children
             | Prover(name,version,_) ->
-              if Prover.select ~name ?version project.provers = None
+              if Prover.select ~name ~version project.provers = None
               then retval := 1 ;
           in
           let check file =

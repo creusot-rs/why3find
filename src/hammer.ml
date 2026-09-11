@@ -467,7 +467,7 @@ let hammer =
 let period (h : hammer) = h.project.config.time
 
 let try_prover p v t : strategy = fun n ->
-  match Prover.select ~name:p ?version:v n.hammer.project.provers with
+  match Prover.select ~name:p ~version:v n.hammer.project.provers with
   | None -> notfound ()
   | Some p ->
     let period = period n.hammer in

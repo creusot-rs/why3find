@@ -40,7 +40,7 @@ let tactics : (string,int ref) Hashtbl.t = Hashtbl.create 0
 let rec full_stats = function
   | Crc.Stuck -> ()
   | Prover(p,v,t) ->
-    let id = Prover.pattern ~name:p ?version:v () in
+    let id = Prover.pattern ~name:p ~version:v () in
     let stat =
       try Hashtbl.find provers id with Not_found ->
         let s = Stats.create () in
