@@ -516,12 +516,18 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       (* --- Checks ----- *)
       if !check then
         begin
+          let missing = Hashtbl.create 0 in
           let rec check_crc = function
             | Crc.Stuck -> ()
             | Tactic { children; _ } -> List.iter check_crc children
             | Prover(name,version,_) ->
-              if Prover.select ~name ~version project.provers = None
-              then retval := 1 ;
+              let id = Printf.sprintf "%s@%s" name version in
+              if not (Hashtbl.mem missing id) then
+                let status =
+                  if List.exists (Prover.fits ~name ~version) provers then 0
+                  else if List.exists (Prover.fits ~name ?version:None) provers
+                  then 1 else 2
+                in Hashtbl.add missing id status ;
           in
           let check file =
             let iter = Why3.Wstdlib.Mstr.iter in
@@ -529,8 +535,13 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             let path,_ = Wutil.filepath ~root ~file in
             iter (fun _ -> iter (fun _ -> check_crc))
             @@ (Proofs.load ~root ~path ~file ()).strategy
-          in
-          Wenv.allfiles check "."
+          in Wenv.allfiles check "." ;
+          Hashtbl.iter
+            (fun p s ->
+               if s=1 then Log.warning "[hint] prover %s @{<orange>relaxed@}" p ;
+               if s=2 then Log.warning "[hint] prover %s @{<red>discarded@}" p ;
+               if s<>0 then retval := 1 ;
+            ) missing ;
         end ;
       let wmain = Why3.Whyconf.get_main project.whyconf in
       List.iter (check_custom_drivers wmain) provers ;

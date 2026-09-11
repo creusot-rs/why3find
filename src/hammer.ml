@@ -466,11 +466,22 @@ let hammer =
 
 let period (h : hammer) = h.project.config.time
 
+let warn_once = Hashtbl.create 0
+
 let find_prover p v provers =
-  try
-    List.find_opt (Prover.fits ~name:p ~version:v) provers
-  with Not_found ->
-    List.find_opt (Prover.fits ~name:p ?version:None) provers
+  match List.find_opt (Prover.fits ~name:p ~version:v) provers with
+  | Some _ as prv -> prv
+  | None ->
+    let id = Printf.sprintf "%s@%s" p v in
+    let result = List.find_opt (Prover.fits ~name:p ?version:None) provers in
+    if not @@ Hashtbl.mem warn_once id then
+      begin
+        Hashtbl.add warn_once id () ;
+        if result = None
+        then Log.warning "[hint] prover %s @{<red>discarded@}" id
+        else Log.warning "[hint] prover %s @{<orange>relaxed@}" id
+      end ;
+    result
 
 let try_prover p v t : strategy = fun n ->
   match find_prover p v n.hammer.provers with

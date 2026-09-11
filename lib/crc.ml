@@ -199,7 +199,7 @@ let rec of_json (js : Json.t) : crc =
       let p = List.assoc "prover" fds |> Json.jstring in
       let t = List.assoc "time" fds |> Json.jfloat in
       let p,v = Prover.pattern_of_string p in
-      Prover(p,Option.value ~default:".0" v,t)
+      Prover(p,Option.value ~default:"0.0" v,t)
     | `Assoc fds when List.mem_assoc "tactic" fds ->
       let tr = List.assoc "tactic" fds |> Json.jstring in
       let xs = List.assoc "children" fds |> Json.jlist in
