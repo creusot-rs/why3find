@@ -31,6 +31,7 @@
  - Enhanced debugger with forward/backward steps and breakpoints (!201)
  - New command `Open Generated Document` from VSCode extension (!214)
  - LSP now renders proof hints as `(outdated)` for updated files (!218)
+ - LSP now reports proof diagnostics on subgoals (!223)
 
 ### Bug Fixes
 
