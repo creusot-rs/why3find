@@ -56,8 +56,9 @@ let select_tactics prj =
 let select_provers ?patterns prj =
   List.filter_map
     (fun pattern ->
+       let relaxed = Prover.relaxed in
        let name, version = Prover.pattern_of_string pattern in
-       Prover.select ~name ?version ~pattern prj.provers
+       Prover.select ~name ?version ~pattern ~relaxed prj.provers
     ) @@
   match patterns with Some ps -> ps | None -> prj.config.provers
 

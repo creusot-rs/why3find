@@ -38,7 +38,7 @@ val mem : desc -> 'a portfolio -> bool
 val find : desc -> 'a portfolio -> 'a
 val select :
   name:string -> ?version:string -> ?warn:bool -> ?pattern:string ->
-  'a portfolio -> 'a option
+  ?relaxed:('a -> 'a) -> 'a portfolio -> 'a option
 (** No version means the most recent one, if any.
     Does not warn if [~warn:true] and warns with [~pattern] if provided. *)
 
@@ -103,6 +103,7 @@ val version : prover -> string
 val fullname : prover -> string
 val infoname : prover -> string
 val relaxed : prover -> prover
+val fits : name:string -> ?version:string -> prover -> bool
 
 val pp_prover : Format.formatter -> prover -> unit
 (** Prints prover fullname. *)
