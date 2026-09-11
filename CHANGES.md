@@ -10,7 +10,8 @@
  - New CSS style for documentation generator (!210, !220)
  - Support for Markdown maths equations with KaTeX (!211)
  - Proof files are now stored in `why3find.proofs` directory;
-   rerun proofs or check config to automatically upgrade (!218)
+   re-run proofs or check config to automatically upgrade (!218)
+ - Documentation now include proof statistics with treemaps (!222)
 
 ### Command Line Interface
 
