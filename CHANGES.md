@@ -35,7 +35,7 @@
 
 ### Bug Fixes
 
- - Fixed relaxed prover constraints in CRC files (!198)
+ - Fixed relaxed prover constraints in CRC files (!198, !224)
  - Improved time stability in proof witnessess (!204)
  - Fixed invalid configuration file (!215)
  - Fixed parsing of decimal time (!216)
