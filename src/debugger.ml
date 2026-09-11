@@ -21,8 +21,8 @@ let dloc_of_position (p : Why3.Loc.position) : Dap.location =
   let file,l1,c1,l2,c2 = Why3.Loc.get p in
   Dap.loc ~file ~line:(l1-1) ~column:c1 ~end_line:(l2-1) ~end_column:c2 ()
 
-let dloc_of_range ~file ((p,q) : Range.range) : Dap.location =
-  Dap.loc ~file ~line:p.line ~column:p.col ~end_line:q.line ~end_column:q.col ()
+  let dloc_of_range ~file ((p,q) : Range.range) : Dap.location =
+    Dap.loc ~file ~line:p.line ~column:p.col ~end_line:q.line ~end_column:q.col ()
 
 let dloc_of_goal goal =
   let file = Session.file goal in
@@ -566,9 +566,9 @@ let cc_file adapter project gnames file =
   try
     Dap.output adapter "Compiling %s@." file ;
     let root = project.Project.root in
-    let dir, path, lib = Wutil.filepath ~root ~file in
+    let path, lib = Wutil.filepath ~root ~file in
     let theories, format = Wutil.load_theories project.Project.env file in
-    let session = Session.create ~dir ~file ~format theories in
+    let session = Session.create ~file ~format theories in
     let proof = Proofs.load ~move:false ~root ~path ~file () in
     let default = Calibration.default project in
     let profile = Calibration.of_json ~default proof.profile in

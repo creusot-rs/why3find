@@ -11,12 +11,11 @@ open Why3
 (** All recognized extensions. Typically [".mlw"] and other from plugins. *)
 val exts : unit -> string list
 
-val filepath : root:string -> file:string -> string * string * string list
+val filepath : root:string -> file:string -> string * string list
 (**
-   Compute derived path from a source filename relatively to the root,
-   namely dir, path and lib:
+   Compute derived path from a source filename relatively to the root:
     - from [~root:"./project"] and [~file:"project/backup/../foo/bar.mlw"]
-    - returns [( "foo/bar", "foo.bar", ["foo";"bar"] )]
+    - returns [( "foo.bar", ["foo";"bar"] )]
 *)
 
 val list_theories : Theory.theory Wstdlib.Mstr.t -> Theory.theory list

@@ -282,8 +282,8 @@ let stats_session ~file ~path ?subgoals ?lenses ?onStuck strategy session =
 
 let stats_file env ~root ~file =
   let theories, format = Wutil.load_theories env file in
-  let dir, path, _ = Wutil.filepath ~root ~file in
-  let session = Session.create ~dir ~file ~format theories in
+  let path, _ = Wutil.filepath ~root ~file in
+  let session = Session.create ~file ~format theories in
   let Proofs.{ strategy } = Proofs.load ~move:false ~root ~path ~file () in
   stats_session ~file ~path strategy session
 

@@ -440,9 +440,9 @@ let process ~(project:Project.t)
         exit 2
       end ;
     let root = project.root in
-    let dir, path, lib = Wutil.filepath ~root ~file in
+    let path, lib = Wutil.filepath ~root ~file in
     let theories, format = Wutil.load_theories project.env file in
-    let session = Session.create ~dir ~file ~format theories in
+    let session = Session.create ~file ~format theories in
     let move = mode <> `Replay in
     let proof = Proofs.load ~move ~root ~path ~file () in
     let default = Calibration.default project in

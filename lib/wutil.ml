@@ -42,7 +42,7 @@ let filepath ~root ~file =
       match ps, qs with p :: ps , q :: qs when p = q -> reroot ps qs | _ -> qs
     in reroot droot dfile
   in
-  String.concat "/" dir, String.concat "." dir, dir
+  String.concat "." dir, dir
 
 let list_theories tmap =
   let byloc a b =
