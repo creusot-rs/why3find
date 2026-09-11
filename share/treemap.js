@@ -45,7 +45,7 @@ function Why3findTreemap(id, width, height, data) {
   leaf.append("title").text(d => {
     let title = d.data.path;
     if (d.data.status) title += '\n' + d.data.status;
-    const count = (d.data.proved || 0) + (d.data.stuck || 0) ;
+    const count = (d.data.proved || 0) + (d.data.stuck || 0);
     if (d.data.depth || count > 1)
       title += `\nTotal (${count}) (${time(d.data.time)})`;
     return title;
@@ -89,7 +89,9 @@ function Why3findTreemap(id, width, height, data) {
     });
     if (buffer.length) lines.push(buffer);
   }
-  const is_path = /^[a-zA-Z._]+/;
+
+  const pathElement = /^[a-zA-Z][a-zA-Z._]*/;
+  const pathSubgoal = /(.[0-9]+)+/g;
 
   // Set text
   leaf
@@ -100,11 +102,14 @@ function Why3findTreemap(id, width, height, data) {
       const w = Math.round((d.x1 - d.x0 - 12) / 6);
       if (w < 5) return [];
       const lines = [];
-      layout(lines, w, d.data.path.split('.'), '.');
+      let path = d.data.path;
+      let subgoal = path.search(pathSubgoal);
+      if (subgoal > 0) path = path.substring(0, subgoal);
+      layout(lines, w, path.split('.'), '.');
       if (lines.length < h) {
         const status = d.data.status;
         const stats = status ? status.split(' ').filter(d => d !== 'Valid') : [];
-        const count = (d.data.stuck || 0) + (d.data.proved || 0) ;
+        const count = (d.data.stuck || 0) + (d.data.proved || 0);
         if (d.data.count > 1) {
           stats.push(`(${count})`);
           stats.push(`(${time(d.data.time)})`);
@@ -118,7 +123,7 @@ function Why3findTreemap(id, width, height, data) {
     .join("text")
     .attr("x", 5)
     .attr("y", (_, i) => 14 + i * 12)
-    .attr("opacity", txt => is_path.test(txt) ? 1 : 0.5)
+    .attr("opacity", txt => pathElement.test(txt) ? 1 : 0.5)
     .text(txt => txt);
 
 }
