@@ -75,10 +75,12 @@ val parse :
   unit -> source
 
 val source :
-  ?cache:Cache.t ->
   env:Why3.Env.env ->
   henv:Axioms.henv ->
-  root:string -> dir:string -> lib:string list -> path:string -> file:string ->
+  root:string -> lib:string list -> path:string -> file:string ->
+  ?cache:Cache.t ->
+  ?subgoals:bool ->
+  ?onStuck:(Session.goal -> unit) ->
   in_channel -> source
 
 val empty : unit -> source
@@ -96,7 +98,7 @@ type href =
 type position = Lexing.position * Lexing.position
 
 val find_proof : Id.t -> theory option -> Crc.crc option
-val reload_proofs : source -> unit
+val reload_proofs : ?onStuck:(Session.goal -> unit) -> source -> unit
 
 val resolve :
   src:source -> theory:theory option -> infix:bool ->

@@ -120,24 +120,26 @@ let register ?(force=false) name fn =
 let process_request adapter ~seq command arguments =
   begin
     if !trace then Format.eprintf "@[<hov 2>REQUEST %S %a@]@." command Json.pretty arguments ;
-    match Hashtbl.find protocol command adapter arguments with
-    | body ->
-      send_response adapter ~seq command body
-    | exception Exit ->
-      send_response adapter ~seq command `Null
-    | exception Not_found ->
+    match Hashtbl.find_opt protocol command with
+    | None ->
       Log.error "Unsupported command (%s)" command ;
       send_error adapter ~seq command "unsupported"
-    | exception Invalid_argument msg ->
-      Log.error "Invalid argument (%s:%s)" command msg ;
-      send_error adapter ~seq command "invalid"
-    | exception Failure msg ->
-      Log.error "Internal error (%s:%s)" command msg ;
-      send_error adapter ~seq command "failure"
-    | exception err ->
-      let msg = Printexc.to_string err in
-      Log.error "Internal error (%s:%s)" command msg ;
-      send_error adapter ~seq command "failure"
+    | Some handler ->
+      try
+        send_response adapter ~seq command @@ handler adapter arguments
+      with
+      | Exit | Not_found ->
+        send_response adapter ~seq command `Null
+      | Invalid_argument msg ->
+        Log.error "Invalid argument (%s:%s)" command msg ;
+        send_error adapter ~seq command "invalid"
+      | Failure msg ->
+        Log.error "Internal error (%s:%s)" command msg ;
+        send_error adapter ~seq command "failure"
+      | err ->
+        let msg = Printexc.to_string err in
+        Log.error "Internal error (%s:%s)" command msg ;
+        send_error adapter ~seq command "failure"
   end
 
 let process adapter =
@@ -441,6 +443,12 @@ let () = register "locations"
       let r = Json.jfield "locationReference" args |> Json.jint in
       Json.assoc @@ js_sourcefields @@ Hashtbl.find locations r
     end
+
+(* -------------------------------------------------------------------------- *)
+(* ---  Source                                                            --- *)
+(* -------------------------------------------------------------------------- *)
+
+let () = register "source" (fun _adapter _args -> `Null)
 
 (* -------------------------------------------------------------------------- *)
 (* ---  Breakpoints                                                       --- *)

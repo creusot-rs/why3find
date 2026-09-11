@@ -48,6 +48,17 @@ let range_of_pos ((p,q) : lexpos) : string * Range.range =
   let q = Range.at ~line:(q.pos_lnum - 1) ~col:(q.pos_cnum - q.pos_bol) () in
   file , (p,q)
 
+let onStuck ~file diagnostics (g : Session.goal) =
+  match Session.target g with
+  | None -> ()
+  | Some loc ->
+    let (f,range) = of_loc loc in
+    if f = file then
+      let severity = `Warning in
+      let message = Printf.sprintf "%s: No Proof" (Session.fullname g) in
+      let diag = Lspserver.diagnostic ~range ~severity ~message () in
+      diagnostics := diag :: !diagnostics
+
 let preprocess file diagnostics =
   try
     let warning (f,range) message =
@@ -79,10 +90,12 @@ let preprocess file diagnostics =
     let project = Wenv.init ~root config in
     let env = project.env in
     let henv = Axioms.init project in
-    let dir,path,lib = Wutil.filepath ~root ~file in
+    let path,lib = Wutil.filepath ~root ~file in
     let cache = Cache.create ~root () in
-    let parser = Docref.source ~cache ~env ~henv ~root ~dir ~lib ~path ~file in
-    let src = Utils.input ~file parser in
+    let src =
+      Utils.input ~file @@
+      Docref.source ~cache ~env ~henv ~root ~lib ~path ~file
+        ~subgoals:true ~onStuck:(onStuck ~file diagnostics) in
     let types =
       Why3.Wstdlib.Mstr.fold
         (fun _ (t : Docref.theory) d ->
@@ -573,14 +586,19 @@ let () = Lspserver.on_file_event
     begin fun channel ~uri _evt ->
       match Lspserver.to_file ~uri with
       | None -> ()
-      | Some file ->
-        if Filename.check_suffix file ".json"
-        || Filename.check_suffix file ".crc"
+      | Some updated ->
+        if Filename.check_suffix updated ".json"
+        || Filename.check_suffix updated ".crc"
         then
           try
-            let source = watched file in
-            Docref.reload_proofs source.src ;
+            let source = watched updated in
+            let file = source.src.file in
+            let uri = Lspserver.to_uri ~filename:file in
+            let diagnostics = ref [] in
+            let onStuck = onStuck ~file diagnostics in
+            Docref.reload_proofs ~onStuck source.src ;
             Lspserver.refresh_codelens channel ;
+            Lspserver.publish_diagnostic channel ~uri !diagnostics ;
           with _ -> ()
     end
 

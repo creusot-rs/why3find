@@ -13,7 +13,6 @@
 type session
 
 val create :
-  dir:string ->
   file:string ->
   format:string ->
   Why3.Theory.theory list ->

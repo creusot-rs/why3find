@@ -149,7 +149,7 @@ let bind env ?goal id children =
     | g::gs , c::cs -> (k,Some g,c) :: pairwise (succ k) gs cs
   in pairwise 0 goals children
 
-let rec stats_crc env ~file ~url ~path ~name (k,goal,crc) : Json.t =
+let rec stats_crc env ~file ~url ~path ~name ~onStuck (k,goal,crc) : Json.t =
   let loc = Option.bind goal Session.target in
   let path = Printf.sprintf "%s.%d" path (succ k) in
   let status = Format.asprintf "%a" Crc.pp_hint crc in
@@ -161,7 +161,9 @@ let rec stats_crc env ~file ~url ~path ~name (k,goal,crc) : Json.t =
   ] in
   let stats =
     match crc with
-    | Crc.Stuck -> [
+    | Crc.Stuck ->
+      Option.iter (fun f -> Option.iter f goal) onStuck ;
+      [
         "time" , `Float 1.0 ; (* fake *)
         "stuck", `Int 1 ;
       ]
@@ -176,12 +178,12 @@ let rec stats_crc env ~file ~url ~path ~name (k,goal,crc) : Json.t =
         "proved" , Json.optint proved ;
         "tactic" , `String id ;
         "children" , Json.list_map
-          (stats_crc env ~file ~url ~path ~name)
+          (stats_crc env ~file ~url ~path ~name ~onStuck)
           (bind env ?goal id children) ;
       ]
   in jnode (base @ stats)
 
-let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
+let stats_goal proofs ?subgoals ?lenses ?onStuck ~file ~path ~url (goal : Session.goal) =
   let name = Session.name goal in
   let crc = Why3.Wstdlib.Mstr.find_def Crc.stuck name proofs in
   let infix = Id.of_infix @@ name in
@@ -202,14 +204,17 @@ let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
     "location", jsloc ~file loc ;
   ] in
   match crc with
-  | Crc.Stuck -> {
+  | Crc.Stuck ->
+    Option.iter (fun f -> f goal) onStuck ;
+    {
       json = Json.assoc @@ base @ [
           "time", `Float 1.0 ; (* fake *)
           "stuck" , `Int 1 ;
         ] ;
       stuck = 1 ; proved = 0 ; time = 0.0 ;
     }
-  | Crc.Prover(_,_,time) -> {
+  | Crc.Prover(_,_,time) ->
+    {
       json = Json.assoc @@ base @ [
           "time", `Float time ;
           "proved", `Int 1 ;
@@ -218,9 +223,9 @@ let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
     }
   | Crc.Tactic { time ; stuck ; proved ; depth ; id ; children } ->
     let children =
-      match env with None -> `Null | Some env ->
+      match subgoals with None -> `Null | Some env ->
         Json.list_map
-          (stats_crc env ~url ~file ~path ~name)
+          (stats_crc env ~url ~file ~path ~name ~onStuck)
           (bind env ~goal id children)
     in {
       json = jnode @@ base @ [
@@ -233,7 +238,7 @@ let stats_goal proofs ?env ?lenses ~file ~path ~url (goal : Session.goal) =
       stuck ; proved ; time ;
     }
 
-let stats_theory ?env ?lenses ~file ~path ?(local=false)
+let stats_theory ?subgoals ?lenses ?onStuck ~file ~path
     (strategy : Proofs.strategy)
     (thy : Session.theory) =
   let name = Session.thy_name thy in
@@ -244,8 +249,9 @@ let stats_theory ?env ?lenses ~file ~path ?(local=false)
   let proofs = Why3.Wstdlib.Mstr.(find_def empty name strategy) in
   let goals = Session.split thy in
   let url = Printf.sprintf "%s.%s.html" path name in
-  let path = if local then name else Printf.sprintf "%s.%s" path name in
-  let jstats = jmap (stats_goal proofs ?env ?lenses ~file ~path ~url) goals in
+  let path = if subgoals = None then Printf.sprintf "%s.%s" path name else name in
+  let jstats =
+    jmap (stats_goal proofs ?subgoals ?lenses ?onStuck ~file ~path ~url) goals in
   let json = jnode [
       "path", `String path ;
       "file", `String file ;
@@ -258,9 +264,10 @@ let stats_theory ?env ?lenses ~file ~path ?(local=false)
     ]
   in { jstats with json }
 
-let stats_session ~file ~path ?local ?env ?lenses strategy session =
+let stats_session ~file ~path ?subgoals ?lenses ?onStuck strategy session =
   let theories = Session.theories session in
-  let jstats = jmap (stats_theory ?env ?lenses strategy ~file ~path ?local) theories in
+  let jstats = jmap
+      (stats_theory ?subgoals ?lenses ?onStuck strategy ~file ~path) theories in
   let url = Printf.sprintf "%s.html" path in
   let json = jnode [
       "path", `String path ;
@@ -275,8 +282,8 @@ let stats_session ~file ~path ?local ?env ?lenses strategy session =
 
 let stats_file env ~root ~file =
   let theories, format = Wutil.load_theories env file in
-  let dir, path, _ = Wutil.filepath ~root ~file in
-  let session = Session.create ~dir ~file ~format theories in
+  let path, _ = Wutil.filepath ~root ~file in
+  let session = Session.create ~file ~format theories in
   let Proofs.{ strategy } = Proofs.load ~move:false ~root ~path ~file () in
   stats_session ~file ~path strategy session
 

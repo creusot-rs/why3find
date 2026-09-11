@@ -1257,7 +1257,7 @@ let process_source_treemap out (src : Docref.source) =
   Option.iter begin fun (env,session) ->
     let Docref.{ file ; path ; strategy } = src in
     let stats =
-      Proofstats.stats_session ~env ~path ~local:true ~file strategy session in
+      Proofstats.stats_session ~subgoals:env ~path ~file strategy session in
     if not @@ Proofstats.is_empty stats then
       begin
         let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in

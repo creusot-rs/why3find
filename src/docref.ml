@@ -272,7 +272,7 @@ let zip_goals thy proofs =
     Mstr.empty
     (Why3.Task.split_theory thy None None)
 
-let reload_proofs source =
+let reload_proofs ?onStuck source =
   begin
     let { file ; root ; path } = source in
     let crc = Proofs.load ~move:false ~root ~path ~file () in
@@ -290,10 +290,11 @@ let reload_proofs source =
          source.outdated <- Cache.outdated cache ~path ~file ~proof ;
       ) source.cache ;
     Option.iter
-      (fun (_,session) ->
+      (fun (env,session) ->
          source.statistics <-
            Proofstats.stats_session
-             ~lenses:source.lenses ~path ~file crc.strategy session
+             ~subgoals:env ?onStuck ~lenses:source.lenses
+             ~path ~file crc.strategy session
       ) source.session
   end
 
@@ -316,7 +317,8 @@ let empty () = {
   outdated = true ;
 }
 
-let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
+let source ~env ~henv ~root ~lib ~path ~file
+    ?cache ?(subgoals=false) ?onStuck inc =
   let globals = Why3.Debug.test_flag Why3.Glob.flag in
   try
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
@@ -324,7 +326,7 @@ let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
     let format = Why3.Env.get_format file in
     let tmap = Why3.Env.read_channel Why3.Env.base_language env file inc in
     let theories = Wutil.list_theories tmap in
-    let session = Session.create ~dir ~file ~format theories in
+    let session = Session.create ~file ~format theories in
     let crc = Proofs.load ~move:false ~root ~path ~file () in
     let theories =
       Mstr.mapi
@@ -357,8 +359,9 @@ let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
     in
     let strategy = crc.strategy in
     let lenses = Hashtbl.create 0 in
-    let statistics =
-      Proofstats.stats_session ~path ~file ~lenses strategy session in
+    let subgoals = if subgoals then Some env else None in
+    let statistics = Proofstats.stats_session ~path ~file ~lenses
+        ?subgoals ?onStuck strategy session in
     let session = Some (env,session) in
     { file ; lib ; root ; path ; theories ; lenses ;
       cache ; session ; strategy ; outdated ; statistics }
@@ -372,10 +375,10 @@ let parse ~cache ~env ~henv ~root ~file () =
       Log.error "invalid file name: %S" file ;
       exit 2
     end ;
-  let dir,path,lib = Wutil.filepath ~root ~file in
+  let path,lib = Wutil.filepath ~root ~file in
   try
     let inc = open_in file in
-    let src = source ~cache ~env ~henv ~lib ~root ~path ~dir ~file inc in
+    let src = source ~cache ~env ~henv ~lib ~root ~path ~file inc in
     close_in inc ; src
   with exn ->
     Log.error "%s" (Printexc.to_string exn) ;
