@@ -32,9 +32,9 @@ val jmap : ('a -> jstats) -> 'a list -> jstats
 val stats_session :
   file:string ->
   path:string ->
-  ?local:bool ->
-  ?env:Why3.Env.env ->
+  ?subgoals:Why3.Env.env ->
   ?lenses:(int,string) Hashtbl.t ->
+  ?onStuck:(Session.goal -> unit) ->
   Proofs.strategy -> Session.session -> jstats
 
 val statistics : root:string -> env:Why3.Env.env -> files:string list -> jstats

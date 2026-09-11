@@ -316,7 +316,8 @@ let empty () = {
   outdated = true ;
 }
 
-let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
+let source ~env ~henv ~root ~dir ~lib ~path ~file
+    ?cache ?(subgoals=false) ?onStuck inc =
   let globals = Why3.Debug.test_flag Why3.Glob.flag in
   try
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
@@ -357,8 +358,9 @@ let source ?cache ~env ~henv ~root ~dir ~lib ~path ~file inc =
     in
     let strategy = crc.strategy in
     let lenses = Hashtbl.create 0 in
-    let statistics =
-      Proofstats.stats_session ~path ~file ~lenses strategy session in
+    let subgoals = if subgoals then Some env else None in
+    let statistics = Proofstats.stats_session ~path ~file ~lenses
+        ?subgoals ?onStuck strategy session in
     let session = Some (env,session) in
     { file ; lib ; root ; path ; theories ; lenses ;
       cache ; session ; strategy ; outdated ; statistics }

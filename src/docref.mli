@@ -75,10 +75,12 @@ val parse :
   unit -> source
 
 val source :
-  ?cache:Cache.t ->
   env:Why3.Env.env ->
   henv:Axioms.henv ->
   root:string -> dir:string -> lib:string list -> path:string -> file:string ->
+  ?cache:Cache.t ->
+  ?subgoals:bool ->
+  ?onStuck:(Session.goal -> unit) ->
   in_channel -> source
 
 val empty : unit -> source
