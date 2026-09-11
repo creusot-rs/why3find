@@ -31,7 +31,7 @@ let create () = {
 let rec add_crc ps (crc : Crc.crc) =
   match crc with
   | Stuck -> ps.failed <- succ ps.failed
-  | Prover (p, _, t) ->
+  | Prover (p,_,t) ->
     ps.time <- t +. ps.time;
     ps.proved <- succ ps.proved ;
     let s =
