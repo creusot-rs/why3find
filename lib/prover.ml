@@ -104,14 +104,14 @@ let warn_prover_not_found =
   Why3.Wstdlib.Hstr.memo 5 (fun p -> Log.warning "prover %s not found" p)
 
 let select
-    ~name ?version ?(warn=true) ?pattern:spec
+    ~name ?version ?(warn=true) ?pattern:spec ?(relaxed=Fun.id)
     (m : 'a portfolio) : 'a option =
   try
     let w = Smap.find name m in
     let a =
       match version with
       | Some v -> Vmap.find v w
-      | None -> snd @@ Vmap.min_binding w
+      | None -> relaxed @@ snd @@ Vmap.min_binding w
     in Some a
   with Not_found ->
     if warn then
@@ -357,6 +357,10 @@ let version prv = prv.desc.version
 let fullname p = Format.sprintf "%s@%s" (name p) (version p)
 let infoname p = Format.sprintf "%s(%s)" (name p) (version p)
 let pp_prover fmt p = Format.fprintf fmt "%s@%s" (name p) (version p)
+
+let fits ~name ?version p =
+  p.desc.name = name &&
+  match version with None -> true | Some v -> p.desc.version = v
 
 (* Digest the file that why3 will load *)
 let digest_driver main (dir, name) =

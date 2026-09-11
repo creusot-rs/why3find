@@ -12,7 +12,7 @@
 
 type crc = private
   | Stuck
-  | Prover of string * string option * float
+  | Prover of string * string * float
   | Tactic of {
       id : string ;
       children : crc list ;

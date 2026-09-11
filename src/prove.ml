@@ -39,12 +39,11 @@ let tactics : (string,int ref) Hashtbl.t = Hashtbl.create 0
 
 let rec full_stats = function
   | Crc.Stuck -> ()
-  | Prover(p,v,t) ->
-    let id = Prover.pattern ~name:p ?version:v () in
+  | Prover(p,_,t) ->
     let stat =
-      try Hashtbl.find provers id with Not_found ->
+      try Hashtbl.find provers p with Not_found ->
         let s = Stats.create () in
-        Hashtbl.add provers id s ; s
+        Hashtbl.add provers p s ; s
     in Stats.add stat t
   | Tactic { id ; children } ->
     let stat =
@@ -166,24 +165,29 @@ let print_stats allprovers alltactics fmt =
       end ;
     if !btime > 0.0 || !bdepth > 0 then
       Format.fprintf fmt "Provers %t%t@\n" print_time print_depth ;
+    let width = ref 0 in
+    let size a = width := max !width (String.length a) in
+    let prvs =
+      List.sort_uniq String.compare @@
+      List.map (fun p -> let a = Prover.name p in size a ; a) allprovers in
+    List.iter (fun a -> size (Tactic.name a)) alltactics ;
     List.iter
-      (fun (prv : Prover.prover) ->
+      (fun prv ->
          try
-           let id = Prover.(if prv.relaxed then name prv else fullname prv) in
-           let s = Hashtbl.find provers id in
+           let s = Hashtbl.find provers prv in
            Format.fprintf fmt " - %a (%4d) (%a - %a - %a)@\n"
-             (Utils.pp_left 20) id (Stats.count s)
+             (Utils.pp_left !width) prv (Stats.count s)
              Utils.pp_rtime (Stats.min s)
              Utils.pp_rtime (Stats.average s)
              Utils.pp_rtime (Stats.max s)
          with Not_found -> ()
-      ) allprovers ;
+      ) prvs ;
     List.iter
       (fun (tac : Tactic.tactic) ->
          try
            let id = Tactic.name tac in
            let s = Hashtbl.find tactics id in
-           Format.fprintf fmt " - %-20s (%4d)@\n" id !s
+           Format.fprintf fmt " - %a (%4d)@\n" (Utils.pp_left !width) id !s
          with Not_found -> ()
       ) alltactics ;
     Format.pp_print_flush fmt ()
