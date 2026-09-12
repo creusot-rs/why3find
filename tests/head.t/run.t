@@ -21,7 +21,7 @@
   <a class="toc3" href="#_5">Title E</a>
   <a class="toc2" href="#_6">Title F</a>
   </nav>
-  <header><a href="index.html" title="Index">Index</a> — <code>library a</code></header>
+  <header><a href="index.html" title="Index">Head.t</a> — <code>library a</code></header>
   <div class=doc>
   <p>Testing Headings.</p>
   <h1><a><div class=anchor id="_1"></div>Title A</a></h1>

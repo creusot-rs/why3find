@@ -16,13 +16,13 @@
       src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.18.5/katex.min.js"
       integrity="sha512-yRrA0fXbfdjHDJXBxj4ABSlaLGZk5HOm5qpvXx6GEjR1t5yCLdenOvN9hzHZhrznHyHVKuIK+QltSR4gc//lQA=="
       crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <title>Index — foo</title>
+  <title>Katex.t — foo</title>
   </head>
   <body>
   <nav>
   <a class="toc1" href="#_1">Test for Maths</a>
   </nav>
-  <header><a href="index.html" title="Index">Index</a> — Test for Maths
+  <header><a href="index.html" title="Index">Katex.t</a> — Test for Maths
          </header>
   <div class=doc>
   <h1><a><div class=anchor id="_1"></div>Test for Maths</a></h1>
@@ -43,7 +43,7 @@
   <title>Library foo</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library foo</code></header>
+  <header><a href="index.html" title="Index">Katex.t</a> — <code>library foo</code></header>
   <pre class=src><span class=keyword>module</span> <a title="foo.Foo" href="foo.Foo.html">Foo</a><a href="foo.proof.html#Foo" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="foo.proof.html#Foo" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -67,7 +67,7 @@
   <title>Module foo.Foo</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>module Foo</code></header>
+  <header><a href="index.html" title="Index">Katex.t</a> — <code>library <a href="foo.index.html">foo</a></code> — <code>module Foo</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>Foo</span><a href="foo.proof.html#Foo" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="foo.proof.html#Foo" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>use</span> real.<a title="real.Real" href="https://www.why3.org/stdlib/real.html#Real_">Real</a>

@@ -10,10 +10,10 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <title>Index</title>
+  <title>Depends.t</title>
   </head>
   <body>
-  <header>Index</header>
+  <header>Depends.t</header>
   <div class=dashboard>
   <div class=tab>
   <h1>Development</h1>

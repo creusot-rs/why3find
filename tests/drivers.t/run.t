@@ -10,7 +10,7 @@
   <title>Module drivers.A</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Drivers.t</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>module A</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>A</span><a href="drivers.proof.html#A" title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></a><a href="drivers.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
@@ -32,7 +32,7 @@
   <title>Library drivers</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Drivers.t</a> — <code>library <a href="drivers.index.html">drivers</a></code> — <code>proofs</code></header>
   <div class=doc><h1>Proofs</h1></div>
   <pre class="src crc"><span class=keyword>module</span> <a href="drivers.A.html"><div class=anchor id="A"></div>drivers.A</a><span title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc">

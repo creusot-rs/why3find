@@ -13,7 +13,7 @@
   <title>Library a</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library a</code></header>
+  <header><a href="index.html" title="Index">Style.t</a> — <code>library a</code></header>
   <div class=doc>
   <p>Testing Documentation.</p>
   <p>This is <em>emph text</em>.</p>

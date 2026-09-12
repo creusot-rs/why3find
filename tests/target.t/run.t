@@ -16,7 +16,7 @@
   <title>Module target.B</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="target.index.html">target</a></code> — <code>module B</code></header>
+  <header><a href="index.html" title="Index">Target.t</a> — <code>library <a href="target.index.html">target</a></code> — <code>module B</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>B</span><a href="target.proof.html#B" title="7 logic parameters, 9 hypotheses, no instance found" class="icon small warning icofont-warning-alt"></a><a href="target.proof.html#B" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -36,7 +36,7 @@
         <span class=comment>(* cloned <a id="clone-14" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A1.r&#013;(cloned from target.A.r)"><div class=anchor id="A1.r"></div>A1.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A1.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A1.pq"></div>A1.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
-        <span class=codelense>No proof</span>
+        <a href="target.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="target.A.html#qr" title="target.B.A1.qr&#013;(cloned from target.A.qr)"><div class=anchor id="A1.qr"></div>A1.qr</a><a href="target.proof.html#B.A1.qr" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>
@@ -45,7 +45,7 @@
         <span class=comment>(* cloned <a id="clone-20" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A2.r&#013;(cloned from target.A.r)"><div class=anchor id="A2.r"></div>A2.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A2.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A2.pq"></div>A2.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
-        <span class=codelense>No proof</span>
+        <a href="target.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="target.A.html#qr" title="target.B.A2.qr&#013;(cloned from target.A.qr)"><div class=anchor id="A2.qr"></div>A2.qr</a><a href="target.proof.html#B.A2.qr" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>
@@ -54,7 +54,7 @@
         <span class=comment>(* cloned <a id="clone-26" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A3.r&#013;(cloned from target.A.r)"><div class=anchor id="A3.r"></div>A3.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A3.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A3.pq"></div>A3.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
-        <span class=codelense>No proof</span>
+        <a href="target.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="target.A.html#qr" title="target.B.A3.qr&#013;(cloned from target.A.qr)"><div class=anchor id="A3.qr"></div>A3.qr</a><a href="target.proof.html#B.A3.qr" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>
@@ -63,7 +63,7 @@
         <span class=comment>(* cloned <a id="clone-32" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A4.r&#013;(cloned from target.A.r)"><div class=anchor id="A4.r"></div>A4.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A4.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A4.pq"></div>A4.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
-        <span class=codelense>No proof</span>
+        <a href="target.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="target.A.html#qr" title="target.B.A4.qr&#013;(cloned from target.A.qr)"><div class=anchor id="A4.qr"></div>A4.qr</a><a href="target.proof.html#B.A4.qr" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a> <span class="comment">(* spaced *)</span>
@@ -72,7 +72,7 @@
         <span class=comment>(* cloned <a id="clone-38" href="target.A.html">target.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="target.A.html#r" title="target.B.A5.r&#013;(cloned from target.A.r)"><div class=anchor id="A5.r"></div>A5.r</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int
         <span class=keyword>axiom</span> <a href="target.A.html#pq" title="target.B.A5.pq&#013;(cloned from target.A.pq)"><div class=anchor id="A5.pq"></div>A5.pq</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
-        <span class=codelense>No proof</span>
+        <a href="target.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="target.A.html#qr" title="target.B.A5.qr&#013;(cloned from target.A.qr)"><div class=anchor id="A5.qr"></div>A5.qr</a><a href="target.proof.html#B.A5.qr" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="1 logic parameter, 1 hypothesis" class="icon small warning icofont-warning-alt"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>predicate</span> <a title="target.A.p" href="target.A.html#p">p</a><a href="#p" title="target.B.p" class="icon small remark icofont-question-circle"></a>, <span class=keyword>axiom</span> <a title="target.A.pq" href="target.A.html#pq">pq</a>, <span class=keyword>predicate</span> <a title="target.A.q" href="target.A.html#q">q</a> = Q.<a title="target.Q.q" href="target.Q.html#q">q</a>, <span class=keyword>type</span> <a title="target.A.a" href="target.A.html#a">a</a> = int

@@ -16,7 +16,7 @@
   <title>Module clones.AC</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module AC</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module AC</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>AC</span><a href="clones.proof.html#AC" title="2 logic parameters, 2 hypotheses, 1 ground instance" class="icon small valid icofont-star"></a><a href="clones.proof.html#AC" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>clone</span> <span class=keyword>export</span> <a title="clones.Monoid" href="clones.Monoid.html">Monoid</a> <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
@@ -54,7 +54,7 @@
   <title>Module clones.Associative</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Associative</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Associative</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>Associative</span><a href="clones.proof.html#Associative" title="2 logic parameters, 1 hypothesis, 3 ground instances" class="icon small valid icofont-star"></a><a href="clones.proof.html#Associative" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>clone</span> <span class=keyword>export</span> <a title="clones.Monoid" href="clones.Monoid.html">Monoid</a> <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
@@ -79,7 +79,7 @@
   <title>Module clones.Commutative</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Commutative</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Commutative</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>Commutative</span><a href="clones.proof.html#Commutative" title="2 logic parameters, 1 hypothesis, 4 ground instances" class="icon small valid icofont-star"></a><a href="clones.proof.html#Commutative" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>clone</span> <a title="clones.Monoid" href="clones.Monoid.html">Monoid</a> <span class=keyword>as</span> M <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
@@ -104,7 +104,7 @@
   <title>Module clones.IntA</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module IntA</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module IntA</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>IntA</span><a href="clones.proof.html#IntA" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -112,7 +112,7 @@
       <span class="comment section-toggle">begin</span>
         <span class=comment>(* cloned <a id="clone-1" href="clones.Monoid.html">clones.Monoid</a> *)</span>
         <span class=comment>(* cloned <a id="clone-4" href="clones.Associative.html">clones.Associative</a> *)</span>
-        <span class=codelense>No proof</span>
+        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.Associative.html#associative" title="clones.IntA.Associative.associative&#013;(cloned from clones.Associative.associative)"><div class=anchor id="Associative.associative"></div>Associative.associative</a><a href="clones.proof.html#IntA.Associative.associative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="clones.Associative.t" href="clones.Associative.html#t">t</a> = int, <span class=keyword>function</span> <a title="clones.Associative.op" href="clones.Associative.html#op">op</a> = (<a title="int.Int.(+)" href="https://www.why3.org/stdlib/int.html#infix%20+_19">+</a>)
@@ -130,7 +130,7 @@
   <title>Module clones.IntAC</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module IntAC</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module IntAC</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>IntAC</span><a href="clones.proof.html#IntAC" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -142,9 +142,9 @@
         <span class=comment>(* cloned <a id="clone-6" href="clones.Monoid.html">clones.Monoid</a> *)</span>
         <span class=comment>(* cloned <a id="clone-9" href="clones.Associative.html">clones.Associative</a> *)</span>
         <span class=comment>(* cloned <a id="clone-10" href="clones.AC.html">clones.AC</a> *)</span>
-        <span class=codelense>No proof</span>
+        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.AC.html#commutative" title="clones.IntAC.commutative&#013;(cloned from clones.AC.commutative)"><div class=anchor id="commutative"></div>commutative</a><a href="clones.proof.html#IntAC.commutative" title="Failed (no proof)" class="icon failed icofont-error"></a>
-        <span class=codelense>No proof</span>
+        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.AC.html#associative" title="clones.IntAC.associative&#013;(cloned from clones.AC.associative)"><div class=anchor id="associative"></div>associative</a><a href="clones.proof.html#IntAC.associative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="clones.AC.t" href="clones.AC.html#t">t</a> = int, <span class=keyword>function</span> <a title="clones.AC.op" href="clones.AC.html#op">op</a> = (<a title="int.Int.(+)" href="https://www.why3.org/stdlib/int.html#infix%20+_19">+</a>)
@@ -162,7 +162,7 @@
   <title>Module clones.IntC</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module IntC</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module IntC</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>IntC</span><a href="clones.proof.html#IntC" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -170,7 +170,7 @@
       <span class="comment section-toggle">begin</span>
         <span class=comment>(* cloned <a id="clone-1" href="clones.Monoid.html">clones.Monoid</a> *)</span>
         <span class=comment>(* cloned <a id="clone-4" href="clones.Commutative.html">clones.Commutative</a> *)</span>
-        <span class=codelense>No proof</span>
+        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.Commutative.html#commutative" title="clones.IntC.S.commutative&#013;(cloned from clones.Commutative.commutative)"><div class=anchor id="S.commutative"></div>S.commutative</a><a href="clones.proof.html#IntC.S.commutative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> M.<a title="clones.Commutative.M.t" href="clones.Commutative.html#M.t">t</a> = int, <span class=keyword>function</span> M.<a title="clones.Commutative.M.op" href="clones.Commutative.html#M.op">op</a> = (+)
@@ -178,7 +178,7 @@
       <span class="comment section-toggle">begin</span>
         <span class=comment>(* cloned <a id="clone-5" href="clones.Monoid.html">clones.Monoid</a> *)</span>
         <span class=comment>(* cloned <a id="clone-8" href="clones.Commutative.html">clones.Commutative</a> *)</span>
-        <span class=codelense>No proof</span>
+        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.Commutative.html#commutative" title="clones.IntC.P.commutative&#013;(cloned from clones.Commutative.commutative)"><div class=anchor id="P.commutative"></div>P.commutative</a><a href="clones.proof.html#IntC.P.commutative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> M.<a title="clones.Commutative.M.t" href="clones.Commutative.html#M.t">t</a> = int, <span class=keyword>function</span> M.<a title="clones.Commutative.M.op" href="clones.Commutative.html#M.op">op</a> = (*)
@@ -196,7 +196,7 @@
   <title>Module clones.Monoid</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Monoid</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Monoid</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>Monoid</span><a href="clones.proof.html#Monoid" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="clones.proof.html#Monoid" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
@@ -215,7 +215,7 @@
   <title>Module clones.Neutral</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Neutral</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module Neutral</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>Neutral</span><a href="clones.proof.html#Neutral" title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#Neutral" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>clone</span> <span class=keyword>export</span> <a title="clones.Monoid" href="clones.Monoid.html">Monoid</a> <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
@@ -241,7 +241,7 @@
   <title>Library clones</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library clones</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library clones</code></header>
   <pre class=src><span class=keyword>module</span> <a title="clones.Monoid" href="clones.Monoid.html">Monoid</a><a href="clones.proof.html#Monoid" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="clones.proof.html#Monoid" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <pre class=src><span class=keyword>module</span> <a title="clones.Neutral" href="clones.Neutral.html">Neutral</a><a href="clones.proof.html#Neutral" title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#Neutral" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <pre class=src><span class=keyword>module</span> <a title="clones.Commutative" href="clones.Commutative.html">Commutative</a><a href="clones.proof.html#Commutative" title="2 logic parameters, 1 hypothesis, 4 ground instances" class="icon small valid icofont-star"></a><a href="clones.proof.html#Commutative" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
@@ -262,7 +262,7 @@
   <title>Library clones</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Clones.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
   <div class=doc><h1>Proofs</h1></div>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.Monoid.html"><div class=anchor id="Monoid"></div>clones.Monoid</a><span title="2 logic parameters" class="icon small remark icofont-question-circle"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.Neutral.html"><div class=anchor id="Neutral"></div>clones.Neutral</a><span title="3 logic parameters, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></pre>

@@ -13,7 +13,7 @@
   <title>Library a</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library a</code></header>
+  <header><a href="index.html" title="Index">Comments.t</a> — <code>library a</code></header>
   <pre class=src><span class=keyword>module</span> <a title="a.Foo" href="a.Foo.html">Foo</a><a href="a.proof.html#Foo" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -28,7 +28,7 @@
   <title>Module a.Foo</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module Foo</code></header>
+  <header><a href="index.html" title="Index">Comments.t</a> — <code>library <a href="a.index.html">a</a></code> — <code>module Foo</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>Foo</span><a href="a.proof.html#Foo" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class="comment">(* Printed

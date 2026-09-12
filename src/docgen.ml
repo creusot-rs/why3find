@@ -170,7 +170,9 @@ let codeline env ?(offset=0) ?(indent=0) () =
     begin
       let line = Token.line env.input + offset in
       Option.iter
-        (Pdoc.printf env.out "\n%s<span class=codelense>%s</span>" indent)
+        (Pdoc.printf env.out
+           "\n%s<a class=codelense href=\"%s.index.html#proof-stats\">%s</a>"
+           indent env.src.path)
         (Hashtbl.find_opt env.src.lenses line) ;
       Pdoc.printf env.out
         "\n\
@@ -313,7 +315,9 @@ let process_proof env id ?(valid=false) = function
 
 let process_status env indent crc =
   Pdoc.pp env.out Pdoc.pp_spaces indent ;
-  Pdoc.printf env.out "<span class=codelense>%a</span>@\n" Crc.pp_hint crc
+  Pdoc.printf env.out
+    "<a href=\"%s.index.html#proof-stats\" class=codelense>%a</a>@\n"
+    env.src.path Crc.pp_hint crc
 
 (* -------------------------------------------------------------------------- *)
 (* --- Axioms & Parameter                                                 --- *)
@@ -1198,14 +1202,18 @@ let package () =
 (* --- Titling Document                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-let document_header ~file ~page =
+let document_header ~file ?page () =
   try
     String.trim @@
     let header = Utils.input ~file input_line in
     let rec start p = if header.[p] = '#' then start (succ p) else p in
     let p = start 0 in
     if p > 0 then String.sub header p (String.length header - p) else header
-  with _ -> page
+  with _ ->
+    String.capitalize_ascii @@
+    match page with
+    | Some page -> page
+    | None -> Filename.basename @@ Sys.getcwd ()
 
 (* -------------------------------------------------------------------------- *)
 (* --- Markdown File Processing                                           --- *)
@@ -1216,7 +1224,7 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
     let src = Docref.empty () in
     let input = Token.input ~doc:true file in
     let page = Filename.chop_extension @@ Filename.basename file in
-    let header = document_header ~file ~page in
+    let header = document_header ~file ~page () in
     let href = page ^ ".html" in
     let ofile = Filename.concat dir href in
     let page_title = if title <> page then Printf.sprintf "%s — %s" title page else page in
@@ -1259,7 +1267,7 @@ let process_source_treemap out (src : Docref.source) =
       begin
         let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
         Pdoc.printf out
-          "<div class=doc><h1>Proofs</h1></div>@\n\
+          "<div class=doc><h1 id=\"proof-stats\">Statistics</h1></div>@\n\
            <div class=dashboard>@\n<div class=tab>@\n\
            <div class=treemap id=\"%s\"></div>@\n\
            <script type=\"text/javascript\" defer>\
@@ -1386,7 +1394,7 @@ let process_statistics out sources =
           (pp_title "Cumulated time" Utils.pp_rtime) time ;
       if depth > 0 then Pdoc.printf out " (depth %a)"
           (pp_title "Maximal depth" Format.pp_print_int) depth ;
-      Pdoc.printf out "@\n" ;
+      Pdoc.printf out "@\n@\n" ;
       Proofstats.iter_provers
         (fun prv s ->
            Pdoc.printf out "- <b>%a</b> (%a) (%a) (%a — %a — %a)@\n"
@@ -1509,7 +1517,8 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
     shared ~out ~file:"fonts/icofont.woff2" ;
     if treemaps then shared ~out ~file:"treemap.js" ;
     (* Pre-processing *)
-    let title = if title<>"" then title else document_header ~file:"README.md" ~page:"Index" in
+    let title =
+      if title<>"" then title else document_header ~file:"README.md" () in
     let cache = Cache.create ~root:project.root () in
     let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
     (* Doc generation *)

@@ -28,13 +28,13 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <title>Index — main</title>
+  <title>Refs.t — main</title>
   </head>
   <body>
   <nav>
   <a class="toc1" href="#_1">Main Document</a>
   </nav>
-  <header><a href="index.html" title="Index">Index</a> — Main Document
+  <header><a href="index.html" title="Index">Refs.t</a> — Main Document
          </header>
   <div class=doc>
   <h1><a><div class=anchor id="_1"></div>Main Document</a></h1>
@@ -61,7 +61,7 @@
   <title>Library a</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library a</code></header>
+  <header><a href="index.html" title="Index">Refs.t</a> — <code>library a</code></header>
   <div class=doc>
   <p>Infix reference: <code class=src><a title="int.Int.(+)" href="https://www.why3.org/stdlib/int.html#infix%20+_19">int.Int.(+)</a></code></p>
   <p>Prefix reference: <code class=src><a title="int.Int.(-)" href="https://www.why3.org/stdlib/int.html#prefix%20-_18">int.Int.(-_)</a></code></p>
@@ -88,7 +88,7 @@
   <title>Theory a.A</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Refs.t</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
   <pre class=src>
   <span class=keyword>theory</span> <span class=scope>A</span><a href="a.proof.html#A" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
@@ -111,7 +111,7 @@
   <title>Module a.B</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module B</code></header>
+  <header><a href="index.html" title="Index">Refs.t</a> — <code>library <a href="a.index.html">a</a></code> — <code>module B</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>B</span><a href="a.proof.html#B" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
@@ -140,7 +140,7 @@
   <title>Module a.C</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module C</code></header>
+  <header><a href="index.html" title="Index">Refs.t</a> — <code>library <a href="a.index.html">a</a></code> — <code>module C</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>C</span><a href="a.proof.html#C" title="2 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#C" title="Valid (no goals)" class="icon remark icofont-check"></a>
     <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>

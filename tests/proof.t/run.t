@@ -10,7 +10,7 @@
   <title>Module clones.A</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Proof.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module A</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>A</span><a href="clones.proof.html#A" title="3 logic parameters, 2 hypotheses, 1 incomplete instance" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#A" title="Valid (one goal)" class="icon valid icofont-check"></a>
   
@@ -36,7 +36,7 @@
   <title>Module clones.B</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module B</code></header>
+  <header><a href="index.html" title="Index">Proof.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>module B</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>B</span><a href="clones.proof.html#B" title="1 logic parameter, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></a><a href="clones.proof.html#B" title="Valid (one goal)" class="icon valid icofont-check"></a>
     <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
@@ -45,7 +45,7 @@
         <span class=comment>(* cloned <a id="clone-8" href="clones.A.html">clones.A</a> *)</span>
         <span class=keyword>function</span> <a href="clones.A.html#e" title="clones.B.A.e&#013;(cloned from clones.A.e)"><div class=anchor id="A.e"></div>A.e</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : int
         <span class=keyword>axiom</span> <a href="clones.A.html#neutral" title="clones.B.A.neutral&#013;(cloned from clones.A.neutral)"><div class=anchor id="A.neutral"></div>A.neutral</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
-        <span class=codelense>Valid (alt-ergo)</span>
+        <a href="clones.index.html#proof-stats" class=codelense>Valid (alt-ergo)</a>
         <span class=keyword>lemma</span> <a href="clones.A.html#commutative" title="clones.B.A.commutative&#013;(cloned from clones.A.commutative)"><div class=anchor id="A.commutative"></div>A.commutative</a><a href="clones.proof.html#B.A.commutative" title="Valid (one goal)" class="icon valid icofont-check"></a>
         <span class=keyword>lemma</span> <a href="clones.A.html#neutral_com" title="clones.B.A.neutral_com&#013;(cloned from clones.A.neutral_com)"><div class=anchor id="A.neutral_com"></div>A.neutral_com</a><span title="cloned" class="icon remark icofont-check"></span>
       <span class="comment section-toggle">end</span>
@@ -65,7 +65,7 @@
   <title>Module certif.S</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>module S</code></header>
+  <header><a href="index.html" title="Index">Proof.t</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>module S</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>S</span><a href="certif.proof.html#S" title="Partial proof (6/10 goals)" class="icon warning icofont-error"></a>
   
@@ -117,7 +117,7 @@
   <title>Library clones</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Proof.t</a> — <code>library <a href="clones.index.html">clones</a></code> — <code>proofs</code></header>
   <div class=doc><h1>Proofs</h1></div>
   <pre class="src crc"><span class=keyword>module</span> <a href="clones.A.html"><div class=anchor id="A"></div>clones.A</a><span title="3 logic parameters, 2 hypotheses, 1 incomplete instance" class="icon small warning icofont-warning-alt"></span><span title="Valid (one goal)" class="icon valid icofont-check"></span></pre>
   <pre class="src crc">
@@ -149,7 +149,7 @@
   <title>Library certif</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>proofs</code></header>
+  <header><a href="index.html" title="Index">Proof.t</a> — <code>library <a href="certif.index.html">certif</a></code> — <code>proofs</code></header>
   <div class=doc><h1>Proofs</h1></div>
   <pre class="src crc"><span class=keyword>module</span> <a href="certif.S.html"><div class=anchor id="S"></div>certif.S</a><span title="Partial proof (6/10 goals)" class="icon warning icofont-error"></span></pre>
   <pre class="src crc">

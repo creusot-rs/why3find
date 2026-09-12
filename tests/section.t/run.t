@@ -10,7 +10,7 @@
   <title>Module a.A</title>
   </head>
   <body>
-  <header><a href="index.html" title="Index">Index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
+  <header><a href="index.html" title="Index">Section.t</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
   <pre class=src>
   <span class=keyword>module</span> <span class=scope>A</span><a href="a.proof.html#A" title="3 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#A" title="Failed (no proof)" class="icon failed icofont-error"></a>
     <span class=keyword>use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
