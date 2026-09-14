@@ -32,6 +32,7 @@
   {
     "files": [
       {
+        "path": "foo",
         "children": [
           {
             "path": "foo.S",
@@ -42,6 +43,7 @@
             "time": 0.0
           },
           {
+            "path": "foo.T",
             "children": [
               {
                 "goal": "Add.com",

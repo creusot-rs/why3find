@@ -45,7 +45,7 @@
         <span class=comment>(* cloned <a id="clone-8" href="clones.A.html">clones.A</a> *)</span>
         <span class=keyword>function</span> <a href="clones.A.html#e" title="clones.B.A.e&#013;(cloned from clones.A.e)"><div class=anchor id="A.e"></div>A.e</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : int
         <span class=keyword>axiom</span> <a href="clones.A.html#neutral" title="clones.B.A.neutral&#013;(cloned from clones.A.neutral)"><div class=anchor id="A.neutral"></div>A.neutral</a><span title="Hypothesis" class="icon small warning icofont-warning-alt"></span>
-        <a href="clones.index.html#proof-stats" class=codelense>Valid (alt-ergo)</a>
+        <a href="clones.index.html#B.A.commutative" class=codelense>Valid (alt-ergo)</a>
         <span class=keyword>lemma</span> <a href="clones.A.html#commutative" title="clones.B.A.commutative&#013;(cloned from clones.A.commutative)"><div class=anchor id="A.commutative"></div>A.commutative</a><a href="clones.proof.html#B.A.commutative" title="Valid (one goal)" class="icon valid icofont-check"></a>
         <span class=keyword>lemma</span> <a href="clones.A.html#neutral_com" title="clones.B.A.neutral_com&#013;(cloned from clones.A.neutral_com)"><div class=anchor id="A.neutral_com"></div>A.neutral_com</a><span title="cloned" class="icon remark icofont-check"></span>
       <span class="comment section-toggle">end</span>

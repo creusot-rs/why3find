@@ -84,9 +84,10 @@ type source = {
   theories: theory Mstr.t ;
   cache: Cache.t option ;
   session: (Why3.Env.env * Session.session) option ;
-  lenses : (int,string) Hashtbl.t ;
+  lenses : (int,Proofstats.lense) Hashtbl.t ;
   mutable strategy : Proofs.strategy ;
-  mutable statistics : Proofstats.jstats ;
+  mutable local : Proofstats.jstats ;
+  mutable global : Proofstats.jstats ;
   mutable outdated : bool ;
 }
 
@@ -278,7 +279,8 @@ let reload_proofs ?onStuck source =
     let crc = Proofs.load ~move:false ~root ~path ~file () in
     Hashtbl.clear source.lenses ;
     source.strategy <- crc.strategy ;
-    source.statistics <- Proofstats.empty ;
+    source.local <- Proofstats.empty ;
+    source.global <- Proofstats.empty ;
     Mstr.iter
       (fun _ (th : theory) ->
          let proofs = get_proofs th.theory crc.strategy in
@@ -291,7 +293,7 @@ let reload_proofs ?onStuck source =
       ) source.cache ;
     Option.iter
       (fun (env,session) ->
-         source.statistics <-
+         source.local <-
            Proofstats.stats_session
              ~subgoals:env ?onStuck ~lenses:source.lenses
              ~path ~file crc.strategy session
@@ -313,12 +315,12 @@ let empty () = {
   strategy = Mstr.empty ;
   session = None ;
   lenses = Hashtbl.create 0 ;
-  statistics = Proofstats.empty ;
+  local = Proofstats.empty ;
+  global = Proofstats.empty ;
   outdated = true ;
 }
 
-let source ~env ~henv ~root ~lib ~path ~file
-    ?cache ?(subgoals=false) ?onStuck inc =
+let source ~env ~henv ~root ~lib ~path ~file ?cache ?onStuck inc =
   let globals = Why3.Debug.test_flag Why3.Glob.flag in
   try
     if not globals then Why3.Debug.set_flag Why3.Glob.flag ;
@@ -359,12 +361,13 @@ let source ~env ~henv ~root ~lib ~path ~file
     in
     let strategy = crc.strategy in
     let lenses = Hashtbl.create 0 in
-    let subgoals = if subgoals then Some env else None in
-    let statistics = Proofstats.stats_session ~path ~file ~lenses
-        ?subgoals ?onStuck strategy session in
+    let global = Proofstats.stats_session ~path ~file strategy session in
+    let local = Proofstats.stats_session ~path ~file
+        ~subgoals:env ~lenses ?onStuck
+        strategy session in
     let session = Some (env,session) in
     { file ; lib ; root ; path ; theories ; lenses ;
-      cache ; session ; strategy ; outdated ; statistics }
+      cache ; session ; strategy ; outdated ; global ; local }
   with exn ->
     if not globals then Why3.Debug.unset_flag Why3.Glob.flag ;
     raise exn

@@ -61,9 +61,10 @@ type source = {
   theories: theory Mstr.t ;
   cache : Cache.t option ;
   session : (Why3.Env.env * Session.session) option ;
-  lenses : (int,string) Hashtbl.t ;
+  lenses : (int,Proofstats.lense) Hashtbl.t ;
   mutable strategy : Proofs.strategy ;
-  mutable statistics : Proofstats.jstats ;
+  mutable local : Proofstats.jstats ;
+  mutable global : Proofstats.jstats ;
   mutable outdated : bool ;
 }
 
@@ -79,7 +80,6 @@ val source :
   henv:Axioms.henv ->
   root:string -> lib:string list -> path:string -> file:string ->
   ?cache:Cache.t ->
-  ?subgoals:bool ->
   ?onStuck:(Session.goal -> unit) ->
   in_channel -> source
 

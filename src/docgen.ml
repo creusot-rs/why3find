@@ -170,9 +170,10 @@ let codeline env ?(offset=0) ?(indent=0) () =
     begin
       let line = Token.line env.input + offset in
       Option.iter
-        (Pdoc.printf env.out
-           "\n%s<a class=codelense href=\"%s.index.html#proof-stats\">%s</a>"
-           indent env.src.path)
+        (function Proofstats.{ goal ; status } ->
+           Pdoc.printf env.out
+             "\n%s<a class=codelense href=\"%s.index.html#%s\">%s</a>"
+             indent env.src.path goal status)
         (Hashtbl.find_opt env.src.lenses line) ;
       Pdoc.printf env.out
         "\n\
@@ -313,11 +314,11 @@ let process_proof env id ?(valid=false) = function
     Pdoc.pp env.out (pp_vlink ~href) (Crc.verdict crc) ;
     process_certif env id crc
 
-let process_status env indent crc =
+let process_status env indent goal crc =
   Pdoc.pp env.out Pdoc.pp_spaces indent ;
   Pdoc.printf env.out
-    "<a href=\"%s.index.html#proof-stats\" class=codelense>%a</a>@\n"
-    env.src.path Crc.pp_hint crc
+    "<a href=\"%s.index.html#%s\" class=codelense>%a</a>@\n"
+    env.src.path goal Crc.pp_hint crc
 
 (* -------------------------------------------------------------------------- *)
 (* --- Axioms & Parameter                                                 --- *)
@@ -517,8 +518,8 @@ let pp_ident ~env ~local ?anchor ?attr fmt id =
     Format.fprintf fmt "%a<a" (Id.pp_qpath ~local) id ;
     Option.iter (Format.fprintf fmt " class=\"%s\"") attr ;
     Format.fprintf fmt " title=\"%a\" href=\"%a\">"
-    Id.pp_title id
-    (Id.pp_ahref ~current:None ~package_url:env.package_url) id ;
+      Id.pp_title id
+      (Id.pp_ahref ~current:None ~package_url:env.package_url) id ;
     Option.iter (Format.fprintf fmt "<div class=anchor id=\"%s\"></div>") anchor ;
     Format.fprintf fmt "%a</a>"
       Id.pp_qname id
@@ -559,7 +560,8 @@ let declare env n kwd ?(attr=[]) ?(valid=false)
     let src = Id.resolve ~lib source in
     let pp_href = Id.pp_ahref ~package_url ~current in
     let proof = Docref.find_proof tgt.self env.theory in
-    Option.iter (process_status env n) proof ;
+    let goal = Format.asprintf "%s.%a" (Option.get env.current) Id.pp_local tgt in
+    Option.iter (process_status env n goal) proof ;
     Pdoc.printf env.out "%a%a " Pdoc.pp_spaces n Pdoc.pp_keyword kwd ;
     List.iter (Pdoc.printf env.out "%a " Pdoc.pp_attribute) attr ;
     Pdoc.printf env.out
@@ -1259,24 +1261,20 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
 (* -------------------------------------------------------------------------- *)
 
 let process_source_treemap out (src : Docref.source) =
-  Option.iter begin fun (env,session) ->
-    let Docref.{ file ; path ; strategy } = src in
-    let stats =
-      Proofstats.stats_session ~subgoals:env ~path ~file strategy session in
-    if not @@ Proofstats.is_empty stats then
-      begin
-        let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
-        Pdoc.printf out
-          "<div class=doc><h1 id=\"proof-stats\">Statistics</h1></div>@\n\
-           <div class=dashboard>@\n<div class=tab>@\n\
-           <div class=treemap id=\"%s\"></div>@\n\
-           <script type=\"text/javascript\" defer>\
-           Why3findTreemap('#%s',800,400, %a );\
-           </script>@\n\
-           </div>@\n</div>@."
-          id id Json.pretty stats.json ;
-      end
-  end src.session
+  let stats = src.local in
+  if not @@ Proofstats.is_empty stats then
+    begin
+      let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+      Pdoc.printf out
+        "<div class=doc><h1 id=\"proof-stats\">Statistics</h1></div>@\n\
+         <div class=dashboard>@\n<div class=tab>@\n\
+         <div class=treemap id=\"%s\"></div>@\n\
+         <script type=\"text/javascript\" defer>\
+         Why3findTreemap('#%s',800,400, %a );\
+         </script>@\n\
+         </div>@\n</div>@."
+        id id Json.pretty stats.json ;
+    end
 
 let process_global_treemap out sources =
   let stats =
@@ -1284,7 +1282,7 @@ let process_global_treemap out sources =
       (fun (_,s) ->
          match s with
          | None -> Proofstats.empty
-         | Some (src : Docref.source) -> src.statistics
+         | Some (src : Docref.source) -> src.global
       ) sources in
   if not @@ Proofstats.is_empty stats then
     begin

@@ -78,7 +78,7 @@
       <span class="comment section-toggle">begin</span>
         <span class=comment>(* cloned <a id="clone-4" href="foo.A.html">foo.A</a> *)</span>
         <span class=keyword>predicate</span> <a href="foo.A.html#eq" title="bar.B.A.eq&#013;(cloned from foo.A.eq)"><div class=anchor id="A.eq"></div>A.eq</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> int int
-        <a href="bar.index.html#proof-stats" class=codelense>No proof</a>
+        <a href="bar.index.html#B.A.refl" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="foo.A.html#refl" title="bar.B.A.refl&#013;(cloned from foo.A.refl)"><div class=anchor id="A.refl"></div>A.refl</a><a href="bar.proof.html#B.A.refl" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="1 logic parameter" class="icon small remark icofont-question-circle"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="foo.A.a" href="foo.A.html#a">a</a> = int

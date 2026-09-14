@@ -128,8 +128,16 @@ let jmap f xs =
 
 let jnode (fields : (string * Json.t) list) =
   match List.assoc "children" fields with
-  | `List cs as children when cs <> [] -> `Assoc [ "children" , children ]
+  | `List cs as children when cs <> [] ->
+    let goal = try List.assoc "goal" fields with Not_found -> `Null in
+    let path = try List.assoc "path" fields with Not_found -> `Null in
+    Json.assoc [ "goal", goal ; "path", path ; "children" , children ]
   | _ | exception Not_found -> Json.assoc fields
+
+type lense = {
+  goal : string ;
+  status : string ;
+}
 
 (* -------------------------------------------------------------------------- *)
 (* --- Compute Statistics                                                 --- *)
@@ -190,12 +198,13 @@ let stats_goal proofs ?subgoals ?lenses ?onStuck ~file ~path ~url (goal : Sessio
   let path = Printf.sprintf "%s.%s" path infix in
   let status = Format.asprintf "%a" Crc.pp_hint crc in
   let loc = Session.target goal in
-  begin match lenses , loc with
+  begin
+    match lenses , loc with
     | None , _ | _ , None -> ()
     | Some lenses , Some loc ->
       let f,line,_,_,_ = Why3.Loc.get loc in
-      if f = file then Hashtbl.add lenses line status
-  end ;
+      if f = file then Hashtbl.add lenses line { goal = path ; status }
+    end ;
   let base = [
     "goal" , `String name ;
     "path" , `String path ;

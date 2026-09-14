@@ -94,8 +94,9 @@ let preprocess file diagnostics =
     let cache = Cache.create ~root () in
     let src =
       Utils.input ~file @@
-      Docref.source ~cache ~env ~henv ~root ~lib ~path ~file
-        ~subgoals:true ~onStuck:(onStuck ~file diagnostics) in
+      Docref.source
+        ~cache ~env ~henv ~root ~lib ~path ~file
+        ~onStuck:(onStuck ~file diagnostics) in
     let types =
       Why3.Wstdlib.Mstr.fold
         (fun _ (t : Docref.theory) d ->

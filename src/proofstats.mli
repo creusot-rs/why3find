@@ -25,6 +25,11 @@ type jstats = {
   json : Json.t ;
 }
 
+type lense = {
+  goal : string ;
+  status : string ;
+}
+
 val empty : jstats
 val is_empty : jstats -> bool
 val jmap : ('a -> jstats) -> 'a list -> jstats
@@ -33,7 +38,7 @@ val stats_session :
   file:string ->
   path:string ->
   ?subgoals:Why3.Env.env ->
-  ?lenses:(int,string) Hashtbl.t ->
+  ?lenses:(int,lense) Hashtbl.t ->
   ?onStuck:(Session.goal -> unit) ->
   Proofs.strategy -> Session.session -> jstats
 
