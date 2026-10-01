@@ -311,17 +311,12 @@ type context = {
   span : int * int ;
   chunks : chunk list ;
 }
-let empty = {
-  file = "" ;
-  goal = 0 , 0 ;
-  span = 0 , 0 ;
-  chunks = [] ;
-}
 
 let window ~file thy chunks =
   let lines = decls ~file thy in
   let p,q = goal_range chunks in
-  if p > q then empty else
+  if p > q then None
+  else
     (* declaration range *)
     let u,v =
       if p < q then
@@ -344,7 +339,7 @@ let window ~file thy chunks =
              true
            end
         ) chunks
-    in { file ; goal = p,q ; span = !hp,!hq ; chunks }
+    in Some { file ; goal = p,q ; span = !hp,!hq ; chunks }
 
 let context ~file thy task = window ~file thy @@ split ~file task
 
@@ -542,10 +537,11 @@ let rec decorate cursor head tail =
 (* -------------------------------------------------------------------------- *)
 
 let highlight ~file ~context:width thy task =
-  let w = context ~file thy task in
-  match w.chunks with [] -> () | head::tail ->
+  match context ~file thy task with
+  | None | Some { chunks = [] } -> ()
+  | Some { goal ; chunks = head::tail } ->
     Format.printf "@{<orange>[%s:%a %s]@}@\n"
-      file pp_range w.goal (task_name task) ;
+      file pp_range goal (task_name task) ;
     let text = Utils.readfile ~file in
     let cursor = {
       text ; width ; offset = 0 ; pos = Range.start ;
