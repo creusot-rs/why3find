@@ -112,7 +112,7 @@
       <span class="comment section-toggle">begin</span>
         <span class=comment>(* cloned <a id="clone-1" href="clones.Monoid.html">clones.Monoid</a> *)</span>
         <span class=comment>(* cloned <a id="clone-4" href="clones.Associative.html">clones.Associative</a> *)</span>
-        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
+        <a href="clones.index.html#IntA.Associative.associative" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.Associative.html#associative" title="clones.IntA.Associative.associative&#013;(cloned from clones.Associative.associative)"><div class=anchor id="Associative.associative"></div>Associative.associative</a><a href="clones.proof.html#IntA.Associative.associative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="clones.Associative.t" href="clones.Associative.html#t">t</a> = int, <span class=keyword>function</span> <a title="clones.Associative.op" href="clones.Associative.html#op">op</a> = (<a title="int.Int.(+)" href="https://www.why3.org/stdlib/int.html#infix%20+_19">+</a>)
@@ -142,9 +142,9 @@
         <span class=comment>(* cloned <a id="clone-6" href="clones.Monoid.html">clones.Monoid</a> *)</span>
         <span class=comment>(* cloned <a id="clone-9" href="clones.Associative.html">clones.Associative</a> *)</span>
         <span class=comment>(* cloned <a id="clone-10" href="clones.AC.html">clones.AC</a> *)</span>
-        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
+        <a href="clones.index.html#IntAC.commutative" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.AC.html#commutative" title="clones.IntAC.commutative&#013;(cloned from clones.AC.commutative)"><div class=anchor id="commutative"></div>commutative</a><a href="clones.proof.html#IntAC.commutative" title="Failed (no proof)" class="icon failed icofont-error"></a>
-        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
+        <a href="clones.index.html#IntAC.associative" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.AC.html#associative" title="clones.IntAC.associative&#013;(cloned from clones.AC.associative)"><div class=anchor id="associative"></div>associative</a><a href="clones.proof.html#IntAC.associative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="clones.AC.t" href="clones.AC.html#t">t</a> = int, <span class=keyword>function</span> <a title="clones.AC.op" href="clones.AC.html#op">op</a> = (<a title="int.Int.(+)" href="https://www.why3.org/stdlib/int.html#infix%20+_19">+</a>)
@@ -170,7 +170,7 @@
       <span class="comment section-toggle">begin</span>
         <span class=comment>(* cloned <a id="clone-1" href="clones.Monoid.html">clones.Monoid</a> *)</span>
         <span class=comment>(* cloned <a id="clone-4" href="clones.Commutative.html">clones.Commutative</a> *)</span>
-        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
+        <a href="clones.index.html#IntC.S.commutative" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.Commutative.html#commutative" title="clones.IntC.S.commutative&#013;(cloned from clones.Commutative.commutative)"><div class=anchor id="S.commutative"></div>S.commutative</a><a href="clones.proof.html#IntC.S.commutative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> M.<a title="clones.Commutative.M.t" href="clones.Commutative.html#M.t">t</a> = int, <span class=keyword>function</span> M.<a title="clones.Commutative.M.op" href="clones.Commutative.html#M.op">op</a> = (+)
@@ -178,7 +178,7 @@
       <span class="comment section-toggle">begin</span>
         <span class=comment>(* cloned <a id="clone-5" href="clones.Monoid.html">clones.Monoid</a> *)</span>
         <span class=comment>(* cloned <a id="clone-8" href="clones.Commutative.html">clones.Commutative</a> *)</span>
-        <a href="clones.index.html#proof-stats" class=codelense>No proof</a>
+        <a href="clones.index.html#IntC.P.commutative" class=codelense>No proof</a>
         <span class=keyword>lemma</span> <a href="clones.Commutative.html#commutative" title="clones.IntC.P.commutative&#013;(cloned from clones.Commutative.commutative)"><div class=anchor id="P.commutative"></div>P.commutative</a><a href="clones.proof.html#IntC.P.commutative" title="Failed (no proof)" class="icon failed icofont-error"></a>
       <span class="comment section-toggle">end</span>
     </span>}</span><span title="Failed (no proof)" class="icon failed icofont-error"></span> <span class=keyword>with</span> <span class=keyword>type</span> M.<a title="clones.Commutative.M.t" href="clones.Commutative.html#M.t">t</a> = int, <span class=keyword>function</span> M.<a title="clones.Commutative.M.op" href="clones.Commutative.html#M.op">op</a> = (*)

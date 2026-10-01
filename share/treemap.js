@@ -30,13 +30,43 @@ function Why3findTreemap(id, width, height, data) {
   // SVG container.
   const svg =
     d3.select(id).append("svg")
-      .attr("viewBox", [0, 0, width, height])
+      .attr("viewBox", [-3, -32, width+6, height+35])
       .attr("width", width)
       .attr("height", height)
       .attr("style", "font: 10px monospace;");
 
+  // Add a border for each goals
+
+  const goals = root.descendants().filter(d => d.data.goal);
+  const targets =
+    svg.append("g")
+    .selectAll("g")
+    .data(goals)
+    .join("g")
+    .attr("id", d => d.data.path)
+    .attr("class", "goal");
+
+  targets
+    .append("text")
+    .attr("x", d => Math.min(d.x0, 800 - d.data.path.length * 6))
+    .attr("y", -12)
+    .attr("fill", "red")
+    .attr("opacity", 1)
+    .attr("visibility", "hidden")
+    .text(d => d.data.path);
+
+  targets
+    .append("rect")
+    .attr("fill", "red")
+    .attr("fill-opacity", 0)
+    .attr("x", d => d.x0)
+    .attr("y", d => d.y0)
+    .attr("width", d => d.x1 - d.x0)
+    .attr("height", d => d.y1 - d.y0);
+
   // Add a cell for each leaf of the hierarchy.
-  const leaf = svg.selectAll("g")
+  const leaf = svg.append("g")
+    .selectAll("g")
     .data(root.leaves())
     .join("g")
     .attr("transform", d => `translate(${d.x0},${d.y0})`)

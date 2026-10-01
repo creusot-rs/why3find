@@ -218,6 +218,16 @@ div.treemap svg * {
   cursor: pointer
 }
 
+div.treemap .goal:target rect {
+  stroke: red;
+  stroke-width: 3px;
+}
+
+div.treemap .goal:target text {
+  visibility: visible;
+}
+
+
 .scope {
   color: #3e7777;
 }
