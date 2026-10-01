@@ -150,7 +150,7 @@ let fork out ~file ~title =
     contents = Buffer.create 80 ;
     forked = Some out.target ;
     treemap = 0 ;
-    matheq = 0 ;
+    matheq = out.target.matheq ;
   }
 
 let matheq out =

@@ -531,7 +531,24 @@ let rec pp_type ~env ~local ~arg fmt (ty : Why3.Ty.ty) =
   if arg then Format.pp_print_char fmt ' ' ;
   match ty.ty_node with
   | Tyvar tv -> Format.pp_print_string fmt tv.tv_name.id_string
-  | Tyapp(ts,[]) -> pp_ident ~env ~local fmt ts.ts_name
+  | Tyapp(ts,[]) ->
+    if Why3.Ty.is_ts_tuple ts then
+      Format.pp_print_string fmt "unit"
+    else
+      pp_ident ~env ~local fmt ts.ts_name
+  | Tyapp(ts,x::xs) when Why3.Ty.is_ts_tuple ts ->
+    begin
+      if arg then Format.pp_print_char fmt '(' ;
+      let pp = pp_type ~env ~local ~arg:false in
+      pp fmt x ;
+      List.iter (Format.fprintf fmt ",%a" pp) xs ;
+      if arg then Format.pp_print_char fmt ')' ;
+    end
+  | Tyapp(ts,[a;b]) when Why3.Ty.(ts_equal ts_func) ts ->
+    begin
+      let pp = pp_type ~env ~local ~arg:false in
+      Format.fprintf fmt "(%a -> %a)" pp a pp b ;
+    end
   | Tyapp(ts,args) ->
     begin
       if arg then Format.pp_print_char fmt '(' ;
@@ -1127,7 +1144,6 @@ let parse env =
     | Style(Bold,_) -> process_style env Bold
     | Style(Head,h) -> process_header env h
     | Style(Dash,n) -> process_dash env n
-    | Style _ -> ()
     | OpenDoc ->
       begin
         Pdoc.flush ~onlyspace:false out ;
