@@ -21,24 +21,26 @@ let dloc_of_position (p : Why3.Loc.position) : Dap.location =
   let file,l1,c1,l2,c2 = Why3.Loc.get p in
   Dap.loc ~file ~line:(l1-1) ~column:c1 ~end_line:(l2-1) ~end_column:c2 ()
 
-  let dloc_of_range ~file ((p,q) : Range.range) : Dap.location =
-    Dap.loc ~file ~line:p.line ~column:p.col ~end_line:q.line ~end_column:q.col ()
+let dloc_of_range ~file ((p,q) : Range.range) : Dap.location =
+  Dap.loc ~file ~line:p.line ~column:p.col ~end_line:q.line ~end_column:q.col ()
 
 let dloc_of_goal goal =
-  let file = Session.file goal in
-  let context = Session.context goal in
-  let loc =
-    List.find_map
-      (function Vc.{ kind = Goal ; range } -> Some range | _ -> None)
-      context.chunks in
-  match loc with
-  | Some range -> Some (dloc_of_range ~file range)
-  | None ->
-    let line,end_line = context.goal in
-    if 0 <= line && line <= end_line && end_line < max_int then
-      Some (Dap.loc ~file ~line ~end_line ())
-    else
-      Option.map dloc_of_position @@ Session.target goal
+  match Session.context goal with
+  | None -> None
+  | Some context ->
+    let file = Session.file goal in
+    let loc =
+      List.find_map
+        (function Vc.{ kind = Goal ; range } -> Some range | _ -> None)
+        context.chunks in
+    match loc with
+    | Some range -> Some (dloc_of_range ~file range)
+    | None ->
+      let line,end_line = context.goal in
+      if 0 <= line && line <= end_line && end_line < max_int then
+        Some (Dap.loc ~file ~line ~end_line ())
+      else
+        Option.map dloc_of_position @@ Session.target goal
 
 (* -------------------------------------------------------------------------- *)
 (* ---  Cursor & Breakpoints Data                                          --- *)
@@ -92,9 +94,11 @@ let () = Dap.on_breakpoint ~clear:clear_breakpoints
       else
       if Array.exists
           (fun root ->
-             let c = Session.context root in
-             c.file = file &&
-             let (p,q) = c.goal in p <= line && line <= q
+             match Session.context root with
+             | None -> false
+             | Some c ->
+               c.file = file &&
+               let (p,q) = c.goal in p <= line && line <= q
           ) !roots
       then
         let id = add_breakpoint ~file ~line ~verified:true in
@@ -244,12 +248,14 @@ let () = Dap.register "why3/context"
       match Dap.get_by_frameId goal_attr frameId with
       | None -> `Null
       | Some goal ->
-        let context = Session.context goal in
-        let file = context.file in
-        Json.assoc [
-          "source" , `String file ;
-          "chunks" , Json.list_map (jchunk ~file) context.chunks ;
-        ]
+        match Session.context goal with
+        | None -> `Null
+        | Some context ->
+          let file = context.file in
+          Json.assoc [
+            "source" , `String file ;
+            "chunks" , Json.list_map (jchunk ~file) context.chunks ;
+          ]
     end
 
 let () = Dap.register "why3/task"

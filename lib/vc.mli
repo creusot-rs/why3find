@@ -26,7 +26,7 @@ type context = {
 
 val dump : file:string -> Why3.Task.task -> unit
 val pp_range : Format.formatter -> int * int -> unit
-val context : file:string -> Why3.Theory.theory -> Why3.Task.task -> context
+val context : file:string -> Why3.Theory.theory -> Why3.Task.task -> context option
 val highlight : file:string -> context:int -> Why3.Theory.theory -> Why3.Task.task -> unit
 
 type descr = { name : string ; expl : string ; head : string }

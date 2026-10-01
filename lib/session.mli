@@ -37,7 +37,7 @@ val file : goal -> string
 val target : goal -> Why3.Loc.position option
 val task : goal -> Why3.Task.task
 val theory : goal -> Why3.Theory.theory
-val context : goal -> Vc.context
+val context : goal -> Vc.context option
 val proof : goal -> Crc.crc option
 
 val pp_goal : Format.formatter -> goal -> unit

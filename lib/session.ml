@@ -69,7 +69,7 @@ type goal = Goal of {
     mutable tactic : ( Tactic.tactic * goal list ) option ;
     mutable hashname : string ;
     mutable fullname : string ;
-    mutable context : Vc.context option ;
+    mutable context : Vc.context option option ;
     mutable touched : bool ;
     mutable proof : Crc.crc option ;
   }
