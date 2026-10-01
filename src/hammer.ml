@@ -477,9 +477,9 @@ let find_prover p v provers =
     if not @@ Hashtbl.mem warn_once id then
       begin
         Hashtbl.add warn_once id () ;
-        if result = None
-        then Log.warning "[hint] prover %s @{<red>discarded@}" id
-        else Log.warning "[hint] prover %s @{<orange>relaxed@}" id
+        match result with
+        | None -> Log.warning "[proofss] %s @{<red>discarded@}" id
+        | Some v -> Log.warning "[proofs] %s @{<orange>relaxed to %s@}" id (Prover.version v)
       end ;
     result
 

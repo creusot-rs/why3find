@@ -524,9 +524,11 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
               let id = Printf.sprintf "%s@%s" name version in
               if not (Hashtbl.mem missing id) then
                 let status =
-                  if List.exists (Prover.fits ~name ~version) provers then 0
-                  else if List.exists (Prover.fits ~name ?version:None) provers
-                  then 1 else 2
+                  if List.exists (Prover.fits ~name ~version) provers then `Ok
+                  else
+                    match List.find_opt (Prover.fits ~name ?version:None) provers with
+                    | None -> `Discarded
+                    | Some p -> `Relaxed (Prover.version p)
                 in Hashtbl.add missing id status ;
           in
           let check file =
@@ -538,9 +540,14 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
           in Wenv.allfiles check "." ;
           Hashtbl.iter
             (fun p s ->
-               if s=1 then Log.warning "[hint] prover %s @{<orange>relaxed@}" p ;
-               if s=2 then Log.warning "[hint] prover %s @{<red>discarded@}" p ;
-               if s<>0 then retval := 1 ;
+               match s with
+               | `Ok -> ()
+               | `Discarded ->
+                 Log.warning "[proofs] %s will be @{<red>discarded@}" p ;
+                 retval := 1 ;
+               | `Relaxed v ->
+                 Log.warning "[proofs] %s will be @{<orange>relaxed to %s@}" p v ;
+                 retval := 1 ;
             ) missing ;
         end ;
       let wmain = Why3.Whyconf.get_main project.whyconf in
