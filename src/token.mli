@@ -17,7 +17,6 @@ type style =
   | Emph
   | Bold
   | Dash
-  | Ordered
 
 type token =
   | Eof
@@ -38,6 +37,7 @@ type token =
   | Math of string
   | Equation of string
 
+val pp : Format.formatter -> token -> unit
 val src_lexer : (Lexing.lexbuf -> token) ref
 val doc_lexer : (Lexing.lexbuf -> token) ref
 
@@ -87,7 +87,5 @@ val startline : input -> bool
 (** The last returned token is at then beginning of the line
     {i and} after an empty line. *)
 val emptyline : input -> bool
-
-val pp : Format.formatter -> token -> unit
 
 (* -------------------------------------------------------------------------- *)

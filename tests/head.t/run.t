@@ -27,15 +27,15 @@
   <h1><a><div class=anchor id="_1"></div>Title A</a></h1>
   <p>Section 1</p>
   <h2><a><div class=anchor id="_2"></div>Title B</a></h2>
-  <p>Section 1</p>
+  <p>Section 1.1</p>
   <h2><a><div class=anchor id="_3"></div>Title C</a></h2>
-  <p>Section 2</p>
+  <p>Section 1.2</p>
   <h3><a><div class=anchor id="_4"></div>Title D</a></h3>
-  <p>Section 1</p>
+  <p>Section 1.2.1</p>
   <h3><a><div class=anchor id="_5"></div>Title E</a></h3>
-  <p>Section 2</p>
+  <p>Section 1.2.2</p>
   <h2><a><div class=anchor id="_6"></div>Title F</a></h2>
-  <p>Section 3</p>
+  <p>Section 1.3</p>
   </div>
   <script type="text/javascript" src="script.js"></script>
   </body>

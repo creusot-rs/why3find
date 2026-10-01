@@ -1127,7 +1127,6 @@ let parse env =
     | Style(Bold,_) -> process_style env Bold
     | Style(Head,h) -> process_header env h
     | Style(Dash,n) -> process_dash env n
-    | Style _ -> ()
     | OpenDoc ->
       begin
         Pdoc.flush ~onlyspace:false out ;

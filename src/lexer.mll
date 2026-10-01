@@ -83,7 +83,6 @@ and document = parse
  | "(*)" as s { Text s }
  | '*'+ ')' { CloseDoc }
  | ('#'+ as head) space* { Style(Head,head) }
- | ['0'-'9']+ '.' { style Ordered lexbuf }
  | '-'+ { style Dash lexbuf }
  | '_' | '*' { style Emph lexbuf }
  | "__" | "**" { style Bold lexbuf }

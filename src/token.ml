@@ -17,7 +17,6 @@ type style =
   | Emph
   | Bold
   | Dash
-  | Ordered
 
 type token =
   | Eof
@@ -37,6 +36,25 @@ type token =
   | Verb of string
   | Math of string
   | Equation of string
+
+let pp fmt = function
+  | Eof -> Format.pp_print_string fmt "Eof"
+  | Space -> Format.pp_print_string fmt "Space"
+  | Newline -> Format.pp_print_string fmt "Newline"
+  | Char c -> Format.fprintf fmt "Char %S" (String.make 1 c)
+  | Text s -> Format.fprintf fmt "Text %S" s
+  | Comment s -> Format.fprintf fmt "Comment %S" s
+  | Infix s -> Format.fprintf fmt "Infix %s" s
+  | Ident s -> Format.fprintf fmt "Ident %s" s
+  | OpenDoc -> Format.pp_print_string fmt "OpenDoc \"(**\""
+  | CloseDoc -> Format.pp_print_string fmt "CloseDoc \"*)\""
+  | OpenSection (o,s) -> Format.fprintf fmt "OpenSection %c%s" (if o then '+' else '-') s
+  | CloseSection s -> Format.fprintf fmt "CloseSection %s" s
+  | Style (_sty, s) -> Format.fprintf fmt "Styled %S" s
+  | Ref s -> Format.fprintf fmt "Ref %S" s
+  | Verb s -> Format.fprintf fmt "Verb %S" s
+  | Math s -> Format.fprintf fmt "Math %S" s
+  | Equation s -> Format.fprintf fmt "Equation %S" s
 
 type context = Src | Doc | End
 
@@ -138,24 +156,5 @@ let rec fetch_id ~kind input =
   | Space | Newline -> fetch_id ~kind input
   | Ident s -> s
   | _ -> error input "missing %s name" kind
-
-let pp fmt = function
-  | Eof -> Format.pp_print_string fmt "Eof"
-  | Space -> Format.pp_print_string fmt "Space"
-  | Newline -> Format.pp_print_string fmt "Newline"
-  | Char c -> Format.fprintf fmt "Char %S" (String.make 1 c)
-  | Text s -> Format.fprintf fmt "Text %S" s
-  | Comment s -> Format.fprintf fmt "Comment %S" s
-  | Infix s -> Format.fprintf fmt "Infix %s" s
-  | Ident s -> Format.fprintf fmt "Ident %s" s
-  | OpenDoc -> Format.pp_print_string fmt "OpenDoc \"(**\""
-  | CloseDoc -> Format.pp_print_string fmt "CloseDoc \"*)\""
-  | OpenSection (o,s) -> Format.fprintf fmt "OpenSection %c%s" (if o then '+' else '-') s
-  | CloseSection s -> Format.fprintf fmt "CloseSection %s" s
-  | Style (_sty, s) -> Format.fprintf fmt "Styled %S" s
-  | Ref s -> Format.fprintf fmt "Ref %S" s
-  | Verb s -> Format.fprintf fmt "Verb %S" s
-  | Math s -> Format.fprintf fmt "Math %S" s
-  | Equation s -> Format.fprintf fmt "Equation %S" s
 
 (* -------------------------------------------------------------------------- *)
