@@ -53,6 +53,7 @@ val pp_time : Format.formatter -> float -> unit
 val pp_atime : Format.formatter -> float -> unit (* left aligned, positive *)
 val pp_rtime : Format.formatter -> float -> unit (* right aligned, positive *)
 val pp_delta : Format.formatter -> float -> unit
+val pp_percent : Format.formatter -> float -> unit
 val pa_time : string -> float (* seconds *)
 val pp_s : Format.formatter -> int -> unit
 val pp_yies : Format.formatter -> int -> unit

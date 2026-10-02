@@ -114,16 +114,17 @@ div.tab {
   margin-bottom: 1cm;
 }
 
-div.tab pre {
-  color: gray;
-  width: auto;
-  margin-left: 0.5cm;
-  margin-right: 0px;
-}
-
 /* -------------------------------------------------------------------------- */
 /* --- Source Code Styling                                                --- */
 /* -------------------------------------------------------------------------- */
+
+pre.stats {
+  color: gray;
+  width: auto;
+  font-size: smaller;
+  margin-left: 0.5cm;
+  margin-right: 0px;
+}
 
 pre.src {
   margin-left: 2cm;
@@ -214,8 +215,12 @@ div.treemap svg {
   height: auto;
 }
 
-div.treemap svg * {
-  cursor: pointer
+div.treemap svg g.targets * {
+  cursor: default;
+}
+
+div.treemap svg g.zones * {
+  cursor: pointer;
 }
 
 div.treemap .goal:target rect {

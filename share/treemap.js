@@ -30,7 +30,7 @@ function Why3findTreemap(id, width, height, data) {
   // SVG container.
   const svg =
     d3.select(id).append("svg")
-      .attr("viewBox", [-3, -32, width+6, height+35])
+      .attr("viewBox", [-3, -32, width + 6, height + 35])
       .attr("width", width)
       .attr("height", height)
       .attr("style", "font: 10px monospace;");
@@ -40,11 +40,12 @@ function Why3findTreemap(id, width, height, data) {
   const goals = root.descendants().filter(d => d.data.goal);
   const targets =
     svg.append("g")
-    .selectAll("g")
-    .data(goals)
-    .join("g")
-    .attr("id", d => d.data.path)
-    .attr("class", "goal");
+      .attr("class", "targets")
+      .selectAll("g")
+      .data(goals)
+      .join("g")
+      .attr("id", d => d.data.path)
+      .attr("class", "goal");
 
   targets
     .append("text")
@@ -65,12 +66,14 @@ function Why3findTreemap(id, width, height, data) {
     .attr("height", d => d.y1 - d.y0);
 
   // Add a cell for each leaf of the hierarchy.
-  const leaf = svg.append("g")
-    .selectAll("g")
-    .data(root.leaves())
-    .join("g")
-    .attr("transform", d => `translate(${d.x0},${d.y0})`)
-    .append("a").attr("href", d => d.data.url);
+  const leaf =
+    svg.append("g")
+      .attr("class","zones")
+      .selectAll("g")
+      .data(root.leaves())
+      .join("g")
+      .attr("transform", d => `translate(${d.x0},${d.y0})`)
+      .append("a").attr("href", d => d.data.url);
 
   // Append a title.
   leaf.append("title").text(d => {

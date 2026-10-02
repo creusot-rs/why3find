@@ -1273,17 +1273,53 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
   end
 
 (* -------------------------------------------------------------------------- *)
+(* --- Printing Stats Utilities                                           --- *)
+(* -------------------------------------------------------------------------- *)
+
+let pp_occurs fmt n = if n > 1 then Format.fprintf fmt " %d" n
+let pp_count fmt n = Format.fprintf fmt "%4d" n
+let pp_partial fmt (p,n) = Format.fprintf fmt "%d/%d" p n
+let pp_title title pp fmt x =
+  Format.fprintf fmt "<span title=\"%s\">%a</span>" title pp x
+
+(* -------------------------------------------------------------------------- *)
 (* --- Generating Global Treemaps                                         --- *)
 (* -------------------------------------------------------------------------- *)
 
-let process_source_treemap out (src : Docref.source) =
+let process_source_treemap out (src : Docref.source) ps =
   let stats = src.local in
   if not @@ Proofstats.is_empty stats then
     begin
+      let qs = Proofstats.create () in
+      Proofstats.add_strategy qs src.strategy ;
+      let total = Proofstats.total qs in
+      let proved = Proofstats.proved qs in
+      let time = Proofstats.time qs in
+      let percent = time /. Proofstats.time ps in
+      Pdoc.printf out
+        "<div class=doc><h1 id=\"proof-stats\">Statistics</h1>@\n<pre class=stats>" ;
+      if proved = total then
+        Pdoc.printf out "<b>Proved</b> (%a)"
+          (pp_title "Total goals (all proved)" Format.pp_print_int) proved
+      else if proved > 0 then
+        Pdoc.printf out "<b class=warning>Partial</b> (%a)"
+          (pp_title "Proved/Total goals" pp_partial) (proved,total) ;
+      Proofstats.iter_provers
+        (fun prv s ->
+           Pdoc.printf out
+             " <span title=\"Total %a | Range %a - %a - %a\">(%s%a)</span>"
+               Utils.pp_rtime (Stats.sum s)
+               Utils.pp_rtime (Stats.min s)
+               Utils.pp_rtime (Stats.average s)
+               Utils.pp_rtime (Stats.max s)
+               prv pp_occurs (Stats.count s)
+        ) qs ;
+      Pdoc.printf out " (%a)" (pp_title "Cumulated time" Utils.pp_time) time ;
+      Pdoc.printf out " (%a)" (pp_title "Of total time" Utils.pp_percent) percent ;
+      Pdoc.printf out "</pre>@\n</div>@\n" ;
       let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
       Pdoc.printf out
-        "<div class=doc><h1 id=\"proof-stats\">Statistics</h1></div>@\n\
-         <div class=dashboard>@\n<div class=tab>@\n\
+        "<div class=dashboard>@\n<div class=tab>@\n\
          <div class=treemap id=\"%s\"></div>@\n\
          <script type=\"text/javascript\" defer>\
          Why3findTreemap('#%s',800,400, %a );\
@@ -1318,7 +1354,7 @@ let process_global_treemap out sources =
 (* -------------------------------------------------------------------------- *)
 
 let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
-    (src : Docref.source) =
+    (src : Docref.source) ps =
   let titledoc = title in
   let title = Printf.sprintf "Library %s" src.path in
   let href = src.path ^ ".index.html" in
@@ -1356,7 +1392,7 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
     Pdoc.printf crc "<div class=doc><h1>Proofs</h1></div>@\n" ;
     Pdoc.flush crc ;
     parse env ;
-    if treemaps then process_source_treemap out env.src ;
+    if treemaps then process_source_treemap out env.src ps ;
     Pdoc.close_all out ;
     Pdoc.close_all crc ;
   end
@@ -1365,25 +1401,22 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
 (* --- Computing Statistics                                               --- *)
 (* -------------------------------------------------------------------------- *)
 
-let pp_count fmt n = Format.fprintf fmt "%4d" n
-let pp_partial fmt (p,n) = Format.fprintf fmt "%d/%d" p n
-let pp_title title pp fmt x =
-  Format.fprintf fmt "<span title=\"%s\">%a</span>" title pp x
-
-let process_statistics out sources =
+let total_stats sources =
   let ps = Proofstats.create () in
   List.iter
     (fun (_,s) ->
        match s with
        | None -> ()
        | Some (src : Docref.source) -> Proofstats.add_strategy ps src.strategy
-    ) sources ;
+    ) sources ; ps
+
+let process_statistics out ps =
   let total = Proofstats.total ps in
   if total > 0 then
     begin
       Pdoc.printf out
         "<h1>Statistics</h1>@\n\
-         <pre>@\n" ;
+         <pre class=stats>@\n" ;
       let w = ref 0 in
       let wsize a _ = w := max !w (String.length a) in
       let proved = Proofstats.proved ps in
@@ -1472,7 +1505,7 @@ let pp_chapters out ~senv ~title cs =
       Pdoc.printf out "</ul>@." ;
     end
 
-let process_index ~out:dir ~senv ~title sources =
+let process_index ~out:dir ~senv ~title sources ps =
   let href = "index.html" in
   if List.for_all (fun c -> c.href <> href) !chapters then
     begin
@@ -1482,7 +1515,7 @@ let process_index ~out:dir ~senv ~title sources =
       Pdoc.printf out "<div class=dashboard>@\n<div class=tab>@\n" ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
-      process_statistics out sources ;
+      process_statistics out ps ;
       Pdoc.printf out "</div>@\n" ;
       if treemaps then process_global_treemap out sources ;
       Pdoc.flush out ;
@@ -1508,10 +1541,10 @@ let preprocess ~root ~cache ~henv ~wenv ~senv file =
   else
     Utils.failwith "Don't known what to do with %S" file
 
-let process ~wenv ~henv ~out ~title (file,kind) =
+let process ~wenv ~henv ~out ~title ps (file,kind) =
   match kind with
   | None -> process_markdown ~wenv ~henv ~out ~title file
-  | Some src -> process_source ~wenv ~henv ~out ~title file src
+  | Some src -> process_source ~wenv ~henv ~out ~title file src ps
 
 let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
   begin
@@ -1535,10 +1568,11 @@ let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
       if title<>"" then title else document_header ~file:"README.md" () in
     let cache = Cache.create ~root:project.root () in
     let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
+    let ps = total_stats sources in
     (* Doc generation *)
-    List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url) sources ;
+    List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url ps) sources ;
     (* Indexing *)
-    process_index ~out ~senv ~title sources ;
+    process_index ~out ~senv ~title sources ps ;
     (* Final output *)
     Log.emit "Generated %s%s/index.html"
       (if url then "file://" else "") (Utils.absolute out) ;

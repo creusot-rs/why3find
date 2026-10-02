@@ -345,6 +345,15 @@ let pa_time s =
     | _ -> float_of_string s
   else float_of_string s
 
+let pp_percent fmt q =
+  if q > 1.0 then Format.fprintf fmt "100%%" else
+  if q < 0.01 then
+    let n = Float.(to_int @@ round (1000.0 *. q)) in
+    Format.fprintf fmt "0.%d%%" n
+  else
+    let c = Float.(to_int @@ round (100.0 *. q)) in
+    Format.fprintf fmt "%d%%" c
+
 (* -------------------------------------------------------------------------- *)
 (* --- Pretty Printing                                                    --- *)
 (* -------------------------------------------------------------------------- *)
