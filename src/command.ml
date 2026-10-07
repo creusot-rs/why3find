@@ -521,10 +521,10 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             | Crc.Stuck -> ()
             | Tactic { children; _ } -> List.iter check_crc children
             | Prover(name,version,_) ->
-              let id = Printf.sprintf "%s@%s" name version in
+              let id = Prover.pattern ~name ?version () in
               if not (Hashtbl.mem missing id) then
                 let status =
-                  if List.exists (Prover.fits ~name ~version) provers then `Ok
+                  if List.exists (Prover.fits ~name ?version) provers then `Ok
                   else
                     match List.find_opt (Prover.fits ~name ?version:None) provers with
                     | None -> `Discarded

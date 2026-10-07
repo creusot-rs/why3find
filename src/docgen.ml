@@ -284,8 +284,11 @@ let rec child n fmt crc =
   | Crc.Stuck ->
     Format.fprintf fmt "stuck<span class=\"%s\"></span>" icon_failed
   | Crc.Prover(p,v,t) ->
-    Format.fprintf fmt "<span class=prover title=\"%s@%s\">%s</span> %a"
-      p v p Utils.pp_time t
+    let id = Prover.pattern ~name:p ?version:v () in
+    let attr = if v = None then "" else " (relaxed)" in
+    Format.fprintf fmt
+      "<span class=prover title=\"Prover %s%s\">%s</span> %a"
+      id attr p Utils.pp_time t
   | Crc.Tactic { id ; children ; stuck ; proved } ->
     Format.fprintf fmt "%s%a" id pp_verdict_mark (Crc.nverdict ~stuck ~proved) ;
     List.iter (child (n+2) fmt) children

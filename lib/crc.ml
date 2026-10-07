@@ -12,7 +12,7 @@
 
 type crc =
   | Stuck
-  | Prover of string * string * float
+  | Prover of string * string option * float
   | Tactic of {
       id : string ;
       children : crc list ;
@@ -23,8 +23,8 @@ type crc =
     }
 let stuck = Stuck
 
-let prover (p : Prover.prover) time =
-  Prover(p.desc.name,p.desc.version,time)
+let prover Prover.{ relaxed ; desc = { name ; version }} time =
+  Prover(name,(if relaxed then None else Some version),time)
 
 let get_stuck = function
   | Stuck -> 1
@@ -99,7 +99,8 @@ let pp_checked fmt ~stuck:s ~proved:p =
 
 let pp_status fmt = function
   | Tactic { id } -> Format.pp_print_string fmt id
-  | Prover(p,v,_) -> Format.fprintf fmt "%s@%s" p v
+  | Prover(p,None,_) -> Format.pp_print_string fmt p
+  | Prover(p,Some v,_) -> Format.fprintf fmt "%s@%s" p v
   | Stuck -> Format.pp_print_string fmt "stuck"
 
 let pretty fmt crc =
@@ -184,7 +185,7 @@ let rec to_json (a : crc) : Json.t =
   match a with
   | Stuck -> `Null
   | Prover(p,v,t) ->
-    let pv = Printf.sprintf "%s@%s" p v in
+    let pv = Prover.pattern ~name:p ?version:v () in
     `Assoc [ "prover", `String pv ; "time", `Float t]
   | Tactic { id ; children } ->
     `Assoc [
@@ -199,7 +200,7 @@ let rec of_json (js : Json.t) : crc =
       let p = List.assoc "prover" fds |> Json.jstring in
       let t = List.assoc "time" fds |> Json.jfloat in
       let p,v = Prover.pattern_of_string p in
-      Prover(p,Option.value ~default:"0.0" v,t)
+      Prover(p,v,t)
     | `Assoc fds when List.mem_assoc "tactic" fds ->
       let tr = List.assoc "tactic" fds |> Json.jstring in
       let xs = List.assoc "children" fds |> Json.jlist in
@@ -223,7 +224,8 @@ let update ?(complete=true) ?(period=1.0) ?(hint=Stuck) result =
   let rec merge h r =
     match h, r with
     | Prover(p0,v0,t0), Prover(p1,v1,t1)
-      when p0 = p1 && v0 = v1 && equivalent ~period t0 t1 -> h
+      when p0 = p1 && equivalent ~period t0 t1 ->
+      if v0 = v1 then h else Prover(p1,v1,max t0 t1)
     | Tactic { id = f ; children = hs } ,
       Tactic { id = g ; children = rs }
       when f = g && List.length hs = List.length rs ->

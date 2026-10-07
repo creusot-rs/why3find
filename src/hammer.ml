@@ -469,19 +469,21 @@ let period (h : hammer) = h.project.config.time
 let warn_once = Hashtbl.create 0
 
 let find_prover p v provers =
-  match List.find_opt (Prover.fits ~name:p ~version:v) provers with
+  match List.find_opt (Prover.fits ~name:p ?version:v) provers with
   | Some _ as prv -> prv
   | None ->
-    let id = Printf.sprintf "%s@%s" p v in
-    let result = List.find_opt (Prover.fits ~name:p ?version:None) provers in
-    if not @@ Hashtbl.mem warn_once id then
+    let id = Prover.pattern ~name:p ?version:v () in
+    let alt =
+      if v = None then None
+      else List.find_opt (Prover.fits ~name:p) provers
+    in if not @@ Hashtbl.mem warn_once id then
       begin
         Hashtbl.add warn_once id () ;
-        match result with
+        match alt with
         | None -> Log.warning "[proofss] %s @{<red>discarded@}" id
         | Some v -> Log.warning "[proofs] %s @{<orange>relaxed to %s@}" id (Prover.version v)
       end ;
-    result
+    alt
 
 let try_prover p v t : strategy = fun n ->
   match find_prover p v n.hammer.provers with
