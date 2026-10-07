@@ -94,7 +94,6 @@ type header = {
 type target = {
   file: string;
   htitle: string;
-  mutable hbase: int; (* base level *)
   mutable headers: header list; (* in reverse order *)
   mutable matheq: int ;
   mutable treemap: int ;
@@ -110,7 +109,7 @@ type output = {
 let output ~file ~title =
   {
     target = {
-      file ; htitle = title ; hbase = 0 ; headers = [] ;
+      file ; htitle = title ; headers = [] ;
       contents = Buffer.create 80 ;
       forked = None ; matheq = 0 ; treemap = 0 ;
     } ;
@@ -146,7 +145,7 @@ let flush ?(onlyspace=true) output =
 let fork out ~file ~title =
   flush out ;
   out.target <- {
-    file ; htitle = title ; hbase = 0 ; headers = [] ;
+    file ; htitle = title ; headers = [] ;
     contents = Buffer.create 80 ;
     forked = Some out.target ;
     treemap = 0 ;
@@ -175,8 +174,6 @@ let pp_html_s out ?className s =
 let header out ~level ~title ?(toc=title) () =
   let target = out.target in
   let name = Printf.sprintf "_%d" (succ @@ List.length target.headers) in
-  if target.hbase <= 0 then target.hbase <- level ;
-  let level = 1 + level - target.hbase in
   target.headers <- { level ; name ; title = toc } :: target.headers ;
   Format.fprintf out.current.fmt
     "<h%d><a><div class=anchor id=\"%s\"></div>%s</a></h%d>@\n"
