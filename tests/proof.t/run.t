@@ -127,13 +127,13 @@
   </pre>
   <pre class="src crc">
     <span class=keyword>goal</span> <a href="clones.A.html#neutral_com"><div class=anchor id="A.neutral_com"></div>neutral_com</a><span title="Valid (one goal)" class="icon valid icofont-check"></span>
-      <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 500ns</pre><pre class="src crc"><span class=keyword>module</span> <a href="clones.B.html"><div class=anchor id="B"></div>clones.B</a><span title="1 logic parameter, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (one goal)" class="icon valid icofont-check"></span></pre>
+      <span class=prover title="Prover alt-ergo@2.4.2 (relaxed)">alt-ergo</span> 500ns</pre><pre class="src crc"><span class=keyword>module</span> <a href="clones.B.html"><div class=anchor id="B"></div>clones.B</a><span title="1 logic parameter, 1 hypothesis, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (one goal)" class="icon valid icofont-check"></span></pre>
   <pre class="src crc">
     <span class=keyword>axiom</span> <a href="clones.B.html#A.neutral"><div class=anchor id="B.A.neutral"></div>A.neutral</a><span title="uncloned hypothesis" class="icon small warning icofont-warning-alt"></span>
   </pre>
   <pre class="src crc">
     <span class=keyword>goal</span> <a href="clones.B.html#A.commutative"><div class=anchor id="B.A.commutative"></div>A.commutative</a><span title="Valid (one goal)" class="icon valid icofont-check"></span>
-      <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 400ns</pre><pre class="src crc"><span class=keyword>module</span> <a href="clones.C.html"><div class=anchor id="C"></div>clones.C</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
+      <span class=prover title="Prover alt-ergo@2.4.2 (relaxed)">alt-ergo</span> 400ns</pre><pre class="src crc"><span class=keyword>module</span> <a href="clones.C.html"><div class=anchor id="C"></div>clones.C</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
   <pre class="src crc">
     <span class=keyword>goal</span> <a href="clones.C.html#A.neutral"><div class=anchor id="C.A.neutral"></div>A.neutral</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
     <span class=keyword>goal</span> <a href="clones.C.html#A.commutative"><div class=anchor id="C.A.commutative"></div>A.commutative</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
@@ -155,19 +155,19 @@
   <pre class="src crc">
     <span class=keyword>goal</span> <a href="certif.S.html#mixfix%20%5B%5D"><div class=anchor id="S.mixfix%20%5B%5D"></div>([])</a><span title="Partial proof (3/5 goals)" class="icon warning icofont-error"></span>
       split_vc<span title="Partial proof (3/5 goals)" class="icon warning icofont-error"></span>
-        <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 4ms
+        <span class=prover title="Prover alt-ergo@2.4.2 (relaxed)">alt-ergo</span> 4ms
         split_vc<span title="Partial proof (1/2 goals)" class="icon warning icofont-error"></span>
           stuck<span class="icon failed icofont-error"></span>
-          <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 3ms
-        <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 3ms
+          <span class=prover title="Prover alt-ergo@2.4.2 (relaxed)">alt-ergo</span> 3ms
+        <span class=prover title="Prover alt-ergo@2.4.2 (relaxed)">alt-ergo</span> 3ms
         stuck<span class="icon failed icofont-error"></span></pre><pre class="src crc">
     <span class=keyword>goal</span> <a href="certif.S.html#reflexivity"><div class=anchor id="S.reflexivity"></div>reflexivity</a><span title="Valid (one goal)" class="icon valid icofont-check"></span>
-      <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 2ms</pre><pre class="src crc">
+      <span class=prover title="Prover alt-ergo@2.4.2 (relaxed)">alt-ergo</span> 2ms</pre><pre class="src crc">
     <span class=keyword>goal</span> <a href="certif.S.html#extensivity"><div class=anchor id="S.extensivity"></div>extensivity</a><span title="Partial proof (2/3 goals)" class="icon warning icofont-error"></span>
       split_vc<span title="Partial proof (2/3 goals)" class="icon warning icofont-error"></span>
-        <span class=prover title="alt-ergo@2.4.2">alt-ergo</span> 4ms
+        <span class=prover title="Prover alt-ergo@2.4.2 (relaxed)">alt-ergo</span> 4ms
         stuck<span class="icon failed icofont-error"></span>
-        <span class=prover title="cvc4@1.8">cvc4</span> 70ms</pre><pre class="src crc">
+        <span class=prover title="Prover cvc4@1.8 (relaxed)">cvc4</span> 70ms</pre><pre class="src crc">
     <span class=keyword>goal</span> <a href="certif.S.html#wrong"><div class=anchor id="S.wrong"></div>wrong</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
