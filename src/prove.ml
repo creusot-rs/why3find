@@ -39,12 +39,11 @@ let tactics : (string,int ref) Hashtbl.t = Hashtbl.create 0
 
 let rec full_stats = function
   | Crc.Stuck -> ()
-  | Prover(p,v,t) ->
-    let id = Prover.desc ~name:p ?version:v () in
+  | Prover(p,_,t) ->
     let stat =
-      try Hashtbl.find provers id with Not_found ->
+      try Hashtbl.find provers p with Not_found ->
         let s = Stats.create () in
-        Hashtbl.add provers id s ; s
+        Hashtbl.add provers p s ; s
     in Stats.add stat t
   | Tactic { id ; children } ->
     let stat =
@@ -166,24 +165,29 @@ let print_stats allprovers alltactics fmt =
       end ;
     if !btime > 0.0 || !bdepth > 0 then
       Format.fprintf fmt "Provers %t%t@\n" print_time print_depth ;
+    let width = ref 0 in
+    let size a = width := max !width (String.length a) in
+    let prvs =
+      List.sort_uniq String.compare @@
+      List.map (fun p -> let a = Prover.name p in size a ; a) allprovers in
+    List.iter (fun a -> size (Tactic.name a)) alltactics ;
     List.iter
-      (fun (prv : Prover.prover) ->
+      (fun prv ->
          try
-           let id = Prover.fullname prv in
-           let s = Hashtbl.find provers id in
+           let s = Hashtbl.find provers prv in
            Format.fprintf fmt " - %a (%4d) (%a - %a - %a)@\n"
-             (Utils.pp_left 20) id (Stats.count s)
+             (Utils.pp_left !width) prv (Stats.count s)
              Utils.pp_rtime (Stats.min s)
              Utils.pp_rtime (Stats.average s)
              Utils.pp_rtime (Stats.max s)
          with Not_found -> ()
-      ) allprovers ;
+      ) prvs ;
     List.iter
       (fun (tac : Tactic.tactic) ->
          try
            let id = Tactic.name tac in
            let s = Hashtbl.find tactics id in
-           Format.fprintf fmt " - %-20s (%4d)@\n" id !s
+           Format.fprintf fmt " - %a (%4d)@\n" (Utils.pp_left !width) id !s
          with Not_found -> ()
       ) alltactics ;
     Format.pp_print_flush fmt ()
@@ -425,7 +429,7 @@ let report ~(results:results) henv ~lib proofs =
 
 type mode = [ `Force | `Update | `Minimize | `Replay ]
 
-let process ~env
+let process ~(project:Project.t)
     ?(level=4) ?(mode:mode=`Update) ?provers ?tactics
     ?(results:results=`Default) ?(session=false) ?(axioms=false) ?unsuccess
     ?(gnames=[]) file =
@@ -439,16 +443,17 @@ let process ~env
         Log.error "invalid file name: %S" file ;
         exit 2
       end ;
-    let dir, lib = Wutil.filepath file in
-    let theories, format = Wutil.load_theories env.Project.why3.env file in
-    let session = Session.create ~dir ~file ~format theories in
-    let jprofile, strategy = Proofs.load file in
+    let root = project.root in
+    let path, lib = Wutil.filepath ~root ~file in
+    let theories, format = Wutil.load_theories project.env file in
+    let session = Session.create ~file ~format theories in
+    let move = mode <> `Replay in
+    let proof = Proofs.load ~move ~root ~path ~file () in
+    let default = Calibration.default project in
+    let profile = Calibration.of_json ~default proof.profile in
     let buffer = (* the proof strategy must be kept to stabilize crc files *)
-      if (mode = `Replay)
-      then None
-      else Some (Proofs.create ~file jprofile strategy) in
-    let default = Calibration.default env in
-    let profile = Calibration.of_json ~default jprofile in
+      if mode = `Replay then None else
+        Some (Proofs.buffer ~profile:(Calibration.to_json profile) proof) in
     let force = (mode = `Force) in
     let hammer =
       Hammer.create
@@ -456,17 +461,17 @@ let process ~env
         ~replay:(mode = `Replay)
         ~minimize:(mode = `Minimize)
         ?provers ?tactics ~profile
-        env in
+        project in
     let* proofs =
       Fibers.all @@ List.map
-        (prove_theory ~hammer ~force ~gnames buffer strategy)
+        (prove_theory ~hammer ~force ~gnames buffer proof.strategy)
         (Session.theories session)
     in
     if save then Session.save session ;
-    Option.iter Proofs.save buffer ;
+    Option.iter (Proofs.save project.cache) buffer ;
     let henv =
       if axioms then
-        Some (Axioms.init env)
+        Some (Axioms.init project)
       else None in
     Utils.flush () ;
     let failed = report ~results henv ~lib proofs in
@@ -486,7 +491,7 @@ type outcome = {
   unfixed : string list ;
 }
 
-let prove_files ~(env:Project.env)
+let prove_files ~(project:Project.t)
     ~mode ~level ~session ~results ~axioms ~details
     ~files ~gnames =
   begin
@@ -497,11 +502,12 @@ let prove_files ~(env:Project.env)
         if List.length files > 10 then `Summary else
         if List.length files > 1 then `Modules else `Theories
       | _ -> results in
-    let provers = Prover.select env.why3 ~patterns:env.config.provers in
-    let tactics = Tactic.select env.why3.env env.config.tactics in
+    let provers = Project.select_provers project in
+    let tactics = Tactic.select project.env project.config.tactics in
     on_failed results ;
     List.iter
-      (process ~env ~level ~mode ~session ~results
+      (process
+         ~project ~level ~mode ~session ~results
          ~provers ~tactics ~axioms ~unsuccess ~gnames)
       files ;
     Hammer.run () ;
@@ -516,8 +522,8 @@ let prove_files ~(env:Project.env)
     if axioms then print_axioms_stats () ;
     {
       provers ; tactics ;
-      time = max 1 (int_of_float (0.5 +. env.config.time)) ;
-      mem = Runner.memlimit (Why3.Whyconf.get_main env.why3.config) ;
+      time = max 1 (int_of_float (0.5 +. project.config.time)) ;
+      mem = Runner.memlimit (Why3.Whyconf.get_main project.whyconf) ;
       unfixed = List.rev !unsuccess ;
     }
   end

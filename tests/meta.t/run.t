@@ -1,9 +1,8 @@
-  $ why3find doc mypkg -o foo
+  $ WHY3FIND_TREEMAPS=yes why3find doc mypkg -o foo
   Generated $TESTCASE_ROOT/foo/index.html
   $ why3find install --dune --doc foo mypkg foo.cfg foo.drv
   Warning: won't install configuration file "foo.cfg"
   install (source)   mypkg/foo.mlw
-  install (proof)    mypkg/foo/proof.json
   install (driver)   foo.drv
   install (html)     html/fonts/icofont.woff
   install (html)     html/fonts/icofont.woff2
@@ -15,6 +14,7 @@
   install (html)     html/mypkg.foo.proof.html
   install (html)     html/script.js
   install (html)     html/style.css
+  install (html)     html/treemap.js
   install (meta)     META.json
   Generated $TESTCASE_ROOT/META.json
   Generated $TESTCASE_ROOT/dune.why3find
@@ -32,7 +32,6 @@
     (files
       (META.json as mypkg/META.json)
       (mypkg/foo.mlw as mypkg/mypkg/foo.mlw)
-      (mypkg/foo/proof.json as mypkg/mypkg/foo/proof.json)
       (foo.drv as mypkg/foo.drv)
       (foo/fonts/icofont.woff as mypkg/html/fonts/icofont.woff)
       (foo/fonts/icofont.woff2 as mypkg/html/fonts/icofont.woff2)
@@ -44,6 +43,7 @@
       (foo/mypkg.foo.proof.html as mypkg/html/mypkg.foo.proof.html)
       (foo/script.js as mypkg/html/script.js)
       (foo/style.css as mypkg/html/style.css)
+      (foo/treemap.js as mypkg/html/treemap.js)
       ))
   $ cat dune
   (include dune.why3find)

@@ -13,7 +13,7 @@
 type client
 
 val options : (string * Arg.spec * string) list
-val connect : Project.env -> client option
+val connect : Project.t -> client option
 val request : client ->
   Calibration.profile -> Prover.prover -> Runner.prooftask -> float ->
   Result.t Fibers.signal

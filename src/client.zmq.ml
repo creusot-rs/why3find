@@ -58,12 +58,12 @@ let resolve () =
   if !host <> "" then Some (Printf.sprintf "tcp://%s:%d" !host !port) else
     None
 
-let connect (env : Project.env) =
+let connect (project : Project.t) =
   Option.map
     begin fun address ->
       try Hashtbl.find clients address with Not_found ->
-        let wmain = Why3.Whyconf.get_main env.why3.config in
-        let cache = env.cache in
+        let wmain = Why3.Whyconf.get_main project.whyconf in
+        let cache = project.cache in
         let context = Zmq.Context.create () in
         let socket = Zmq.Socket.(create context dealer) in
         let profile = Calibration.create () in
@@ -212,7 +212,7 @@ let handler client msg =
       let prover = Prover.desc_of_string prover in
       do_download client { prover ; digest }
     | _ -> ()
-  with Not_found | Invalid_argument _ | Prover.InvalidProverDescription _ -> ()
+  with Not_found | Invalid_argument _ -> ()
 
 (* -------------------------------------------------------------------------- *)
 (* --- Running                                                            --- *)

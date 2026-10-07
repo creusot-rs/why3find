@@ -17,7 +17,7 @@ type goal = { prover : Prover.desc ; digest : string }
 (* -------------------------------------------------------------------------- *)
 
 type worker = {
-  wmain : Why3.Whyconf.main ;
+  main : Why3.Whyconf.main ;
   cache : Cache.t ;
   context : Zmq.Context.t ;
   timeout : int ;
@@ -26,7 +26,7 @@ type worker = {
   mutable socket : [ `Dealer ] Zmq.Socket.t ;
   mutable polling : Zmq.Poll.t ;
   maxjobs : int ;
-  provers : Prover.prover Prover.Mdesc.t ;
+  provers : (Prover.desc,Prover.prover) Hashtbl.t ;
   profile : Calibration.profile ;
   pending : (goal,unit Fibers.signal) Hashtbl.t ;
 }
@@ -56,9 +56,11 @@ let recv worker fn =
 (* -------------------------------------------------------------------------- *)
 
 let send_ready worker =
-  let provers = Prover.Mdesc.keys worker.provers in
-  let provers = List.map (fun p -> Prover.desc_to_string p) provers in
-  send worker ("READY"::string_of_int worker.maxjobs::provers)
+  let provers = ref [] in
+  Hashtbl.iter (fun d _ ->
+      provers := Prover.desc_to_string d :: !provers
+    ) worker.provers ;
+  send worker ("READY" :: string_of_int worker.maxjobs :: !provers)
 
 (* -------------------------------------------------------------------------- *)
 (* --- CALIBRATION                                                        --- *)
@@ -104,9 +106,9 @@ let send_result worker goal (alpha,result) =
 let do_prove worker goal timeout data =
   do_kill worker goal ;
   try
-    let { wmain ; profile } = worker in
+    let { main ; profile } = worker in
     let cancel = Fibers.signal () in
-    let prover = Prover.Mdesc.find goal.prover worker.provers in
+    let prover = Hashtbl.find worker.provers goal.prover in
     let buffer = Buffer.create (String.length data) in
     Buffer.add_string buffer data ;
     Hashtbl.add worker.pending goal cancel ;
@@ -115,9 +117,9 @@ let do_prove worker goal timeout data =
     Fibers.background ~callback:(send_result worker goal)
       begin
         let open Fibers.Monad in
-        let* alpha = Calibration.velocity wmain worker.cache profile prover in
+        let* alpha = Calibration.velocity main worker.cache profile prover in
         let timeout = alpha *. timeout in
-        let* result = Runner.prove_buffer wmain ~cancel prover buffer timeout in
+        let* result = Runner.prove_buffer main ~cancel prover buffer timeout in
         Hashtbl.remove worker.pending goal ;
         Fibers.return (alpha,result)
       end
@@ -142,7 +144,7 @@ let handler worker msg =
       let prover = Prover.desc_of_string prover in
       do_prove worker { prover ; digest } (float_of_string timeout) data
     | _ -> ()
-  with Invalid_argument _ | Prover.InvalidProverDescription _ -> ()
+  with Invalid_argument _ -> ()
 
 (* -------------------------------------------------------------------------- *)
 (* --- Worker Lifecycle                                                   --- *)
@@ -191,21 +193,24 @@ let flush worker handler =
 (* -------------------------------------------------------------------------- *)
 
 let connect ~server ~polling =
-  let wconfig = Why3.Whyconf.init_config None in
-  let wmain = Why3.Whyconf.get_main wconfig in
-  let wenv = Config.why3env wconfig in
-  let prvs = Prover.all wenv in
-  let jobs = Runner.get_jobs wmain in
-  let cache = Cache.create ~cdir:".why3find" () in
+  let whyconf = Why3.Whyconf.init_config None in
+  let main = Why3.Whyconf.get_main whyconf in
+  let env = Why3.Env.create_env @@ Why3.Whyconf.loadpath main in
+  let prvs = Prover.provers whyconf env in
+  let provers = Hashtbl.create 5 in
+  Prover.iter (Hashtbl.add provers) prvs ;
+  let jobs = Runner.get_jobs () in
+  let root = try Sys.getenv "HOME" with Not_found -> Sys.getcwd () in
+  let cache = Cache.create ~root () in
   Utils.flush () ;
-  Prover.(Mdesc.iter (fun _ -> Format.printf "Prover %a@." pp_prover) prvs) ;
+  Prover.iter (fun d _ -> Format.printf "Prover %a@." Prover.pp_desc d) prvs ;
   Format.printf "Server %s@." server ;
   let context = Zmq.Context.create () in
   let timeout = int_of_float (polling *. 1e3) in
   let socket,polling = connect context server in
   let profile = Calibration.create () in
   let worker = {
-    wmain ;
+    main ;
     cache ;
     context ;
     timeout ;
@@ -213,7 +218,7 @@ let connect ~server ~polling =
     socket ;
     polling ;
     hangup = 0 ;
-    provers = prvs ;
+    provers ;
     maxjobs = jobs ;
     profile ;
     pending = Hashtbl.create 0 ;

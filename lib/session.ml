@@ -18,14 +18,19 @@ module S = Why3.Session_itp
 (* ---  Sessions (File)                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-type session = Session of { file : S.file ; session : S.session }
+type session = Session of {
+    file : string ;
+    sfile : S.file ;
+    session : S.session ;
+  }
 
-let create ~dir ~file ~format theories =
+let create ~file ~format theories =
+  let dir = Filename.chop_extension file in
   let session = S.empty_session dir in
-  let file = S.add_file_section session
+  let sfile = S.add_file_section session
       (Why3.Sysutil.relativize_filename dir file)
       ~file_is_detached:false theories format
-  in Session { file ; session }
+  in Session { file ; sfile ; session }
 
 let save = function Session { session } ->
   Utils.mkdirs @@ S.get_dir session ;
@@ -35,20 +40,27 @@ let save = function Session { session } ->
 (* ---  Theories                                                          --- *)
 (* -------------------------------------------------------------------------- *)
 
-type theory = Thy of { file : S.file ; session : S.session ; theory : S.theory }
+type theory = Thy of {
+    file : string ;
+    sfile : S.file ;
+    session : S.session ;
+    theory : S.theory ;
+  }
 
 let thy (Thy t) = Th.restore_theory (S.theory_name t.theory)
 let thy_name (Thy t) = (S.theory_name t.theory).id_string
 
-let theories (Session { file ; session }) : theory list =
-  List.map (fun theory -> Thy { file ; theory ; session }) (S.file_theories file)
+let theories (Session { file ; sfile ; session }) : theory list =
+  List.map
+    (fun theory -> Thy { file ; sfile ; theory ; session })
+    (S.file_theories sfile)
 
 (* -------------------------------------------------------------------------- *)
 (* ---  Goals                                                             --- *)
 (* -------------------------------------------------------------------------- *)
 
 type goal = Goal of {
-    file : S.file ;
+    file : string ;
     theory : S.theory ;
     session : S.session ;
     node : S.proofNodeID ;
@@ -57,7 +69,7 @@ type goal = Goal of {
     mutable tactic : ( Tactic.tactic * goal list ) option ;
     mutable hashname : string ;
     mutable fullname : string ;
-    mutable context : Vc.context option ;
+    mutable context : Vc.context option option ;
     mutable touched : bool ;
     mutable proof : Crc.crc option ;
   }
@@ -76,15 +88,10 @@ let split (Thy { file ; session ; theory }) : goal list =
 
 let split = Timer.timed ~name:"Split theories" split
 
+let file (Goal g) = g.file
 let task (Goal g) = g.task
-let theory (Goal g) = Th.restore_theory (S.theory_name g.theory)
 let name g = Vc.task_name @@ task g
-
-let file (Goal g) =
-  match (T.task_goal g.task).pr_name.id_loc with
-  | Some loc -> let file,_,_,_,_ = Why3.Loc.get loc in file
-  | None -> String.concat Filename.dir_sep @@ Why3.Sysutil.decompose_path @@ S.file_path g.file
-
+let theory (Goal g) = Th.restore_theory (S.theory_name g.theory)
 let target (Goal g) = Vc.target g.task
 
 let compute_names (Goal g) =

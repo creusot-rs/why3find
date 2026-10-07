@@ -58,6 +58,7 @@ let pp_block fmt = function
 type env = {
   dir : string ; (* destination directory *)
   src : Docref.source ; (* source file infos *)
+  title : string ; (* document title *)
   package_url : string option;
   input : Token.input ; (* input lexer *)
   out : Pdoc.output ; (* output buffer *)
@@ -81,6 +82,8 @@ type env = {
   mutable opened : string list ; (* opening keywords *)
   mutable scopes : string list ; (* opened scopes *)
   mutable section : int ; (* code foldable section depth *)
+  mutable active : bool ; (* code default active section*)
+  mutable context : bool list ; (* active section stack *)
 }
 
 let bsync ?wanted env =
@@ -109,7 +112,7 @@ let bsync ?wanted env =
       (* Need for opening *)
       begin match wanted with
         | Raw -> ()
-        | Doc -> Pdoc.pp_print_string env.out "<div class=\"doc\">\n"
+        | Doc -> Pdoc.pp_print_string env.out "<div class=doc>\n"
         | Src -> env.indent <- Head 0
       end ;
     end
@@ -155,6 +158,34 @@ let pop env =
   | Emph -> Pdoc.pp_print_string env.out "</em>" (* keep space *)
   | Bold -> Pdoc.pp_print_string env.out "</strong>" (* keep space *)
 
+let linerefs =
+  try Sys.getenv "WHY3FIND_LINEREFS" <> "no" with Not_found -> true
+
+let treemaps =
+  try Sys.getenv "WHY3FIND_TREEMAPS" <> "no" with Not_found -> true
+
+let codeline env ?(offset=0) ?(indent=0) () =
+  let indent = String.make indent ' ' in
+  if linerefs then
+    begin
+      let line = Token.line env.input + offset in
+      Option.iter
+        (function Proofstats.{ goal ; status } ->
+           Pdoc.printf env.out
+             "\n%s<a class=codelense href=\"%s.index.html#%s\">%s</a>"
+             indent env.src.path goal status)
+        (Hashtbl.find_opt env.src.lenses line) ;
+      Pdoc.printf env.out
+        "\n\
+         <div id=\"_L%d\" class=lineanchor>\
+         <div class=linenumber>%d</div>\
+         <div class=linehover></div>\
+         </div>%s"
+        line line indent ;
+    end
+  else
+    Pdoc.printf env.out "\n%s" indent
+
 let text env =
   match env.mode with
   | Body -> push env env.file ; bsync env
@@ -164,14 +195,14 @@ let text env =
   | Pre ->
     match env.indent with
     | Code -> ()
-    | Head n ->
+    | Head indent ->
       bsync env ;
-      Pdoc.pp_print_string env.out "<pre class=\"src\">\n" ;
-      Pdoc.pp_print_string env.out (String.make n ' ') ;
+      Pdoc.pp_print_string env.out "<pre class=src>" ;
+      codeline env ~indent () ;
       env.indent <- Code
-    | Lines(l,n) ->
-      Pdoc.pp_print_string env.out (String.make l '\n') ;
-      Pdoc.pp_print_string env.out (String.make n ' ') ;
+    | Lines(lines,indent) ->
+      for offset = -lines+1 to -1 do codeline env ~offset () done ;
+      codeline env ~indent () ;
       env.indent <- Code
 
 let head env buffer level =
@@ -232,7 +263,7 @@ let pp_verdict_raw href fmt r =
     let title = "Failed (no proof)" in
     pp_mark ?href ~title ~cla:icon_failed fmt
 
-let pp_verdict = pp_verdict_raw None
+let pp_verdict_mark = pp_verdict_raw None
 let pp_vlink ~href fmt r = pp_verdict_raw (Some href) fmt r
 
 let process_proofs_summary env ~crc id = function
@@ -242,34 +273,32 @@ let process_proofs_summary env ~crc id = function
       Docref.Mstr.fold
         (fun _g c (s,p) -> s + Crc.get_stuck c , p + Crc.get_proved c)
         proofs (0,0) in
-    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.urlbase id in
+    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.path id in
     let r = Crc.nverdict ~stuck ~proved in
     Pdoc.pp env.out (pp_vlink ~href) r ;
-    if crc then Pdoc.pp env.crc pp_verdict r
+    if crc then Pdoc.pp env.crc pp_verdict_mark r
 
 let rec child n fmt crc =
   Format.fprintf fmt "@\n%a" Pdoc.pp_spaces n ;
   match crc with
   | Crc.Stuck ->
     Format.fprintf fmt "stuck<span class=\"%s\"></span>" icon_failed
-  | Crc.Prover(p,None,t) ->
-    Format.fprintf fmt "<span class=\"prover\" title=\"%s\">%s</span> %a"
-      p p Utils.pp_time t
-  | Crc.Prover(p,Some v,t) ->
-    Format.fprintf fmt "<span class=\"prover\" title=\"%s@%s\">%s</span> %a"
+  | Crc.Prover(p,v,t) ->
+    Format.fprintf fmt "<span class=prover title=\"%s@%s\">%s</span> %a"
       p v p Utils.pp_time t
   | Crc.Tactic { id ; children ; stuck ; proved } ->
-    Format.fprintf fmt "%s%a" id pp_verdict (Crc.nverdict ~stuck ~proved) ;
+    Format.fprintf fmt "%s%a" id pp_verdict_mark (Crc.nverdict ~stuck ~proved) ;
     List.iter (child (n+2) fmt) children
 
 let process_certif env id crc =
   Pdoc.printf env.crc
-    "<pre class=\"src\">@\n  %a <a id=\"%a\" href=\"%a\">%a</a>%a%t</pre>"
+    "<pre class=\"src crc\">\
+     @\n  %a <a href=\"%a\"><div class=anchor id=\"%a\"></div>%a</a>%a%t</pre>"
     Pdoc.pp_keyword "goal"
-    Id.pp_proof_aname id
     (Id.pp_ahref ~current:None ~package_url:env.package_url) id
+    Id.pp_proof_aname id
     Id.pp_local id
-    pp_verdict (Crc.verdict crc)
+    pp_verdict_mark (Crc.verdict crc)
     begin fun fmt ->
       match crc with
       | Crc.Stuck -> ()
@@ -284,6 +313,12 @@ let process_proof env id ?(valid=false) = function
     let href fmt = Id.pp_proof_ahref fmt id in
     Pdoc.pp env.out (pp_vlink ~href) (Crc.verdict crc) ;
     process_certif env id crc
+
+let process_status env indent goal crc =
+  Pdoc.pp env.out Pdoc.pp_spaces indent ;
+  Pdoc.printf env.out
+    "<a href=\"%s.index.html#%s\" class=codelense>%a</a>@\n"
+    env.src.path goal Crc.pp_hint crc
 
 (* -------------------------------------------------------------------------- *)
 (* --- Axioms & Parameter                                                 --- *)
@@ -346,25 +381,47 @@ let process_hypothesis env (s : Soundness.soundness) (p : Axioms.parameter) =
           pp_mark ~cla:icon_hypothesis ~title:"uncloned hypothesis" fmt
     in
     Pdoc.printf env.crc
-      "@\n  %a <a id=\"%a\" href=\"%a\">%a</a>%t"
+      "@\n  %a <a href=\"%a\"><div class=anchor id=\"%a\"></div>%a</a>%t"
       Pdoc.pp_keyword key
-      Id.pp_proof_aname id
       (Id.pp_ahref ~current:None ~package_url:env.package_url) id
+      Id.pp_proof_aname id
       Id.pp_local id qualif
   with Not_found -> ()
 
-let process_instance env ~ok (Docref.Instance s) =
-  Pdoc.printf env.crc "@\n  %a <a href=\"%s.html#clone-%d\">%s</a>"
-    Pdoc.pp_keyword "instance" s.container s.order s.container ;
+let pp_rank fmt = function None -> () | Some (k,n) ->
+  if k > 0 then Format.fprintf fmt " <span class=codelense>(#%d/%d)</span>" k n
+
+let process_instance env ~ok ~rank (Docref.Instance s) =
+  Pdoc.printf env.crc "@\n  %a <a href=\"%s.html#clone-%d\">%s%a</a>"
+    Pdoc.pp_keyword "instance" s.container s.order s.container pp_rank rank ;
   let title = (if ok then "sound" else "incomplete") ^ " instance" in
   let cla = if ok then icon_complete else icon_hypothesis in
   Pdoc.ppt env.crc @@ pp_mark ~title ~cla
+
+let process_instances env ~ok ns =
+  let get index (Docref.Instance a) =
+    try Hashtbl.find index a.container with Not_found -> 0 in
+  let next index (Docref.Instance a as n) =
+    let k = succ @@ get index n in
+    Hashtbl.replace index a.container k ; k in
+  let add index a = ignore (next index a) in
+  let size = Hashtbl.create 0 in
+  let curr = Hashtbl.create 0 in
+  let ns = List.sort Docref.by_instance ns in
+  List.iter (add size) ns ;
+  List.iter
+    (fun a ->
+       let n = get size a in
+       let k = next curr a in
+       let rank = if n > 1 then Some (k,n) else None in
+       process_instance env ~ok ~rank a
+    ) ns
 
 let process_module_axioms env =
   match env.theory with
   | None -> ()
   | Some thy ->
-    let pre = lazy (Pdoc.printf env.crc "<pre class=\"src\">") in
+    let pre = lazy (Pdoc.printf env.crc "<pre class=\"src crc\">") in
     let sound = Soundness.compute env.senv thy in
     Axioms.iter env.henv ~self:true
       (fun (p : Axioms.parameter) ->
@@ -378,9 +435,9 @@ let process_module_axioms env =
     begin match sound with
       | Unsound | Sound [] | Unknown [] -> ()
       | Sound ns ->
-        Lazy.force pre ; List.iter (process_instance env ~ok:true) ns
+        Lazy.force pre ; process_instances env ~ok:true ns
       | Unknown ns ->
-        Lazy.force pre ; List.iter (process_instance env ~ok:false) ns
+        Lazy.force pre ; process_instances env ~ok:false ns
     end ;
     if Lazy.is_val pre then Pdoc.printf env.crc "@\n</pre>@."
 
@@ -433,7 +490,7 @@ let pp_axioms_link ?href fmt { prm ; hyp ; pvs ; unsafe ; sound } =
         | Unsound ->
           plural unsafe "1 unsound definition" @@
           Printf.sprintf "%d unsafe definitions"
-        | Unknown [] -> ["0 instance found"]
+        | Unknown [] -> ["no instance found"]
         | Unknown ns ->
           plural (List.length ns) "1 incomplete instance" @@
           Printf.sprintf "%d incomplete instances"
@@ -445,7 +502,7 @@ let pp_axioms = pp_axioms_link ?href:None
 let process_axioms_summary env id ~crc = function
   | None -> ()
   | Some (thy : Docref.theory) ->
-    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.urlbase id in
+    let href fmt = Format.fprintf fmt "%s.proof.html#%s" env.src.path id in
     let hs = List.fold_left add_axiom unknown @@ Axioms.parameters thy.signature in
     let hs = { hs with sound = Soundness.compute env.senv thy } in
     Pdoc.pp env.out (pp_axioms_link ~href) hs ;
@@ -459,11 +516,12 @@ let pp_ident ~env ~local ?anchor ?attr fmt id =
   match Id.resolve ~lib:env.src.lib id with
   | id ->
     Format.fprintf fmt "%a<a" (Id.pp_qpath ~local) id ;
-    Option.iter (Format.fprintf fmt " id=\"%s\"") anchor ;
     Option.iter (Format.fprintf fmt " class=\"%s\"") attr ;
-    Format.fprintf fmt " title=\"%a\" href=\"%a\">%a</a>"
+    Format.fprintf fmt " title=\"%a\" href=\"%a\">"
       Id.pp_title id
-      (Id.pp_ahref ~current:None ~package_url:env.package_url) id
+      (Id.pp_ahref ~current:None ~package_url:env.package_url) id ;
+    Option.iter (Format.fprintf fmt "<div class=anchor id=\"%s\"></div>") anchor ;
+    Format.fprintf fmt "%a</a>"
       Id.pp_qname id
   | exception Not_found ->
     (* builtin *)
@@ -473,7 +531,24 @@ let rec pp_type ~env ~local ~arg fmt (ty : Why3.Ty.ty) =
   if arg then Format.pp_print_char fmt ' ' ;
   match ty.ty_node with
   | Tyvar tv -> Format.pp_print_string fmt tv.tv_name.id_string
-  | Tyapp(ts,[]) -> pp_ident ~env ~local fmt ts.ts_name
+  | Tyapp(ts,[]) ->
+    if Why3.Ty.is_ts_tuple ts then
+      Format.pp_print_string fmt "unit"
+    else
+      pp_ident ~env ~local fmt ts.ts_name
+  | Tyapp(ts,x::xs) when Why3.Ty.is_ts_tuple ts ->
+    begin
+      if arg then Format.pp_print_char fmt '(' ;
+      let pp = pp_type ~env ~local ~arg:false in
+      pp fmt x ;
+      List.iter (Format.fprintf fmt ",%a" pp) xs ;
+      if arg then Format.pp_print_char fmt ')' ;
+    end
+  | Tyapp(ts,[a;b]) when Why3.Ty.(ts_equal ts_func) ts ->
+    begin
+      let pp = pp_type ~env ~local ~arg:false in
+      Format.fprintf fmt "(%a -> %a)" pp a pp b ;
+    end
   | Tyapp(ts,args) ->
     begin
       if arg then Format.pp_print_char fmt '(' ;
@@ -500,16 +575,23 @@ let declare env n kwd ?(attr=[]) ?(valid=false)
     let { package_url ; current ; src = { lib } } = env in
     let tgt = Id.resolve ~lib target in
     let src = Id.resolve ~lib source in
-    let pp_href = Id.pp_ahref ~package_url ~current in    Pdoc.printf env.out "%a%a " Pdoc.pp_spaces n Pdoc.pp_keyword kwd ;
+    let pp_href = Id.pp_ahref ~package_url ~current in
+    let proof = Docref.find_proof tgt.self env.theory in
+    let goal = Format.asprintf "%s.%a" (Option.get env.current) Id.pp_local tgt in
+    Option.iter (process_status env n goal) proof ;
+    Pdoc.printf env.out "%a%a " Pdoc.pp_spaces n Pdoc.pp_keyword kwd ;
     List.iter (Pdoc.printf env.out "%a " Pdoc.pp_attribute) attr ;
     Pdoc.printf env.out
-      "%a<a id=\"%a\" href=\"%a\" title=\"%a  (cloned from %a)\">%a</a>"
+      "%a<a href=\"%a\" title=\"%a&#013;(cloned from %a)\">\
+       <div class=anchor id=\"%a\"></div>%a</a>"
       (Id.pp_qpath ~local) tgt
-      Id.pp_aname tgt pp_href src
-      Id.pp_title tgt Id.pp_title src
-      Id.pp_qname tgt ;
+      pp_href src
+      Id.pp_title tgt
+      Id.pp_title src
+      Id.pp_aname tgt
+      Id.pp_local tgt ;
     process_axioms env tgt ;
-    process_proof env tgt ~valid @@ Docref.find_proof tgt.self env.theory ;
+    process_proof env tgt ~valid proof ;
     if not more then Pdoc.printf env.out "@\n" ;
   end
 
@@ -598,14 +680,14 @@ let instance env n order (cloned : Why3.Theory.theory) =
   begin
     env.cloned <- max order env.cloned ;
     let r = Id.resolve ~lib:env.src.lib cloned.th_name in
-    let title = Format.asprintf "%a" Id.pp_title r in
+    let cloned = Format.asprintf "%a" Id.pp_title r in
     let { current ; package_url } = env in
     let pp_href = Id.pp_ahref ~current ~package_url in
     Pdoc.printf env.out
-      "%a<span class=\"comment\">\
-       (* cloned <a name=\"clone-%d\" href=\"%a\">%s</a> *)\
+      "%a<span class=comment>\
+       (* cloned <a id=\"clone-%d\" href=\"%a\">%s</a> *)\
        </span>@\n"
-      Pdoc.pp_spaces n order pp_href r title
+      Pdoc.pp_spaces n order pp_href r cloned
   end
 
 (* -------------------------------------------------------------------------- *)
@@ -613,7 +695,8 @@ let instance env n order (cloned : Why3.Theory.theory) =
 (* -------------------------------------------------------------------------- *)
 
 let process_clone_proofs env clones =
-  let stuck,proved = List.fold_left
+  let stuck,proved =
+    List.fold_left
       (fun (s,p) clone ->
          match clone with
          | Docref.Inst _ -> s,p
@@ -621,10 +704,9 @@ let process_clone_proofs env clones =
            match Docref.find_proof target env.theory with
            | None -> (s,p)
            | Some c -> s + Crc.get_stuck c, p + Crc.get_proved c
-      ) (0,0) clones
-  in
+      ) (0,0) clones in
   if stuck + proved <> 0 then
-    Pdoc.pp env.out pp_verdict (Crc.nverdict ~stuck ~proved)
+    Pdoc.pp env.out pp_verdict_mark (Crc.nverdict ~stuck ~proved)
 
 let process_clone_axioms env clones =
   match env.theory with
@@ -647,8 +729,8 @@ let process_clone_section env ~local ~indent ~container ~kind clones =
     begin
       text env ;
       Pdoc.printf env.out
-        "<span class=\"section\">\
-         {<span class=\"section-toggle\">%s</span>\
+        " <span class=section>\
+         {<span class=\"section-toggle\" title=\"Cloned symbols\">%s</span>\
          <span class=\"section-text\">@\n\
          %a<span class=\"comment section-toggle\">begin</span>@\n"
         kind Pdoc.pp_spaces (indent+2) ;
@@ -700,8 +782,7 @@ let process_clone env ~indent ~export id =
         let dclones = filter s.clones in
         let local = List.rev scope in
         let container = thy.theory in
-        process_clone_section env ~local ~indent ~container ~kind:"#" iclones ;
-        process_clone_section env ~local ~indent ~container ~kind:"…" dclones ;
+        process_clone_section env ~local ~indent ~container ~kind:"…" (iclones @ dclones) ;
         process_clone_axioms env dclones ;
         process_clone_proofs env dclones ;
         pp_space env ;
@@ -726,25 +807,30 @@ let resolve env ?(infix=false) () =
     ~src:env.src ~theory:env.theory
     ~infix (Token.position env.input)
 
-let process_href env (href : Docref.href) s =
+let process_href env (href : Docref.href) ?(infix=false) s =
   match href with
 
   | Def(id,proof) ->
     env.declared <- Sid.add id.self env.declared ;
     env.cloning <- Cloning.init ;
+    if infix then Pdoc.printf env.out "(" ;
     if id.id_qid = [] then
-      Pdoc.pp env.out Pdoc.pp_html s
+      Pdoc.printf env.out "%a" Pdoc.pp_html s
     else
-      Pdoc.printf env.out "<a id=\"%a\">%a</a>" Id.pp_aname id Pdoc.pp_html s ;
+      Pdoc.printf env.out "<a><div class=anchor id=\"%a\"></div>%a</a>"
+        Id.pp_aname id Pdoc.pp_html s ;
+    if infix then Pdoc.printf env.out ")" ;
     process_axioms env id ;
     process_proof env id proof
 
   | Ref id ->
     let { current ; package_url } = env in
+    if infix then Pdoc.printf env.out "(" ;
     Pdoc.printf env.out "<a title=\"%a\" href=\"%a\">%a</a>"
       Id.pp_title id
       (Id.pp_ahref ~current ~package_url) id
       Pdoc.pp_html s ;
+    if infix then Pdoc.printf env.out ")" ;
     process_clone_token env (`Id id.self)
 
   | NoRef ->
@@ -754,7 +840,10 @@ let process_href env (href : Docref.href) s =
       | "." -> process_clone_token env `Dot
       | _ -> process_clone_token env (`Name s)
     end ;
-    Pdoc.pp_html_s env.out s
+    if infix then
+      Pdoc.printf env.out "(%a)" Pdoc.pp_html s
+    else
+      Pdoc.pp_html_s env.out s
 
 (* -------------------------------------------------------------------------- *)
 (* --- Foldable Sections                                                  --- *)
@@ -765,23 +854,28 @@ let pp_active fmt b =
 
 let process_open_section env ~active title =
   text env ;
+  let active = if active then env.active else not env.active in
   env.section <- succ env.section ;
+  env.context <- env.active :: env.context ;
+  env.active <- active ;
   Pdoc.printf env.out
     "<span class=\"section level%d\">\
-     <span class=\"comment\">{</span>\
+     <span class=comment>{</span>\
      <span class=\"attribute section-toggle\">%s</span>\
      <span class=\"comment section-text%a\">…</span>\
-     <span class=\"comment\">}</span>\
+     <span class=comment>}</span>\
      <span class=\"section-text%a\">"
     (min env.section 3) title pp_active (not active) pp_active active
 
 let process_close_section env title =
   env.section <- pred env.section ;
+  env.active <- List.hd env.context ;
+  env.context <- List.tl env.context ;
   text env ;
   Pdoc.printf env.out
-    "<span class=\"comment\">{</span>\
+    "<span class=comment>{</span>\
      <span class=\"attribute section-toggle\">%s</span>\
-     <span class=\"comment\">}</span>\
+     <span class=comment>}</span>\
      </span></span>"
     (if title = "" then "…" else title)
 
@@ -802,11 +896,12 @@ let process_open_module env key =
     let theory = Docref.Mstr.find_opt id env.src.theories in
     bsync ~wanted:Raw env ;
     Pdoc.printf env.out
-      "<pre class=\"src\">%a <a title=\"%s.%s\" href=\"%s\">%s</a>"
+      "<pre class=src>%a <a title=\"%s.%s\" href=\"%s\">%s</a>"
       Pdoc.pp_keyword key path id url id ;
     Pdoc.printf env.crc
-      "<pre class=\"src\">%a <a id=\"%s\" href=\"%s\">%s.%s</a>"
-      Pdoc.pp_keyword key id url path id ;
+      "<pre class=\"src crc\">%a <a href=\"%s\">\
+       <div class=anchor id=\"%s\"></div>%s.%s</a>"
+      Pdoc.pp_keyword key url id path id ;
     process_axioms_summary env id ~crc:true theory ; (* out & crc *)
     process_proofs_summary env id ~crc:true theory ; (* out & crc *)
     Pdoc.printf env.out "</pre>@." ;
@@ -816,11 +911,11 @@ let process_open_module env key =
     Pdoc.fork env.out ~file ~title ;
     Pdoc.printf env.out
       "<header>\
-       <a href=\"index.html\">index</a> — \
+       <a href=\"index.html\" title=\"Index\">%s</a> — \
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>module %s</code>\
        </header>@."
-      env.src.urlbase path id ;
+      env.title env.src.path path id ;
     env.mode <- Body ;
     env.block <- Raw ;
     if prelude <> "" then
@@ -888,6 +983,7 @@ let process_ident env s =
       | "module" | "theory" -> process_open_module env s
       | "end" when env.opened = [] -> process_close_module env s
       | "assume" ->
+        text env ;
         Pdoc.pp env.out Pdoc.pp_admitted s
       | _ ->
         process_clone_token env (`Kwd s) ;
@@ -993,11 +1089,11 @@ let process_newline env =
 let process_reference ~wenv ~env r =
   try
     let { src ; current ; package_url } = env in
-    let name, id = Docref.reference ~wenv ~src ~current r in
+    let name, id = Docref.reference ~env:wenv ~src ~current r in
     let r = Id.resolve ~lib:src.lib id in
     text env ;
     Pdoc.printf env.out
-      "<code class=\"src\"><a title=\"%a\" href=\"%a\">%s</a></code>"
+      "<code class=src><a title=\"%a\" href=\"%a\">%s</a></code>"
       (* markdown reference might be emitted from any file *)
       Id.pp_title r (Id.pp_ahref ~current:None ~package_url) r name
   with
@@ -1028,13 +1124,26 @@ let parse env =
           Pdoc.pp_html_s out ~className:"comment" s ;
         end
     | Verb s ->
-      text env ; Pdoc.printf out "<code class=\"src\">%a</code>" Pdoc.pp_html s
+      text env ; Pdoc.printf out "<code class=src>%a</code>" Pdoc.pp_html s
+    | Math s ->
+      text env ;
+      let id = Pdoc.matheq out in
+      Pdoc.printf out "<span id=\"math%d\">…</span>" id ;
+      Pdoc.printf out "<script>katex.render(%S, math%d,\
+                       { throwOnError: false });\
+                       </script>" s id
+    | Equation s ->
+      text env ;
+      let id = Pdoc.matheq out in
+      Pdoc.printf out "<div class=maths id=\"math%d\">…</div>" id ;
+      Pdoc.printf out "<script>katex.render(%S, math%d,\
+                       { throwOnError: false, displayMode: true });\
+                       </script>" s id
     | Ref s -> process_reference ~wenv ~env s
     | Style(Emph,_) -> process_style env Emph
     | Style(Bold,_) -> process_style env Bold
     | Style(Head,h) -> process_header env h
     | Style(Dash,n) -> process_dash env n
-    | Style _ -> ()
     | OpenDoc ->
       begin
         Pdoc.flush ~onlyspace:false out ;
@@ -1054,7 +1163,7 @@ let parse env =
     | Infix s ->
       text env ;
       let href = resolve env ~infix:true () in
-      process_href env href s
+      process_href env href ~infix:true s ;
   done
 
 (* -------------------------------------------------------------------------- *)
@@ -1111,8 +1220,18 @@ let package () =
 (* --- Titling Document                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-let document_title ~title ~page =
-  if title <> "" then Printf.sprintf "%s — %s" title page else page
+let document_header ~file ?page () =
+  try
+    String.trim @@
+    let header = Utils.input ~file input_line in
+    let rec start p = if header.[p] = '#' then start (succ p) else p in
+    let p = start 0 in
+    if p > 0 then String.sub header p (String.length header - p) else header
+  with _ ->
+    String.capitalize_ascii @@
+    match page with
+    | Some page -> page
+    | None -> Filename.basename @@ Sys.getcwd ()
 
 (* -------------------------------------------------------------------------- *)
 (* --- Markdown File Processing                                           --- *)
@@ -1123,13 +1242,15 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
     let src = Docref.empty () in
     let input = Token.input ~doc:true file in
     let page = Filename.chop_extension @@ Filename.basename file in
-    let title = document_title ~title ~page in
+    let header = document_header ~file ~page () in
     let href = page ^ ".html" in
     let ofile = Filename.concat dir href in
-    let out = Pdoc.output ~file:ofile ~title in
+    let page_title = if title <> page then Printf.sprintf "%s — %s" title page else page in
+    let out = Pdoc.output ~file:ofile ~title:page_title in
     let crc = Pdoc.null () in
     let env = {
-      dir ; src ; package_url; input ; out ; crc ; wenv ; henv ; senv ;
+      dir ; src ; title ;
+      package_url; input ; out ; crc ; wenv ; henv ; senv ;
       space = false ;  indent = Code ;
       block = Raw; mode = Body ; file = Body ; stack = [] ;
       current = None ; theory = None ; instance = None ;
@@ -1137,13 +1258,14 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
       proof_href = 0 ;
       declared = Sid.empty ;
       opened = [] ; scopes = [] ;
-      section = 0 ;
+      section = 0 ; active = true ; context = []
     } in
     chapter ~href ~title () ;
     Pdoc.printf env.out
       "<header>\
-       <a href=\"index.html\">index</a> — %s
-       </header>@." title ;
+       <a href=\"index.html\" title=\"Index\">%s</a>%t
+       </header>@." title
+      (fun fmt -> if header <> title then Format.fprintf fmt " — %s" header) ;
     Pdoc.flush out ;
     push env Div ;
     parse env ;
@@ -1151,61 +1273,202 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
   end
 
 (* -------------------------------------------------------------------------- *)
+(* --- Printing Stats Utilities                                           --- *)
+(* -------------------------------------------------------------------------- *)
+
+let pp_occurs fmt n = if n > 1 then Format.fprintf fmt " %d" n
+let pp_count fmt n = Format.fprintf fmt "%4d" n
+let pp_partial fmt (p,n) = Format.fprintf fmt "%d/%d" p n
+let pp_title title pp fmt x =
+  Format.fprintf fmt "<span title=\"%s\">%a</span>" title pp x
+
+(* -------------------------------------------------------------------------- *)
+(* --- Generating Global Treemaps                                         --- *)
+(* -------------------------------------------------------------------------- *)
+
+let process_source_treemap out (src : Docref.source) ps =
+  let stats = src.local in
+  if not @@ Proofstats.is_empty stats then
+    begin
+      let qs = Proofstats.create () in
+      Proofstats.add_strategy qs src.strategy ;
+      let total = Proofstats.total qs in
+      let proved = Proofstats.proved qs in
+      let time = Proofstats.time qs in
+      let percent = time /. Proofstats.time ps in
+      Pdoc.printf out
+        "<div class=doc><h1 id=\"proof-stats\">Statistics</h1>@\n<pre class=stats>" ;
+      if proved = total then
+        Pdoc.printf out "<b>Proved</b> (%a)"
+          (pp_title "Total goals (all proved)" Format.pp_print_int) proved
+      else if proved > 0 then
+        Pdoc.printf out "<b class=warning>Partial</b> (%a)"
+          (pp_title "Proved/Total goals" pp_partial) (proved,total) ;
+      Proofstats.iter_provers
+        (fun prv s ->
+           Pdoc.printf out
+             " <span title=\"Total %a | Range %a - %a - %a\">(%s%a)</span>"
+               Utils.pp_rtime (Stats.sum s)
+               Utils.pp_rtime (Stats.min s)
+               Utils.pp_rtime (Stats.average s)
+               Utils.pp_rtime (Stats.max s)
+               prv pp_occurs (Stats.count s)
+        ) qs ;
+      Pdoc.printf out " (%a)" (pp_title "Cumulated time" Utils.pp_time) time ;
+      Pdoc.printf out " (%a)" (pp_title "Of total time" Utils.pp_percent) percent ;
+      Pdoc.printf out "</pre>@\n</div>@\n" ;
+      let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+      Pdoc.printf out
+        "<div class=dashboard>@\n<div class=tab>@\n\
+         <div class=treemap id=\"%s\"></div>@\n\
+         <script type=\"text/javascript\" defer>\
+         Why3findTreemap('#%s',800,400, %a );\
+         </script>@\n\
+         </div>@\n</div>@."
+        id id Json.pretty stats.json ;
+    end
+
+let process_global_treemap out sources =
+  let stats =
+    Proofstats.jmap
+      (fun (_,s) ->
+         match s with
+         | None -> Proofstats.empty
+         | Some (src : Docref.source) -> src.global
+      ) sources in
+  if not @@ Proofstats.is_empty stats then
+    begin
+      let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+      Pdoc.printf out
+        "<div class=tab>@\n\
+         <div class=treemap id=\"%s\"></div>@\n\
+         <script type=\"text/javascript\" defer>\
+         Why3findTreemap('#%s',800,400,{ children: %a });\
+         </script>@\n\
+         </div>@."
+        id id Json.pretty stats.json ;
+    end
+
+(* -------------------------------------------------------------------------- *)
 (* --- MLW File Processing                                                --- *)
 (* -------------------------------------------------------------------------- *)
 
-let process_source ~wenv ~henv ~senv ~out:dir ~package_url file
-    (src : Docref.source) =
-  let title = Printf.sprintf "Library %s" src.urlbase in
-  let href = src.urlbase ^ ".index.html"in
-  let pref = src.urlbase ^ ".proof.html"in
+let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
+    (src : Docref.source) ps =
+  let titledoc = title in
+  let title = Printf.sprintf "Library %s" src.path in
+  let href = src.path ^ ".index.html" in
+  let pref = src.path ^ ".proof.html" in
   let ofile = Filename.concat dir href in
   let pfile = Filename.concat dir pref in
   let out = Pdoc.output ~file:ofile ~title in
   let crc = Pdoc.output ~file:pfile ~title in
   let input = Token.input file in
   let env = {
-    dir ; src ; package_url; input ; out ; crc ; wenv ; henv ; senv ;
+    dir ; src ; title = titledoc ;
+    package_url; input ; out ; crc ; wenv ; henv ; senv ;
     space = false ; indent = Code ;
     block = Raw ; mode = Body ; file = Body ; stack = [] ;
     current = None ; theory = None ; instance = None ;
     cloning = Cloning.init ; cloned = 0 ;
     proof_href = 0 ;
     declared = Sid.empty ;
-    opened = [] ; scopes = [] ; section = 0 ;
+    opened = [] ; scopes = [] ; section = 0 ; active = true ; context = [] ;
   } in
   begin
     chapter ~src ~href ~title () ;
     Pdoc.printf out
       "<header>\
-       <a href=\"index.html\">index</a> — <code>library %s</code>\
-       </header>@." src.urlbase ;
+       <a href=\"index.html\" title=\"Index\">%s</a> — \
+       <code>library %s</code>\
+       </header>@." env.title src.path ;
     Pdoc.flush out ;
     Pdoc.printf crc
       "<header>\
-       <a href=\"index.html\">index</a> — \
+       <a href=\"index.html\" title=\"Index\">%s</a> — \
        <code>library <a href=\"%s.index.html\">%s</a></code> — \
        <code>proofs</code>\
-       </header>@." src.urlbase src.urlbase ;
+       </header>@." env.title src.path src.path ;
+    Pdoc.printf crc "<div class=doc><h1>Proofs</h1></div>@\n" ;
     Pdoc.flush crc ;
-    Pdoc.printf crc "<h1>Provers</h1>@\n<pre class=\"src\">" ;
-    Calibration.iter
-      (fun p n t ->
-         Pdoc.printf crc "@\n  %-12s @%-6s n=%-3d %a"
-           (Prover.desc_name p) (Prover.desc_version p) n Utils.pp_time t
-      ) src.profile ;
-    Pdoc.printf crc "@\n</pre>@." ;
-    Pdoc.printf crc "<h1>Proofs</h1>@\n" ;
     parse env ;
+    if treemaps then process_source_treemap out env.src ps ;
     Pdoc.close_all out ;
     Pdoc.close_all crc ;
   end
 
 (* -------------------------------------------------------------------------- *)
+(* --- Computing Statistics                                               --- *)
+(* -------------------------------------------------------------------------- *)
+
+let total_stats sources =
+  let ps = Proofstats.create () in
+  List.iter
+    (fun (_,s) ->
+       match s with
+       | None -> ()
+       | Some (src : Docref.source) -> Proofstats.add_strategy ps src.strategy
+    ) sources ; ps
+
+let process_statistics out ps =
+  let total = Proofstats.total ps in
+  if total > 0 then
+    begin
+      Pdoc.printf out
+        "<h1>Statistics</h1>@\n\
+         <pre class=stats>@\n" ;
+      let w = ref 0 in
+      let wsize a _ = w := max !w (String.length a) in
+      let proved = Proofstats.proved ps in
+      let depth = Proofstats.depth ps in
+      let time = Proofstats.time ps in
+      if proved = total then wsize "Proved" ()
+      else if proved = 0 then wsize "No Proofs" ()
+      else wsize "Partial xxxx/" () ;
+      Proofstats.iter_provers wsize ps ;
+      Proofstats.iter_tactics wsize ps ;
+      if proved = total then
+        Pdoc.printf out "<b>%a</b>   (%a)" (Utils.pp_left !w) "Proved"
+          (pp_title "Total goals (all proved)" pp_count) proved
+      else if proved > 0 then
+        Pdoc.printf out "<b class=warning>%a</b>   (%a)"
+          (Utils.pp_left (!w - 5)) "Partial"
+          (pp_title "Proved/Total goals" pp_partial) (proved,total)
+      else
+        Pdoc.printf out "<b class=error>No Proofs</b>   (%a)"
+          (pp_title "Total goals (none proved)" Format.pp_print_int) total ;
+      if time > 1e-3 then Pdoc.printf out " (%a)"
+          (pp_title "Cumulated time" Utils.pp_rtime) time ;
+      if depth > 0 then Pdoc.printf out " (depth %a)"
+          (pp_title "Maximal depth" Format.pp_print_int) depth ;
+      Pdoc.printf out "@\n@\n" ;
+      Proofstats.iter_provers
+        (fun prv s ->
+           Pdoc.printf out "- <b>%a</b> (%a) (%a) (%a — %a — %a)@\n"
+             (Utils.pp_left !w) prv (pp_title "Proved goals" pp_count) (Stats.count s)
+             (pp_title "Cumulated time" Utils.pp_rtime) (Stats.sum s)
+             (pp_title "Minimum time" Utils.pp_rtime) (Stats.min s)
+             (pp_title "Average time" Utils.pp_rtime) (Stats.average s)
+             (pp_title "Maximal time" Utils.pp_rtime) (Stats.max s)
+        ) ps ;
+      Proofstats.iter_tactics
+        (fun tac n ->
+           Pdoc.printf out "- <b>%a</b> (%a)@\n"
+             (Utils.pp_left !w) tac (pp_title "Tactic occurrences" pp_count) n
+        ) ps ;
+      Pdoc.printf out "</pre>@." ;
+    end
+
+(* -------------------------------------------------------------------------- *)
 (* --- Generating Index                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
+let warns_outdated = lazy
+  (try Sys.getenv "WHY3FIND_OUTDATED" <> "no" with Not_found -> true)
+
 let process_chapter_proofs out (src : Docref.source) =
+  if src.outdated && Lazy.force warns_outdated then
+    Log.warning "%s: proof files might be outdated" src.file ;
   let (stuck,proved) =
     Docref.Mstr.fold
       (fun _ (thy : Docref.theory) acc ->
@@ -1215,7 +1478,7 @@ let process_chapter_proofs out (src : Docref.source) =
               proved + Crc.get_proved crc
            ) thy.proofs acc
       ) src.theories (0,0)
-  in Pdoc.pp out pp_verdict (Crc.nverdict ~stuck ~proved)
+  in Pdoc.pp out pp_verdict_mark (Crc.nverdict ~stuck ~proved)
 
 let process_chapter_axioms out (senv : Soundness.env) (src : Docref.source) =
   let hs =
@@ -1231,7 +1494,7 @@ let process_chapter_axioms out (senv : Soundness.env) (src : Docref.source) =
 let pp_chapters out ~senv ~title cs =
   if cs <> [] then
     begin
-      Pdoc.printf out "<h1>%s</h1>@\n<div class=\"doc\">@\n<ul>@\n" title ;
+      Pdoc.printf out "<h1>%s</h1>@\n<ul>@\n" title ;
       List.iter
         (fun c ->
            Pdoc.printf out "<li><a href=\"%s\">%s</a>" c.href c.title ;
@@ -1239,19 +1502,22 @@ let pp_chapters out ~senv ~title cs =
            Option.iter (process_chapter_proofs out) c.src ;
            Pdoc.printf out "</li>@\n" ;
         ) cs ;
-      Pdoc.printf out "</ul>@\n</div>@." ;
+      Pdoc.printf out "</ul>@." ;
     end
 
-let index ~out:dir ~senv ~title =
+let process_index ~out:dir ~senv ~title sources ps =
   let href = "index.html" in
   if List.for_all (fun c -> c.href <> href) !chapters then
     begin
       let ofile = Filename.concat dir href in
       let out = Pdoc.output ~file:ofile ~title in
-      Pdoc.printf out
-        "<header>index — %s</header>@." title ;
+      Pdoc.printf out "<header>%s</header>@\n" title ;
+      Pdoc.printf out "<div class=dashboard>@\n<div class=tab>@\n" ;
       pp_chapters out ~senv ~title:"Documentation" @@ documentation () ;
       pp_chapters out ~senv ~title:"Development" @@ package () ;
+      process_statistics out ps ;
+      Pdoc.printf out "</div>@\n" ;
+      if treemaps then process_global_treemap out sources ;
       Pdoc.flush out ;
       Pdoc.close_all out ;
     end
@@ -1261,30 +1527,32 @@ let index ~out:dir ~senv ~title =
 (* -------------------------------------------------------------------------- *)
 
 let shared ~out ~file =
-  let tgt = Filename.concat out file in
-  let src = Meta.shared file in
-  Utils.copy ~src ~tgt
+  let source = Meta.shared file in
+  let target = Filename.concat out file in
+  Utils.copy ~source ~target
 
-let preprocess ~henv ~wenv ~senv file =
+let preprocess ~root ~cache ~henv ~wenv ~senv file =
   file ,
   if Filename.check_suffix file ".md" then None else
   if Filename.check_suffix file ".mlw" then
-    let src = Docref.parse ~henv ~wenv file in
-    Soundness.register senv src ; Some src
+    let src = Docref.parse ~cache ~root ~henv ~env:wenv ~file () in
+    Soundness.register senv src ;
+    Some src
   else
     Utils.failwith "Don't known what to do with %S" file
 
-let process ~wenv ~henv ~out ~title (file,kind) =
+let process ~wenv ~henv ~out ~title ps (file,kind) =
   match kind with
   | None -> process_markdown ~wenv ~henv ~out ~title file
-  | Some src -> process_source ~wenv ~henv ~out file src
+  | Some src -> process_source ~wenv ~henv ~out ~title file src ps
 
-let generate ~(env:Project.env) ~out ~title ~files ~url ~package_url =
+let generate ~(project:Project.t) ~out ~title ~files ~url ~package_url =
   begin
     (* Why3 environment *)
-    let wenv = env.why3.env in
+    let wenv = project.env in
+    let root = project.root in
     (* Axioms config *)
-    let henv = Axioms.init env in
+    let henv = Axioms.init project in
     (* Sounness config *)
     let senv = Soundness.init () in
     (* Shared resources *)
@@ -1294,12 +1562,17 @@ let generate ~(env:Project.env) ~out ~title ~files ~url ~package_url =
     shared ~out ~file:"icofont.min.css" ;
     shared ~out ~file:"fonts/icofont.woff" ;
     shared ~out ~file:"fonts/icofont.woff2" ;
+    if treemaps then shared ~out ~file:"treemap.js" ;
     (* Pre-processing *)
-    let sources = List.map (preprocess ~wenv ~henv ~senv) files in
+    let title =
+      if title<>"" then title else document_header ~file:"README.md" () in
+    let cache = Cache.create ~root:project.root () in
+    let sources = List.map (preprocess ~cache ~root ~wenv ~henv ~senv) files in
+    let ps = total_stats sources in
     (* Doc generation *)
-    List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url) sources ;
+    List.iter (process ~wenv ~henv ~senv ~title ~out ~package_url ps) sources ;
     (* Indexing *)
-    index ~out ~senv ~title ;
+    process_index ~out ~senv ~title sources ps ;
     (* Final output *)
     Log.emit "Generated %s%s/index.html"
       (if url then "file://" else "") (Utils.absolute out) ;

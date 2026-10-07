@@ -12,7 +12,6 @@
 "\| default_editor = "xdg-open %f"
 "\| magic = 14
 "\| memlimit = 1000
-"\| running_provers_max = 2
 "\| timelimit = 5.000000
 "\|
 "\| [partial_prover]
@@ -25,4 +24,11 @@
  (_
   (env-vars
    (WHY3CONFIG ../why3.conf)
-   (WHY3FIND_AUTODETECT_PROVERS no))))
+   (WHY3FIND_JOBS 2)
+   (WHY3FIND_DOWNLOADED no)
+   (WHY3FIND_AUTODETECT no)
+   (WHY3FIND_AUTOLOAD no)
+   (WHY3FIND_OUTDATED no)
+   (WHY3FIND_LINEREFS no)
+   (WHY3FIND_TREEMAPS no)
+   )))

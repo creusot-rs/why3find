@@ -25,20 +25,22 @@ let dloc_of_range ~file ((p,q) : Range.range) : Dap.location =
   Dap.loc ~file ~line:p.line ~column:p.col ~end_line:q.line ~end_column:q.col ()
 
 let dloc_of_goal goal =
-  let file = Session.file goal in
-  let context = Session.context goal in
-  let loc =
-    List.find_map
-      (function Vc.{ kind = Goal ; range } -> Some range | _ -> None)
-      context.chunks in
-  match loc with
-  | Some range -> Some (dloc_of_range ~file range)
-  | None ->
-    let line,end_line = context.goal in
-    if 0 <= line && line <= end_line && end_line < max_int then
-      Some (Dap.loc ~file ~line ~end_line ())
-    else
-      Option.map dloc_of_position @@ Session.target goal
+  match Session.context goal with
+  | None -> None
+  | Some context ->
+    let file = Session.file goal in
+    let loc =
+      List.find_map
+        (function Vc.{ kind = Goal ; range } -> Some range | _ -> None)
+        context.chunks in
+    match loc with
+    | Some range -> Some (dloc_of_range ~file range)
+    | None ->
+      let line,end_line = context.goal in
+      if 0 <= line && line <= end_line && end_line < max_int then
+        Some (Dap.loc ~file ~line ~end_line ())
+      else
+        Option.map dloc_of_position @@ Session.target goal
 
 (* -------------------------------------------------------------------------- *)
 (* ---  Cursor & Breakpoints Data                                          --- *)
@@ -92,9 +94,11 @@ let () = Dap.on_breakpoint ~clear:clear_breakpoints
       else
       if Array.exists
           (fun root ->
-             let c = Session.context root in
-             c.file = file &&
-             let (p,q) = c.goal in p <= line && line <= q
+             match Session.context root with
+             | None -> false
+             | Some c ->
+               c.file = file &&
+               let (p,q) = c.goal in p <= line && line <= q
           ) !roots
       then
         let id = add_breakpoint ~file ~line ~verified:true in
@@ -244,12 +248,14 @@ let () = Dap.register "why3/context"
       match Dap.get_by_frameId goal_attr frameId with
       | None -> `Null
       | Some goal ->
-        let context = Session.context goal in
-        let file = context.file in
-        Json.assoc [
-          "source" , `String file ;
-          "chunks" , Json.list_map (jchunk ~file) context.chunks ;
-        ]
+        match Session.context goal with
+        | None -> `Null
+        | Some context ->
+          let file = context.file in
+          Json.assoc [
+            "source" , `String file ;
+            "chunks" , Json.list_map (jchunk ~file) context.chunks ;
+          ]
     end
 
 let () = Dap.register "why3/task"
@@ -562,22 +568,23 @@ let cc_theory hammer buffer strategy gnames theory =
 
 let hline = "--------------------------------------------------------"
 
-let cc_file adapter env gnames file =
+let cc_file adapter project gnames file =
   try
     Dap.output adapter "Compiling %s@." file ;
-    let dir, lib = Wutil.filepath file in
-    let theories, format = Wutil.load_theories env.Project.why3.env file in
-    let session = Session.create ~dir ~file ~format theories in
-    let jprofile, strategy = Proofs.load file in
-    let default = Calibration.default env in
-    let profile = Calibration.of_json ~default jprofile in
+    let root = project.Project.root in
+    let path, lib = Wutil.filepath ~root ~file in
+    let theories, format = Wutil.load_theories project.Project.env file in
+    let session = Session.create ~file ~format theories in
+    let proof = Proofs.load ~move:false ~root ~path ~file () in
+    let default = Calibration.default project in
+    let profile = Calibration.of_json ~default proof.profile in
+    let buffer = Proofs.buffer ~profile:(Calibration.to_json profile) proof in
     Prove.clear_stats () ;
     Runner.clear_stats () ;
-    let buffer = Proofs.create ~file jprofile strategy in
-    let hammer = Hammer.create ~profile env in
+    let hammer = Hammer.create ~profile project in
     let callback _ =
       begin
-        Proofs.save buffer ;
+        Proofs.save project.cache buffer ;
         Log.printf "%s@\nLibrary %s:@\n%t%t%s@."
           hline (String.concat "." lib)
           Runner.print_stats
@@ -586,7 +593,7 @@ let cc_file adapter env gnames file =
       end in
     Fibers.map callback @@ Fibers.all @@
     List.map
-      (cc_theory hammer buffer strategy gnames)
+      (cc_theory hammer buffer proof.strategy gnames)
       (Session.theories session)
   with Why3.Loc.Located(loc,exn) ->
     let file,line,_,_,_ = Why3.Loc.get loc in
@@ -634,7 +641,7 @@ let () = Dap.on_launch
           | Some root ->
             clear () ;
             let config = Config.load_config ~root in
-            let env = Project.create ~root ~config () in
+            let env = Wenv.init ~root config in
             Fibers.background @@ Fibers.all @@
             List.map (cc_file adapter env !goals) files ;
             let progress = Dap.progress adapter ~title:"Why3" () in

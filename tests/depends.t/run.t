@@ -4,17 +4,19 @@
   $ why3find doc b.mlw a.mlw d.mlw c.mlw
   Generated $TESTCASE_ROOT/html/index.html
   $ cat html/index.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <title></title>
+  <title>Depends.t</title>
   </head>
   <body>
-  <header>index — </header>
+  <header>Depends.t</header>
+  <div class=dashboard>
+  <div class=tab>
   <h1>Development</h1>
-  <div class="doc">
   <ul>
   <li><a href="a.index.html">Library a</a><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>
   <li><a href="b.index.html">Library b</a><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>

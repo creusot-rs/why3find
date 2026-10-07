@@ -10,33 +10,75 @@
 
 (** {1 Prover descriptions} *)
 
-type desc
+type desc = { name : string ; version : string }
 (** The type of prover descriptions, identifying a unique prover version. *)
-
-exception InvalidPattern of string
-exception InvalidProverDescription of string
-(** Raised on invalid pattern or prover description, see below. The argument
-    is the erroneous string. *)
 
 val desc_to_string : desc -> string
 val desc_of_string : string -> desc
 (** Converts prover descriptions to and from string. The syntax is the same as
-    patterns below, but the version part is mandatory.
-    @raise InvalidProverDescription when the string description is invalid. *)
+    patterns below, but the version part is mandatory. *)
 
-val desc_name : desc -> string
-val desc_version : desc -> string
-val desc : name:string -> ?version:string -> unit -> string
+val desc_of_config_prover : Why3.Whyconf.config_prover -> desc option
+(** Returns None for alternative or interactive provers *)
 
 val pp_desc : Format.formatter -> desc -> unit
 
-val compare_desc : desc -> desc -> int
-(** Prover descriptions comparison function. Different provers are ordered
-    alphabetically by names, and different version of a same prover by
-    {b reverse} version order. Thus, when sorting, the latest version come
-    {b before} older ones. *)
+val compare_version : string -> string -> int
+(** Compare version in descending order (most recent comes first). *)
 
-module Mdesc : Why3.Extmap.S with type key = desc
+val compare_desc : desc -> desc -> int
+(** Compare by prover name, then prover version (most recent comes first). *)
+
+(** {1 Portfolios} *)
+
+type 'a portfolio
+val empty : 'a portfolio
+val add : desc -> 'a -> 'a portfolio -> 'a portfolio
+val mem : desc -> 'a portfolio -> bool
+val find : desc -> 'a portfolio -> 'a
+val select :
+  name:string -> ?version:string -> ?warn:bool -> ?pattern:string ->
+  ?relaxed:('a -> 'a) -> 'a portfolio -> 'a option
+(** No version means the most recent one, if any.
+    Does not warn if [~warn:true] and warns with [~pattern] if provided. *)
+
+val is_empty : 'a portfolio -> bool
+val iter : (desc -> 'a -> unit) -> 'a portfolio -> unit
+val iterl : (string -> (string * 'a) list -> unit) -> 'a portfolio -> unit
+
+(** {1 Patterns} *)
+
+(** Patterns identify provers. The syntax is [prover-name@prover-version].
+    The [prover-name] match the prover name case-insensitively. (eg [alt-ergo]
+    match the prover of Why3 name [Alt-Ergo])
+    The version part, starting from the '@', is optional. If omitted, it
+    generally means the last available version. *)
+
+val pattern : name:string -> ?version:string -> unit -> string
+
+val pattern_name : string -> string
+val pattern_version : string -> string option
+val pattern_of_string : string -> string * string option
+val pmatch : string -> (desc -> bool) (** Compiled from pattern. *)
+
+(** {1 Why3 Config} *)
+
+val config :
+  ?autodetect:bool ->
+  ?downloaded:bool ->
+  ?autoload:string list ->
+  ?missing:string list ->
+  unit -> Why3.Whyconf.config
+(** Configure available provers:
+    - use global Why3 configuration
+    - use PATH autodetection unless [~autodetect:false]
+    - use XDG_CACHE_HOME/why3find/provers unless [~downloaded:false]
+    - auto-download missing provers [~autoload] (if any)
+    - ask for downloading provers [~missing] (if any)
+*)
+
+val available : Why3.Whyconf.config -> desc portfolio
+val shared : name:string -> (string * string) list (* [VERSION,URL;…] sorted *)
 
 (** {1 Provers} *)
 
@@ -61,41 +103,15 @@ val version : prover -> string
 val fullname : prover -> string
 val infoname : prover -> string
 val relaxed : prover -> prover
+val fits : name:string -> ?version:string -> prover -> bool
 
 val pp_prover : Format.formatter -> prover -> unit
 (** Prints prover fullname. *)
 
-(** {1 Patterns} *)
+val load : Why3.Whyconf.config -> Why3.Env.env -> desc -> Why3.Whyconf.config_prover -> prover
+(** Load the prover with its configured drivers *)
 
-(** Patterns identify provers. The syntax is [prover-name@prover-version].
-    The [prover-name] match the prover name case-insensitively. (eg [alt-ergo]
-    match the prover of Why3 name [Alt-Ergo])
-    The version part, starting from the '@', is optional. If omitted, it
-    generally means the last available version. *)
+val download : name:string -> version:string -> spec:string -> unit
+(** Download and install the given prover in binary cache. *)
 
-val pattern_name : string -> string
-val pattern_version : string -> string option
-val pattern_of_string : string -> string * string option
-(** @raise InvalidPattern when the pattern is invalid *)
-
-(** {1 Retrieving available provers} *)
-
-val all : Config.why3env -> prover Mdesc.t
-(** Returns the set of all available provers for the given Why3 environment. *)
-
-val select : Config.why3env -> patterns:string list -> prover list
-(** Selects the provers that match one of the [patterns].
-    For each [pattern] in order, if the pattern is invalid or the prover is not
-    in the map, a warning is emitted, otherwise one prover is appended to the
-    return list, either the one specified or the latest available version in
-    case of a version-less pattern. *)
-
-val default : Config.why3env -> prover list
-(** Returns the set of available "default" provers. *)
-
-val find :
-  prover list ->
-  name:string -> ?version:string ->
-  unit -> prover option
-(** Find some corresponding prover in the list.
-    Emits a warning if not found. *)
+val provers : Why3.Whyconf.config -> Why3.Env.env -> prover portfolio

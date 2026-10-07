@@ -27,14 +27,24 @@ let exts () =
   let exts = List.concat_map (fun (_, exts, _) -> exts) formats in
   List.map (fun ext -> "." ^ ext) exts
 
-let filepath file =
-  let dir = Filename.chop_extension file in
-  let lib =
-    normalize @@ String.split_on_char '/' @@
-    if Filename.is_relative file then dir else Filename.basename dir
-  in dir, lib
+let filepath ~root ~file =
+  let file = Filename.chop_extension file in
+  let root, file =
+    match Filename.is_relative root , Filename.is_relative file with
+    | true , true | false, false -> root, file
+    | true , false -> Filename.concat (Sys.getcwd ()) root , file
+    | false , true -> root , Filename.concat (Sys.getcwd ()) file
+  in
+  let droot = normalize @@ String.split_on_char '/' root in
+  let dfile = normalize @@ String.split_on_char '/' file in
+  let dir =
+    let rec reroot ps qs =
+      match ps, qs with p :: ps , q :: qs when p = q -> reroot ps qs | _ -> qs
+    in reroot droot dfile
+  in
+  String.concat "." dir, dir
 
-let load_theories (env : Why3.Env.env) file =
+let list_theories tmap =
   let byloc a b =
     match a.Theory.th_name.id_loc , b.Theory.th_name.id_loc with
     | None,None -> 0
@@ -42,8 +52,11 @@ let load_theories (env : Why3.Env.env) file =
     | None,Some _ -> (+1)
     | Some la, Some lb -> Why3.Loc.compare la lb
   in
+  Wstdlib.Mstr.bindings tmap |> List.map snd |> List.sort byloc
+
+let load_theories (env : Why3.Env.env) file =
   let tmap,format = Why3.Env.(read_file base_language env file) in
-  Wstdlib.Mstr.bindings tmap |> List.map snd |> List.sort byloc , format
+  list_theories tmap, format
 
 (* -------------------------------------------------------------------------- *)
 (* --- Iterators                                                          --- *)

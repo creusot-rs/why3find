@@ -34,9 +34,14 @@ let root_for file =
       else lookup (Filename.dirname dir)
   in lookup (Filename.dirname file)
 
-let load_raw_config ~root =
+let load_raw_config ?(back=false) ~root () =
   let path = Filename.concat root conf_file in
-  if Sys.file_exists path then Json.of_file path else `Null
+  if Sys.file_exists path then
+    try Json.of_file path with exn ->
+      if back then Utils.copy ~source:path ~target:(path ^ ".back") ;
+      Log.warning "Invalid configuration file (%s, %s)"
+        path (Printexc.to_string exn) ; `Null
+  else `Null
 
 let get ~of_json ~default name json =
   try of_json (Json.jfield_exn name json) with
@@ -82,32 +87,8 @@ let config_to_json config =
   Json.assoc ~keepnull:false fields
 
 let load_config ~root =
-  config_of_json @@ load_raw_config ~root
+  config_of_json @@ load_raw_config ~root ()
 
 let save_config ~root config =
   let path = Filename.concat root conf_file in
   Json.to_file ~pretty_floats:true path @@ config_to_json config
-
-(* -------------------------------------------------------------------------- *)
-(* --- Why3 Environments                                                  --- *)
-(* -------------------------------------------------------------------------- *)
-
-module WEnv = Why3.Env
-module WConf = Why3.Whyconf
-
-type why3env = {
-  config : WConf.config ;
-  env : WEnv.env ;
-}
-
-module Whtbl = Why3.Weakhtbl.Make (struct
-    type t = why3env
-    let tag w = WEnv.env_tag w.env
-    (* [LC] a new tag is generated for every why3 environment.
-       Hence it is sufficient to identify both the Whyconf and the Env. *)
-  end)
-
-let why3env ?(loadpath=[]) config =
-  let loadpath = loadpath @ WConf.(loadpath @@ get_main config) in
-  let env = WEnv.create_env loadpath in
-  { config ; env }

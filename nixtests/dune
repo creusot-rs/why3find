@@ -1,4 +1,0 @@
-(cram
- (alias nixtests)
- (runtest_alias false)
- (deps %{bin:why3find}))

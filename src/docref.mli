@@ -35,6 +35,8 @@ type instance = Instance of {
     clones : clone list ; (* clone substitution *)
   }
 
+val by_instance : instance -> instance -> int
+
 type instances
 val find_clone : ?instance:instance -> ?source:Id.t -> ?target:Id.t -> unit -> clone option
 val find_instance : instances -> scope:string list -> Id.t -> instance option
@@ -51,20 +53,33 @@ type theory = {
 }
 
 type source = {
-  root: string option;
-  filename: string;
-  lib: string list;
-  urlbase: string;
-  profile: Calibration.profile;
-  theories: theory Mstr.t;
+  root: string ;
+  path: string ;
+  file: string ;
+  lib: string list ;
+  theories: theory Mstr.t ;
+  cache : Cache.t option ;
+  session : (Why3.Env.env * Session.session) option ;
+  lenses : (int,Proofstats.lense) Hashtbl.t ;
+  mutable strategy : Proofs.strategy ;
+  mutable local : Proofstats.jstats ;
+  mutable global : Proofstats.jstats ;
+  mutable outdated : bool ;
 }
 
-val library_path : string -> string list
+val parse :
+  cache:Cache.t ->
+  env:Why3.Env.env ->
+  henv:Axioms.henv ->
+  root:string -> file:string ->
+  unit -> source
 
-val parse : wenv:Why3.Env.env -> henv:Axioms.henv -> string -> source
-
-val source : wenv:Why3.Env.env -> henv:Axioms.henv ->
-  lib:string list -> ?root:string -> filename:string ->
+val source :
+  env:Why3.Env.env ->
+  henv:Axioms.henv ->
+  root:string -> lib:string list -> path:string -> file:string ->
+  ?cache:Cache.t ->
+  ?onStuck:(Session.goal -> unit) ->
   in_channel -> source
 
 val empty : unit -> source
@@ -82,14 +97,14 @@ type href =
 type position = Lexing.position * Lexing.position
 
 val find_proof : Id.t -> theory option -> Crc.crc option
-val reload_proofs : source -> unit
+val reload_proofs : ?onStuck:(Session.goal -> unit) -> source -> unit
 
 val resolve :
   src:source -> theory:theory option -> infix:bool ->
   position -> href
 
 val reference :
-  wenv:Why3.Env.env ->
+  env:Why3.Env.env ->
   src:source -> current:string option ->
   string -> string * Id.t
 

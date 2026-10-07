@@ -36,7 +36,9 @@ let file id =
 let path ?lib id =
   let path =
     try Why3.Pmodule.restore_path id
-    with Not_found -> Why3.Theory.restore_path id
+    with Not_found ->
+      try Why3.Theory.restore_path id
+      with Not_found -> ["unknown"],"Unknown",["unknown"]
   in match lib with
   | None -> path
   | Some lib ->

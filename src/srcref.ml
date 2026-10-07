@@ -26,8 +26,8 @@ type frame = Frame of {
     stacked : Lspserver.symbol list ;
   }
 
-type env = {
-  env : Project.env ;
+type doc = {
+  project : Project.t ;
   src : Docref.source ;
   input : Token.input ;
   mutable blanklines : int ; (* number of consecutive blanklines so far *)
@@ -51,10 +51,10 @@ type env = {
 (* ---  Positions & Ranges                                                --- *)
 (* -------------------------------------------------------------------------- *)
 
-let init env src input =
+let init project src input =
   let here = Token.position input in
   {
-    env ; src ; input ; thy = None ; current = None ;
+    project ; src ; input ; thy = None ; current = None ;
     blanklines = 0 ; closing = here ; first = here ; last = here ;
     opened = [] ; scopes = [] ; sections = [] ;
     declared = Sid.empty ;
@@ -72,255 +72,257 @@ let lexrange ((p,q) : Token.position) : Range.range = lexpos p, lexpos q
 (* ---  Document Symbols Stack                                            --- *)
 (* -------------------------------------------------------------------------- *)
 
-let flush env =
-  match env.frame with
+let flush doc =
+  match doc.frame with
   | None -> ()
   | Some (Frame { first ; token ; name ; kind }) ->
-    let range = lexrange (fst first,snd env.closing) in
+    let range = lexrange (fst first,snd doc.closing) in
     let selection = lexrange token in
     let symbol = Lspserver.symbol ~range ~name ~kind ~selection () in
-    env.symbols <- symbol :: env.symbols ;
-    env.frame <- None
+    doc.symbols <- symbol :: doc.symbols ;
+    doc.frame <- None
 
-let frame env name kind =
-  flush env ;
-  let token = Token.position env.input in
-  env.last <- token ;
-  env.closing <- token ;
-  env.frame <- Some (Frame {
-      first = env.first ;
+let frame doc name kind =
+  flush doc ;
+  let token = Token.position doc.input in
+  doc.last <- token ;
+  doc.closing <- token ;
+  doc.frame <- Some (Frame {
+      first = doc.first ;
       token ; name ; kind ; stacked = [] ;
     })
 
-let push env name kind =
+let push doc name kind =
   begin
-    flush env ;
-    let token = Token.position env.input in
-    env.last <- token ;
-    env.closing <- token ;
+    flush doc ;
+    let token = Token.position doc.input in
+    doc.last <- token ;
+    doc.closing <- token ;
     let frame =
       Frame {
-        first = env.first ;
+        first = doc.first ;
         token ; name ; kind ;
-        stacked = env.symbols
+        stacked = doc.symbols
       } in
-    env.symbols <- [] ;
-    env.stack <- frame :: env.stack ;
+    doc.symbols <- [] ;
+    doc.stack <- frame :: doc.stack ;
   end
 
-let pop env =
-  flush env ;
-  match env.stack with
+let pop doc =
+  flush doc ;
+  match doc.stack with
   | [] -> ()
   | Frame { first ; token ; name ; kind ; stacked } :: frames ->
-    let children = List.rev env.symbols in
-    let range = lexrange (fst first,snd env.last) in
+    let children = List.rev doc.symbols in
+    let range = lexrange (fst first,snd doc.last) in
     let selection = lexrange token in
     let symbol = Lspserver.symbol ~range ~name ~kind ~selection ~children () in
     begin
-      env.stack <- frames ;
-      env.symbols <- symbol :: stacked ;
+      doc.stack <- frames ;
+      doc.symbols <- symbol :: stacked ;
     end
 
-let add_symbol env id =
+let add_symbol doc id =
   try
     let kind : Lspserver.kind =
-      match Docref.find_decl env.env.why3.env env.src id with
+      match Docref.find_decl doc.project.env doc.src id with
       | Type _ -> `TypeParameter
       | Logic _ -> `Function
       | Var _ -> `Variable
       | Let _ -> `Method
       | Exn _ -> `Event
       | Id.Axiom _ | Id.Lemma _ | Id.Goal _ -> `Property in
-    frame env (Id.name id) kind ;
+    frame doc (Id.name id) kind ;
   with Not_found -> ()
 
 (* -------------------------------------------------------------------------- *)
 (* ---  Clones & Identifiers                                              --- *)
 (* -------------------------------------------------------------------------- *)
 
-let resolve env id = Id.resolve ~lib:env.src.lib ~root:env.src.filename id
+let resolve doc id =
+  let root = if doc.src.root = "." then None else Some doc.src.root in
+  Id.resolve ~lib:doc.src.lib ?root id
 
-let process_clone_token env token =
-  let state, action = Cloning.process env.cloning env.input token in
-  env.cloning <- state ;
+let process_clone_token doc token =
+  let state, action = Cloning.process doc.cloning doc.input token in
+  doc.cloning <- state ;
   match action with
   | `Nop | `Space | `Spaces _ | `Target _ -> ()
   | `Clone(_,export,pos,id) ->
-    match env.thy with
+    match doc.thy with
     | None -> ()
     | Some thy ->
-      let scope = Cloning.instance ~scope:env.scopes ~cloned:id export in
+      let scope = Cloning.instance ~scope:doc.scopes ~cloned:id export in
       match Docref.find_instance thy.instances ~scope id with
       | None -> ()
       | Some (Instance s) ->
-        let id = resolve env id in
+        let id = resolve doc id in
         let ids =
           List.filter_map
             (function
               | Docref.Inst _ -> None
               | Clone { target } ->
-                if Sid.mem target env.declared then None else
-                  ( env.declared <- Sid.add target env.declared ;
-                    Some (resolve env target) )
+                if Sid.mem target doc.declared then None else
+                  ( doc.declared <- Sid.add target doc.declared ;
+                    Some (resolve doc target) )
             ) s.clones in
         let symbol = Clone(id,ids) in
-        env.refs <- Rangemap.add (lexrange pos) symbol env.refs
+        doc.refs <- Rangemap.add (lexrange pos) symbol doc.refs
 
 (* -------------------------------------------------------------------------- *)
 (* ---  References                                                        --- *)
 (* -------------------------------------------------------------------------- *)
 
-let process_reference env s =
+let process_reference doc s =
   try
-    let { src ; current } = env in
-    let wenv = env.env.why3.env in
-    let _, id = Docref.reference ~wenv ~src ~current s in
+    let { src ; current } = doc in
+    let env = doc.project.env in
+    let _, id = Docref.reference ~env ~src ~current s in
     let id = Id.resolve ~lib:src.lib id in
-    let pos = Token.position env.input in
-    env.refs <- Rangemap.add (lexrange pos) (Ref id) env.refs ;
+    let pos = Token.position doc.input in
+    doc.refs <- Rangemap.add (lexrange pos) (Ref id) doc.refs ;
   with
-  | Not_found -> Token.error env.input "unknown reference"
-  | Failure msg -> Token.error env.input "%s" msg
+  | Not_found -> Token.error doc.input "unknown reference"
+  | Failure msg -> Token.error doc.input "%s" msg
 
-let process_href env pos token (href : Docref.href) =
+let process_href doc pos token (href : Docref.href) =
   match href with
   | NoRef ->
-    process_clone_token env (`Name token)
+    process_clone_token doc (`Name token)
   | Def(id,_) ->
-    env.declared <- Sid.add id.self env.declared ;
-    env.refs <- Rangemap.add (lexrange pos) (Def id) env.refs ;
-    add_symbol env id
+    doc.declared <- Sid.add id.self doc.declared ;
+    doc.refs <- Rangemap.add (lexrange pos) (Def id) doc.refs ;
+    add_symbol doc id
   | Ref id ->
-    process_clone_token env (`Id id.self) ;
-    env.refs <- Rangemap.add (lexrange pos) (Ref id) env.refs
+    process_clone_token doc (`Id id.self) ;
+    doc.refs <- Rangemap.add (lexrange pos) (Ref id) doc.refs
 
-let process_identifier ?(infix=false) env token =
-  let pos = Token.position env.input in
-  let href = Docref.resolve ~infix ~src:env.src ~theory:env.thy pos in
-  process_href env pos token href
+let process_identifier ?(infix=false) doc token =
+  let pos = Token.position doc.input in
+  let href = Docref.resolve ~infix ~src:doc.src ~theory:doc.thy pos in
+  process_href doc pos token href
 
-let process_open_module env kind =
+let process_open_module doc kind =
   begin
-    let id = Token.fetch_id env.input ~kind in
-    env.thy <- Docref.Mstr.find_opt id env.src.theories ;
-    env.current <- Some id ;
-    env.opened <- [] ;
-    env.scopes <- [] ;
-    env.declared <- Sid.empty ;
-    env.cloning <- Cloning.init ;
-    push env id `Module ;
+    let id = Token.fetch_id doc.input ~kind in
+    doc.thy <- Docref.Mstr.find_opt id doc.src.theories ;
+    doc.current <- Some id ;
+    doc.opened <- [] ;
+    doc.scopes <- [] ;
+    doc.declared <- Sid.empty ;
+    doc.cloning <- Cloning.init ;
+    push doc id `Module ;
   end
 
-let process_close_module env =
+let process_close_module doc =
   begin
-    pop env ;
-    env.thy <- None ;
-    env.current <- None ;
-    env.opened <- [] ;
-    env.scopes <- [] ;
-    env.declared <- Sid.empty ;
-    env.cloning <- Cloning.init ;
+    pop doc ;
+    doc.thy <- None ;
+    doc.current <- None ;
+    doc.opened <- [] ;
+    doc.scopes <- [] ;
+    doc.declared <- Sid.empty ;
+    doc.cloning <- Cloning.init ;
   end
 
-let process_opening s env =
+let process_opening doc s =
   begin
-    env.opened <- s :: env.opened ;
+    doc.opened <- s :: doc.opened ;
     if s = "scope" then
       begin
-        let id = Token.fetch_id ~kind:s env.input in
-        push env id `Namespace ;
-        env.scopes <- id :: env.scopes ;
+        let id = Token.fetch_id ~kind:s doc.input in
+        push doc id `Namespace ;
+        doc.scopes <- id :: doc.scopes ;
       end
   end
 
-let process_closing s env =
-  match env.opened with
+let process_closing doc s =
+  match doc.opened with
   | k0::ks ->
-    env.opened <- ks ;
+    doc.opened <- ks ;
     if k0 = "scope" then
       begin
-        pop env ;
-        env.scopes <- List.tl env.scopes ;
+        pop doc ;
+        doc.scopes <- List.tl doc.scopes ;
       end
   | [] ->
-    Token.error env.input "No matching opening keyword for '%s" s
+    Token.error doc.input "No matching opening keyword for '%s" s
 
-let process_word env s =
+let process_word doc s =
   if Docref.is_keyword s then
     begin
       match s with
-      | "module" | "theory" -> process_open_module env s
-      | "end" when env.opened = [] -> process_close_module env
+      | "module" | "theory" -> process_open_module doc s
+      | "end" when doc.opened = [] -> process_close_module doc
       | _ ->
-        if Docref.is_opening s then process_opening s env ;
-        if Docref.is_closing s then process_closing s env ;
-        process_clone_token env (`Kwd s)
+        if Docref.is_opening s then process_opening doc s ;
+        if Docref.is_closing s then process_closing doc s ;
+        process_clone_token doc (`Kwd s)
     end
   else
-    process_identifier env s
+    process_identifier doc s
 
-let process_open_section env input s =
+let process_open_section doc input s =
   let _,p = Token.position input in
-  env.sections <- (s,p) :: env.sections
+  doc.sections <- (s,p) :: doc.sections
 
-let process_close_section env input =
-  match env.sections with
+let process_close_section doc input =
+  match doc.sections with
   | [] -> ()
   | (s,p) :: sections ->
     let q,_ = Token.position input in
-    env.sections <- sections ;
-    env.refs <- Rangemap.add (lexrange (p,q)) (Section s) env.refs
+    doc.sections <- sections ;
+    doc.refs <- Rangemap.add (lexrange (p,q)) (Section s) doc.refs
 
-let process_block env = function
+let process_block doc = function
   | Token.Newline ->
-    env.blanklines <- succ env.blanklines
+    doc.blanklines <- succ doc.blanklines
 
-  | Token.Infix _ | Token.Ident _ | Token.Ref _ ->
-    let here = Token.position env.input in
-    if env.blanklines > 0 then
+  | Infix _ | Ident _ | Ref _ ->
+    let here = Token.position doc.input in
+    if doc.blanklines > 0 then
       begin
-        env.closing <- env.last ;
-        env.first <- here ;
-        env.blanklines <- 0 ;
+        doc.closing <- doc.last ;
+        doc.first <- here ;
+        doc.blanklines <- 0 ;
       end ;
-    env.last <- here
+    doc.last <- here
 
-  | Token.Comment _ | Token.Space | Token.Eof
-  | Token.Char _ | Token.Text _ | Token.Style _
-  | Token.OpenDoc | Token.CloseDoc
-  | Token.OpenSection _ | Token.CloseSection _
-  | Token.Verb _ -> ()
+  | Comment _ | Space | Eof
+  | Char _ | Text _ | Style _
+  | OpenDoc | CloseDoc
+  | OpenSection _ | CloseSection _
+  | Verb _ | Math _ | Equation _ -> ()
 
-let parse ?doc ?filename ~env ~src file =
+let parse ?doc ?filename ~project ~src file =
   let input = Token.input ?doc ?filename file in
-  let env = init env src input in
+  let doc = init project src input in
   try
     while not @@ Token.eof input do
       let tok = Token.token input in
-      process_block env tok ;
+      process_block doc tok ;
       match tok with
 
       (* scanned *)
-      | Token.Ident s -> process_word env s
-      | Token.Infix s -> process_identifier ~infix:true env s
-      | Token.Ref s -> process_reference env s
-      | Token.Newline -> process_clone_token env `Newline
-      | Token.Comment _ -> process_clone_token env `Comment
+      | Ident s -> process_word doc s
+      | Infix s -> process_identifier ~infix:true doc s
+      | Ref s -> process_reference doc s
+      | Newline -> process_clone_token doc `Newline
+      | Comment _ -> process_clone_token doc `Comment
 
       (* folding *)
-      | Token.OpenSection (_, s) -> process_open_section env input s
-      | Token.CloseSection _ -> process_close_section env input
+      | OpenSection (_, s) -> process_open_section doc input s
+      | CloseSection _ -> process_close_section doc input
 
       (* skipped *)
-      | Token.Eof
-      | Token.Char _ | Token.Text _
-      | Token.OpenDoc | Token.CloseDoc
-      | Token.Space | Token.Style (_, _) | Token.Verb _ -> ()
+      | Eof
+      | Char _ | Text _
+      | OpenDoc | CloseDoc
+      | Space | Style (_, _) | Verb _ | Math _ | Equation _ -> ()
 
     done ;
     Token.close input ;
-    env.refs, env.symbols
+    doc.refs, doc.symbols
   with exn ->
     Token.close input ;
     raise exn

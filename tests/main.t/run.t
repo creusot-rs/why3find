@@ -23,19 +23,21 @@
 --- Generated index
 --------------------------------------------------------------------------
   $ cat html/index.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" type="text/css" href="icofont.min.css">
-  <title></title>
+  <title>Main.t</title>
   </head>
   <body>
-  <header>index — </header>
+  <header>Main.t</header>
+  <div class=dashboard>
+  <div class=tab>
   <h1>Development</h1>
-  <div class="doc">
   <ul>
-  <li><a href="p.a.index.html">Library p.a</a><span title="1 value parameter, 0 instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>
+  <li><a href="p.a.index.html">Library p.a</a><span title="1 value parameter, no instance found" class="icon small warning icofont-warning-alt"></span><span title="Valid (no goals)" class="icon remark icofont-check"></span></li>
   </ul>
   </div>
   <script type="text/javascript" src="script.js"></script>
@@ -45,6 +47,7 @@
 --- Generated File p.a.html
 --------------------------------------------------------------------------
   $ cat html/p.a.index.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -53,16 +56,16 @@
   <title>Library p.a</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library p.a</code></header>
-  <div class="doc">
+  <header><a href="index.html" title="Index">Main.t</a> — <code>library p.a</code></header>
+  <div class=doc>
   <p>Before A</p>
   </div>
-  <pre class="src"><span class="keyword">module</span> <a title="p.a.A" href="p.a.A.html">A</a><a href="p.a.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
-  <div class="doc">
+  <pre class=src><span class=keyword>module</span> <a title="p.a.A" href="p.a.A.html">A</a><a href="p.a.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
+  <div class=doc>
   <p>Before B</p>
   </div>
-  <pre class="src"><span class="keyword">module</span> <a title="p.a.B" href="p.a.B.html">B</a><a href="p.a.proof.html#B" title="1 value parameter, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="p.a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
-  <div class="doc">
+  <pre class=src><span class=keyword>module</span> <a title="p.a.B" href="p.a.B.html">B</a><a href="p.a.proof.html#B" title="1 value parameter, no instance found" class="icon small warning icofont-warning-alt"></a><a href="p.a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a></pre>
+  <div class=doc>
   <p>After B</p>
   </div>
   <script type="text/javascript" src="script.js"></script>
@@ -72,6 +75,7 @@
 --- Generated File p.a.A.html
 --------------------------------------------------------------------------
   $ cat html/p.a.A.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -80,26 +84,26 @@
   <title>Module p.a.A</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="p.a.index.html">p.a</a></code> — <code>module A</code></header>
-  <div class="doc">
+  <header><a href="index.html" title="Index">Main.t</a> — <code>library <a href="p.a.index.html">p.a</a></code> — <code>module A</code></header>
+  <div class=doc>
   <p>Introducing A</p>
   </div>
-  <pre class="src">
-  <span class="keyword">module</span> <span class="scope">A</span><a href="p.a.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
+  <pre class=src>
+  <span class=keyword>module</span> <span class=scope>A</span><a href="p.a.proof.html#A" title="Valid (no goals)" class="icon remark icofont-check"></a>
   
-    <span class="keyword">type</span> <a id="t">t</a> = <a id="A">A</a> | <a id="B">B</a>
+    <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a> = <a><div class=anchor id="A"></div>A</a> | <a><div class=anchor id="B"></div>B</a>
   </pre>
-  <div class="doc">
+  <div class=doc>
   <p>Testing match&ndash;with</p>
   </div>
-  <pre class="src">
-    <span class="keyword">let</span> <a id="swap">swap</a> (e : <a title="p.a.A.t" href="#t">t</a>) : <a title="p.a.A.t" href="#t">t</a> =
-      <span class="keyword">match</span> e <span class="keyword">with</span>
+  <pre class=src>
+    <span class=keyword>let</span> <a><div class=anchor id="swap"></div>swap</a> (e : <a title="p.a.A.t" href="#t">t</a>) : <a title="p.a.A.t" href="#t">t</a> =
+      <span class=keyword>match</span> e <span class=keyword>with</span>
       | <a title="p.a.A.A" href="#A">A</a> -&gt; <a title="p.a.A.B" href="#B">B</a>
       | <a title="p.a.A.B" href="#B">B</a> -&gt; <a title="p.a.A.A" href="#A">A</a>
-      <span class="keyword">end</span>
+      <span class=keyword>end</span>
   
-  <span class="keyword">end</span>
+  <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -108,6 +112,7 @@
 --- Generated File p.a.B.html
 --------------------------------------------------------------------------
   $ cat html/p.a.B.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -116,26 +121,26 @@
   <title>Module p.a.B</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="p.a.index.html">p.a</a></code> — <code>module B</code></header>
-  <div class="doc">
+  <header><a href="index.html" title="Index">Main.t</a> — <code>library <a href="p.a.index.html">p.a</a></code> — <code>module B</code></header>
+  <div class=doc>
   <p>Introducing B</p>
   </div>
-  <pre class="src">
-  <span class="keyword">module</span> <span class="scope">B</span><a href="p.a.proof.html#B" title="1 value parameter, 0 instance found" class="icon small warning icofont-warning-alt"></a><a href="p.a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
+  <pre class=src>
+  <span class=keyword>module</span> <span class=scope>B</span><a href="p.a.proof.html#B" title="1 value parameter, no instance found" class="icon small warning icofont-warning-alt"></a><a href="p.a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
   
-    <span class="keyword">exception</span> <a id="Error">Error</a>
+    <span class=keyword>exception</span> <a><div class=anchor id="Error"></div>Error</a>
   
-    <span class="keyword">val</span> <a id="wrong">wrong</a><span title="Value Parameter" class="icon small warning icofont-warning-alt"></span> () : unit
-      <span class="keyword">raises</span> { <a title="p.a.B.Error" href="#Error">Error</a> }
+    <span class=keyword>val</span> <a><div class=anchor id="wrong"></div>wrong</a><span title="Value Parameter" class="icon small warning icofont-warning-alt"></span> () : unit
+      <span class=keyword>raises</span> { <a title="p.a.B.Error" href="#Error">Error</a> }
   </pre>
-  <div class="doc">
+  <div class=doc>
   <p>Testing try&ndash;with</p>
   </div>
-  <pre class="src">
-    <span class="keyword">let</span> <a id="test">test</a> () : unit =
-      <span class="keyword">try</span> <a title="p.a.B.wrong" href="#wrong">wrong</a> () <span class="keyword">with</span> <a title="p.a.B.Error" href="#Error">Error</a> -&gt; () <span class="keyword">end</span>
+  <pre class=src>
+    <span class=keyword>let</span> <a><div class=anchor id="test"></div>test</a> () : unit =
+      <span class=keyword>try</span> <a title="p.a.B.wrong" href="#wrong">wrong</a> () <span class=keyword>with</span> <a title="p.a.B.Error" href="#Error">Error</a> -&gt; () <span class=keyword>end</span>
   
-  <span class="keyword">end</span>
+  <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
   </body>

@@ -10,9 +10,11 @@
 (* --- System Utilities                                                   --- *)
 (* -------------------------------------------------------------------------- *)
 
-val mkdirs : string -> unit
-val rmpath : string -> unit
-val copy : src:string -> tgt:string -> unit
+val rmpath : string -> unit (* remove file or directory *)
+val mkdirs : string -> unit (* make missing parent directories *)
+val rmdirs : string -> unit (* remove empty parent directories *)
+val copy : source:string -> target:string -> unit
+val outdated : source:string -> target:string -> bool
 val locate : string -> (string * string) option
 val is_local : root:string -> file:string -> bool
 val chdir : string -> unit
@@ -51,6 +53,7 @@ val pp_time : Format.formatter -> float -> unit
 val pp_atime : Format.formatter -> float -> unit (* left aligned, positive *)
 val pp_rtime : Format.formatter -> float -> unit (* right aligned, positive *)
 val pp_delta : Format.formatter -> float -> unit
+val pp_percent : Format.formatter -> float -> unit
 val pa_time : string -> float (* seconds *)
 val pp_s : Format.formatter -> int -> unit
 val pp_yies : Format.formatter -> int -> unit
@@ -64,11 +67,26 @@ val round : float -> float
 
 val show_progress_opt : string * Arg.spec * string
 
-val tty : bool
+val tty : bool (** Stdout supports ANSI escape codes. *)
+
+val ask : ?default:string -> ('a, Format.formatter, unit, string) format4 -> 'a
+(** Prints the message and reads on line from stdin *)
+
 val set_ansi_tags : Format.formatter -> unit
+(** Register semantic tags for emitting ANSI escape codes. *)
 
 val flush : unit -> unit
+(** Clears the current line and move cursor to the left-end side. *)
+
+val killline : unit -> unit
+(** Clears the {i list} written line and move cursor the left-end side. *)
+
 val overflows : unit -> bool
+(** Returns [true] if more lines that terminal height were written. *)
+
+val hline : unit -> unit
+(** Prints an horizontal line *)
+
 val progress : ('a,Format.formatter,unit) format -> 'a
 val failwith : ('a,Format.formatter,unit,'b) format4 -> 'a
 

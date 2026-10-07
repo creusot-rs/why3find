@@ -1,0 +1,8 @@
+{
+  "2.6.3": "https://github.com/OCamlPro/alt-ergo/releases/download/v2.6.3/alt-ergo-v2.6.3-aarch64-macos",
+  "2.6.2": "https://github.com/OCamlPro/alt-ergo/releases/download/v2.6.2/alt-ergo-v2.6.2-aarch64-macos",
+  "2.6.1": "https://github.com/OCamlPro/alt-ergo/releases/download/v2.6.1/alt-ergo-v2.6.1-aarch64-macos",
+  "2.6.0": "https://github.com/OCamlPro/alt-ergo/releases/download/v2.6.0/alt-ergo-v2.6.0-aarch64-macos",
+  "2.5.4": "https://github.com/OCamlPro/alt-ergo/releases/download/v2.5.4/alt-ergo-2.5.4-aarch64-macos.zip#alt-ergo",
+  "2.5.3": "https://github.com/OCamlPro/alt-ergo/releases/download/v2.5.3/alt-ergo-2.5.3-aarch64-macos.zip#alt-ergo"
+}

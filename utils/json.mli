@@ -53,6 +53,8 @@ val jmap : (t -> 'a) -> t -> 'a list
 val mfield : string -> t -> bool
 val jfield : string -> t -> t
 val jfield_exn : string -> t -> t
+val jassoc : (t -> 'a) -> t -> (string * 'a) list
+val jassoc_map : (string -> t -> 'a) -> t -> 'a list
 val jpath : string -> t -> t (* '/'-separated list of fields *)
 val joption : (t -> 'a) -> t -> 'a option
 val jdefault : 'a -> (t -> 'a) -> t -> 'a
@@ -67,3 +69,6 @@ val assoc : ?keepnull:bool -> ?nullempty:bool -> (string * t) list -> t
 val list : ?keepnull:bool -> ?nullempty:bool -> t list -> t
 val list_map : ?keepnull:bool -> ?nullempty:bool -> ('a -> t) -> 'a list -> t
 val option_map : ('a -> t) -> 'a option -> t
+val optint : int -> t
+val optstring : string -> t
+val optbool : bool -> t

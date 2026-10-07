@@ -9,7 +9,15 @@
 module M = Why3.Wstdlib.Mstr
 module Th = Why3.Theory
 
-type proofs = Crc.crc M.t M.t (* Theory -> Task -> CRC *)
+type strategy = Crc.crc M.t M.t (* Theory -> Task -> CRC *)
+
+type crc_info = {
+  path : string ;
+  file : string ;
+  proof : string ;
+  profile : Json.t ;
+  strategy : strategy ;
+}
 
 (* -------------------------------------------------------------------------- *)
 (* --- Proof Files                                                        --- *)
@@ -24,39 +32,85 @@ let jmap cc js =
 let map ?keepnull cc m =
   Json.assoc ?keepnull @@ List.rev @@ M.fold (fun a e js -> (a, cc e) :: js) m []
 
-let jproofs : proofs -> Json.t = map (map  ~keepnull:true Crc.to_json)
+let jproofs : strategy -> Json.t = map (map  ~keepnull:true Crc.to_json)
 
-let filename file =
-  Filename.concat (Filename.chop_extension file) "proof.json"
+let warn_moved =
+  let once = ref true in
+  fun () ->
+    if !once then
+      begin
+        once := false ;
+        if Sys.file_exists ".git" then
+          Log.warning "Moving proof files to `./why3find.proofs (use git add -A)"
+        else
+          Log.warning "Moving proof files to `./why3find.proofs"
+      end
 
-let load file : Json.t * proofs =
-  let file = filename file in
-  let js = if Sys.file_exists file then Json.of_file file else `Null in
+let moved = Hashtbl.create 32
+
+let filename ~move ~root ~path ~file () =
+  let target =
+    Filename.concat root @@
+    Filename.concat "why3find.proofs" @@ path ^ ".json" in
+  let source =
+    Filename.concat (Filename.chop_extension file) "proof.json" in
+  if move then
+    begin
+      (* upgrade old proof files (once) *)
+      if not (Hashtbl.mem moved file) then
+        begin
+          Hashtbl.add moved file () ;
+          (* move old file to new target *)
+          if Sys.file_exists source then
+            begin
+              if Utils.outdated ~source ~target then
+                begin
+                  warn_moved () ;
+                  Utils.copy ~source ~target ;
+                end ;
+              Utils.rmpath source ;
+            end ;
+          (* cleanup old directory *)
+          Utils.rmdirs (Filename.dirname source) ;
+        end ;
+      target
+    end
+  else
+  if Sys.file_exists source && not (Sys.file_exists target)
+  then source else target
+
+let load ?(move=false) ~root ~path ~file () =
+  let proof = filename ~move ~root ~path ~file () in
+  let js = if Sys.file_exists proof then Json.of_file proof else `Null in
   let profile = if js = `Null then `List [] else Json.jfield "profile" js in
   let strategy = jmap (jmap Crc.of_json) @@ Json.jfield "proofs" js in
-  profile , strategy
+  { path ; file ; proof ; profile ; strategy }
 
 type buffer = {
-  file : string;
-  profile : Json.t ;
-  mutable proofs : proofs ;
-  theories_seen : (string, unit) Hashtbl.t ;
-}
+    crc : crc_info ;
+    profile : Json.t ;
+    mutable proofs : strategy ;
+    theories : (string, unit) Hashtbl.t ;
+  }
 
 let dump =
   Timer.throttle @@
   Timer.timed ~name:"Proofs dump"
-    begin function { file; profile; proofs } ->
-      let file = filename file in
-      Utils.mkdirs (Filename.dirname file) ;
-      Json.to_file ~pretty_floats:true file @@ `Assoc [
-        "profile", profile ;
-        "proofs", jproofs proofs ;
+    begin fun b ->
+      let proof = b.crc.proof in
+      Utils.mkdirs (Filename.dirname proof) ;
+      Json.to_file ~pretty_floats:true proof @@ `Assoc [
+        "profile", b.profile ;
+        "proofs", jproofs b.proofs ;
       ]
     end
 
-let create ~file profile proofs =
-  { file; profile ; proofs ; theories_seen = Hashtbl.create 8 }
+let buffer ?profile crc = {
+    crc ;
+    proofs = crc.strategy ;
+    profile = Option.value ~default:crc.profile profile ;
+    theories = Hashtbl.create 8 ;
+  }
 
 let add theory goal crc buffer =
   let theory = Session.thy_name theory in
@@ -66,7 +120,7 @@ let add theory goal crc buffer =
 
 let init theory goals hints buffer =
   let theory = Session.thy_name theory in
-  Hashtbl.add buffer.theories_seen theory ();
+  Hashtbl.add buffer.theories theory ();
   let results =
     if M.is_empty hints then M.empty else
       List.fold_left
@@ -78,7 +132,11 @@ let init theory goals hints buffer =
         M.empty goals
   in buffer.proofs <- M.add theory results buffer.proofs ; dump buffer
 
-let save buf =
-  let proofs =
-    M.filter (fun th _ -> Hashtbl.mem buf.theories_seen th) buf.proofs in
-  dump ~force:true { buf with proofs }
+let save cache buffer =
+  begin
+    buffer.proofs <-
+      M.filter (fun th _ -> Hashtbl.mem buffer.theories th) buffer.proofs ;
+    dump ~force:true buffer ;
+    let { path ; file ; proof } = buffer.crc in
+    Cache.update cache ~path ~file ~proof ;
+  end

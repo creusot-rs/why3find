@@ -1,22 +1,45 @@
 # Changelog
 
 ## Unreleased
+
 ### Notable New Features
+
+ - New command `why3find stats` to generate project JSON statistics (!209)
+ - New command `why3find download` to download provers (!212)
+ - Automatic or on-demand download of missing provers (Cf. README, !212)
+ - New CSS style for documentation generator (!210, !220)
+ - Support for Markdown maths equations with KaTeX (!211)
+ - Proof files are now stored in `why3find.proofs` directory;
+   re-run proofs or check config to automatically upgrade (!218)
+ - Documentation now include proof statistics with treemaps (!222)
+
 ### Command Line Interface
 
  - New option `--summary` to only print the final summary.
    Default behavior is now `--summary` when proving more than 10 files,
    `--modules` when proving more than 1 file and `--theories` when proving 1 file
    (#143, !199).
+ - New option `--autoload` to automatically download missing provers (!212)
+ - New option `--no-autoload` to not download missing provers (!212)
+ - New option `--no-downloaded` to not use downloaded provers (!212)
+ - Renamed option `--no-autodetect-provers` into `--no-autodetect` (!212)
+ - Commands `why3find prove` and `why3find config --check` automatically
+   move old proof files to their new location (!218)
 
 ### IDE Integration
 
  - Enhanced debugger with forward/backward steps and breakpoints (!201)
+ - New command `Open Generated Document` from VSCode extension (!214)
+ - LSP now renders proof hints as `(outdated)` for updated files (!218)
+ - LSP now reports proof diagnostics on subgoals (!223)
 
 ### Bug Fixes
 
- - Fixed relaxed prover constraints in CRC files (!198)
+ - Fixed relaxed prover constraints in CRC files (!198, !224)
  - Improved time stability in proof witnessess (!204)
+ - Fixed invalid configuration file (!215)
+ - Fixed parsing of decimal time (!216)
+ - Fix rendering of infix operators in documentation (!219)
 
 ### API
 
@@ -78,7 +101,7 @@
   (!144).
 - Introduce option `--preprocess <tactic>` to run a tactic before starting the
   proof strategy (!142).
-- Add a LSP server and VSCode extension for the WhyML language. See the
+- Add an LSP server and VSCode extension for the WhyML language. See the
   corresponding section below for detailed features.
 - Improve cache efficiency by hashing tasks earlier in the Why3 processing
   (#93, !91).
@@ -96,7 +119,7 @@
 - New option `--strict` to pin provers to their current version (#90, !86)
 - New option `--relax` to un-pin provers from their configured version
   (#90, !86)
-- New option `--update` to update provers' pins to latest version (!143)
+- New option `--update` to update provers' pins to the latest version (!143)
 - New option `--why3-debug` to enable Why3 debug flags (#88, !80)
 - New option `--why3-warn-off` to disable Why3 warnings (#88, !80)
 - Removed option `--extra-config` (no-more supported feature) (!79, !123)
@@ -132,7 +155,7 @@
 
 ### API
 
-- Expose some of the why3find internal API as a library (!87)
+- Expose some of why3find internal API as a library (!87)
 
 ## 1.0 - 2024-05-15
 

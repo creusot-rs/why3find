@@ -48,7 +48,7 @@ let title = ['A' - 'Z' 'a'-'z' '0'-'9' '-' ' ']+
 rule source = parse
  | eof { Eof }
  | '\n' { newline lexbuf ; Newline }
- | "(*)" { Infix "(*)" }
+ | "(*)" { Infix "*" }
  | "(*proof*)" { OpenSection(false,"proof") }
  | "(*qed*)" { CloseSection "qed" }
  | "(*[" (title as t) "]*)" { OpenSection(false,t) }
@@ -59,6 +59,7 @@ rule source = parse
  | "(*" '*'* "*)" { Comment (Lexing.lexeme lexbuf) }
  | "(*" '*'+  space* { OpenDoc }
  | "(*" { Comment (buffered (comment 0) lexbuf) }
+ | "(" space* (operator as id) space* ")" { Infix id }
  | (ident | operator) as id { Ident id }
  | space { Space }
  | _ as c { Char c }
@@ -82,13 +83,20 @@ and document = parse
  | "(*)" as s { Text s }
  | '*'+ ')' { CloseDoc }
  | ('#'+ as head) space* { Style(Head,head) }
- | ['0'-'9']+ '.' { style Ordered lexbuf }
  | '-'+ { style Dash lexbuf }
  | '_' | '*' { style Emph lexbuf }
  | "__" | "**" { style Bold lexbuf }
  | '{' ([^ '}' '\n']* as rf) '}' { Ref rf }
  | '`' ([^ '`' '\n']* as tt) '`' { Verb tt }
+ | '$' ([^ '$' '\n']+ as tx) '$' { Math tx }
+ | "$$" { Equation (equation (Buffer.create 80) lexbuf) }
  | _ as c { Char c }
+
+ and equation buffer = parse
+ | "$$" { Buffer.contents buffer }
+ | eof { failwith "Unexpected <eof> in math equation" }
+ | '\n' { newline lexbuf ; equation buffer lexbuf }
+ | _ as c { Buffer.add_char buffer c ; equation buffer lexbuf }
 
 (* -------------------------------------------------------------------------- *)
 (* --- Bootstrap                                                          --- *)

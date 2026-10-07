@@ -25,3 +25,49 @@
       }
     }
   }
+  $ why3find stats
+  Proofs 2/2 800ns
+  Saved to .why3find/stats.json
+  $ cat .why3find/stats.json
+  {
+    "files": [
+      {
+        "path": "foo",
+        "children": [
+          {
+            "path": "foo.S",
+            "file": "foo.mlw",
+            "line": 1,
+            "url": "foo.S.html#_L1",
+            "children": [],
+            "time": 0.0
+          },
+          {
+            "path": "foo.T",
+            "children": [
+              {
+                "goal": "Add.com",
+                "path": "foo.T.Add.com",
+                "url": "foo.T.html#_L3",
+                "status": "Valid (alt-ergo)",
+                "location": { "line": 3, "column": 14, "end_column": 41 },
+                "time": 0.0004,
+                "proved": 1
+              },
+              {
+                "goal": "Mul.com",
+                "path": "foo.T.Mul.com",
+                "url": "foo.T.html#_L3",
+                "status": "Valid (alt-ergo)",
+                "location": { "line": 3, "column": 14, "end_column": 41 },
+                "time": 0.0004,
+                "proved": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "time": 0.0008,
+    "proved": 2
+  }

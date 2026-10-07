@@ -7,6 +7,7 @@
 --- Module a.A
 --------------------------------------------------------------------------
   $ cat html/a.A.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -15,21 +16,21 @@
   <title>Module a.A</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
-  <pre class="src">
-  <span class="keyword">module</span> <span class="scope">A</span><a href="a.proof.html#A" title="3 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#A" title="Failed (no proof)" class="icon failed icofont-error"></a>
-    <span class="keyword">use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
-    <span class="keyword">type</span> <a id="t">t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
-    <span class="keyword">val</span> <span class="keyword">constant</span> <a id="neutral">neutral</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : <a title="a.A.t" href="#t">t</a>
-    <span class="keyword">val</span> <a id="op">op</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> <a title="a.A.t" href="#t">t</a> <a title="a.A.t" href="#t">t</a> : <a title="a.A.t" href="#t">t</a>
-    <span class="keyword">let</span> <a id="square">square</a> (x : <a title="a.A.t" href="#t">t</a>) : <a title="a.A.t" href="#t">t</a> = <a title="a.A.op" href="#op">op</a> x x
-    <span class="keyword">let</span> <span class="keyword">rec</span> <a id="assoc">assoc</a><a href="a.proof.html#A.assoc" title="Failed (no proof)" class="icon failed icofont-error"></a> (xs : <a title="list.List.list" href="https://www.why3.org/stdlib/list.html#list_8">list</a> <a title="a.A.t" href="#t">t</a>) : <a title="a.A.t" href="#t">t</a> =
-      <span class="keyword">variant</span> { xs }
-      <span class="keyword">match</span> xs <span class="keyword">with</span>
+  <header><a href="index.html" title="Index">Clone.t</a> — <code>library <a href="a.index.html">a</a></code> — <code>module A</code></header>
+  <pre class=src>
+  <span class=keyword>module</span> <span class=scope>A</span><a href="a.proof.html#A" title="3 logic parameters" class="icon small remark icofont-question-circle"></a><a href="a.proof.html#A" title="Failed (no proof)" class="icon failed icofont-error"></a>
+    <span class=keyword>use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
+    <span class=keyword>type</span> <a><div class=anchor id="t"></div>t</a><span title="Parameter" class="icon small remark icofont-question-circle"></span>
+    <span class=keyword>val</span> <span class=keyword>constant</span> <a><div class=anchor id="neutral"></div>neutral</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> : <a title="a.A.t" href="#t">t</a>
+    <span class=keyword>val</span> <a><div class=anchor id="op"></div>op</a><span title="Parameter" class="icon small remark icofont-question-circle"></span> <a title="a.A.t" href="#t">t</a> <a title="a.A.t" href="#t">t</a> : <a title="a.A.t" href="#t">t</a>
+    <span class=keyword>let</span> <a><div class=anchor id="square"></div>square</a> (x : <a title="a.A.t" href="#t">t</a>) : <a title="a.A.t" href="#t">t</a> = <a title="a.A.op" href="#op">op</a> x x
+    <span class=keyword>let</span> <span class=keyword>rec</span> <a><div class=anchor id="assoc"></div>assoc</a><a href="a.proof.html#A.assoc" title="Failed (no proof)" class="icon failed icofont-error"></a> (xs : <a title="list.List.list" href="https://www.why3.org/stdlib/list.html#list_8">list</a> <a title="a.A.t" href="#t">t</a>) : <a title="a.A.t" href="#t">t</a> =
+      <span class=keyword>variant</span> { xs }
+      <span class=keyword>match</span> xs <span class=keyword>with</span>
       | <a title="list.List.Nil" href="https://www.why3.org/stdlib/list.html#Nil_8">Nil</a> -&gt; <a title="a.A.neutral" href="#neutral">neutral</a>
       | <a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x xs -&gt; <a title="a.A.op" href="#op">op</a> x (assoc xs)
-      <span class="keyword">end</span>
-  <span class="keyword">end</span>
+      <span class=keyword>end</span>
+  <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -38,6 +39,7 @@
 --- Module a.B
 --------------------------------------------------------------------------
   $ cat html/a.B.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -46,24 +48,21 @@
   <title>Module a.B</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module B</code></header>
-  <pre class="src">
-  <span class="keyword">module</span> <span class="scope">B</span><a href="a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
-    <span class="keyword">use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
-    <span class="keyword">use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
-    <span class="keyword">let</span> <span class="keyword">constant</span> <a id="zero">zero</a> = 0
-    <span class="keyword">clone</span> <span class="keyword">export</span> <a title="a.A" href="a.A.html">A</a><span class="section">{<span class="section-toggle">#</span><span class="section-text">
+  <header><a href="index.html" title="Index">Clone.t</a> — <code>library <a href="a.index.html">a</a></code> — <code>module B</code></header>
+  <pre class=src>
+  <span class=keyword>module</span> <span class=scope>B</span><a href="a.proof.html#B" title="Valid (no goals)" class="icon remark icofont-check"></a>
+    <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
+    <span class=keyword>use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
+    <span class=keyword>let</span> <span class=keyword>constant</span> <a><div class=anchor id="zero"></div>zero</a> = 0
+    <span class=keyword>clone</span> <span class=keyword>export</span> <a title="a.A" href="a.A.html">A</a> <span class=section>{<span class="section-toggle" title="Cloned symbols">…</span><span class="section-text">
       <span class="comment section-toggle">begin</span>
-        <span class="comment">(* cloned <a name="clone-4" href="a.A.html">a.A</a> *)</span>
+        <span class=comment>(* cloned <a id="clone-4" href="a.A.html">a.A</a> *)</span>
+        <span class=keyword>let</span> <a href="a.A.html#square" title="a.B.square&#013;(cloned from a.A.square)"><div class=anchor id="square"></div>square</a> int : int
+        <span class=keyword>let</span> <a href="a.A.html#assoc" title="a.B.assoc&#013;(cloned from a.A.assoc)"><div class=anchor id="assoc"></div>assoc</a> (<a title="list.List.list" href="https://www.why3.org/stdlib/list.html#list_8">list</a> int) : int
       <span class="comment section-toggle">end</span>
-    </span>}</span><span class="section">{<span class="section-toggle">…</span><span class="section-text">
-      <span class="comment section-toggle">begin</span>
-        <span class="keyword">let</span> <a id="square" href="a.A.html#square" title="a.B.square  (cloned from a.A.square)">square</a> int : int
-        <span class="keyword">let</span> <a id="assoc" href="a.A.html#assoc" title="a.B.assoc  (cloned from a.A.assoc)">assoc</a> (<a title="list.List.list" href="https://www.why3.org/stdlib/list.html#list_8">list</a> int) : int
-      <span class="comment section-toggle">end</span>
-    </span>}</span> <span class="keyword">with</span> <span class="keyword">type</span> <a title="a.A.t" href="a.A.html#t">t</a> = int, <span class="keyword">val</span> <a title="a.A.neutral" href="a.A.html#neutral">neutral</a> = <a title="a.B.zero" href="#zero">zero</a>, <span class="keyword">val</span> <a title="a.A.op" href="a.A.html#op">op</a> = (<a title="int.Int.(+)" href="https://www.why3.org/stdlib/int.html#infix%20+_19">+</a>)
-    <span class="keyword">let</span> <a id="twice">twice</a> (x : int) : int = <a title="a.B.assoc" href="#assoc">assoc</a> (<a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x (<a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x <a title="list.List.Nil" href="https://www.why3.org/stdlib/list.html#Nil_8">Nil</a>))
-  <span class="keyword">end</span>
+    </span>}</span> <span class=keyword>with</span> <span class=keyword>type</span> <a title="a.A.t" href="a.A.html#t">t</a> = int, <span class=keyword>val</span> <a title="a.A.neutral" href="a.A.html#neutral">neutral</a> = <a title="a.B.zero" href="#zero">zero</a>, <span class=keyword>val</span> <a title="a.A.op" href="a.A.html#op">op</a> = (<a title="int.Int.(+)" href="https://www.why3.org/stdlib/int.html#infix%20+_19">+</a>)
+    <span class=keyword>let</span> <a><div class=anchor id="twice"></div>twice</a> (x : int) : int = <a title="a.B.assoc" href="#assoc">assoc</a> (<a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x (<a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x <a title="list.List.Nil" href="https://www.why3.org/stdlib/list.html#Nil_8">Nil</a>))
+  <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -72,6 +71,7 @@
 --- Module a.E
 --------------------------------------------------------------------------
   $ cat html/a.E.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -80,13 +80,13 @@
   <title>Module a.E</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="a.index.html">a</a></code> — <code>module E</code></header>
-  <pre class="src">
-  <span class="keyword">module</span> <span class="scope">E</span><a href="a.proof.html#E" title="Valid (no goals)" class="icon remark icofont-check"></a>
-    <span class="keyword">use</span> <a title="a.B" href="a.B.html">B</a>
-    <span class="keyword">use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
-    <span class="keyword">let</span> <a id="single">single</a> (x : int) : int = <a title="a.B.assoc" href="a.B.html#assoc">assoc</a> (<a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x <a title="list.List.Nil" href="https://www.why3.org/stdlib/list.html#Nil_8">Nil</a>)
-  <span class="keyword">end</span>
+  <header><a href="index.html" title="Index">Clone.t</a> — <code>library <a href="a.index.html">a</a></code> — <code>module E</code></header>
+  <pre class=src>
+  <span class=keyword>module</span> <span class=scope>E</span><a href="a.proof.html#E" title="Valid (no goals)" class="icon remark icofont-check"></a>
+    <span class=keyword>use</span> <a title="a.B" href="a.B.html">B</a>
+    <span class=keyword>use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
+    <span class=keyword>let</span> <a><div class=anchor id="single"></div>single</a> (x : int) : int = <a title="a.B.assoc" href="a.B.html#assoc">assoc</a> (<a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x <a title="list.List.Nil" href="https://www.why3.org/stdlib/list.html#Nil_8">Nil</a>)
+  <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
@@ -95,6 +95,7 @@
 --- Module b.C
 --------------------------------------------------------------------------
   $ cat html/b.C.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -103,13 +104,13 @@
   <title>Module b.C</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="b.index.html">b</a></code> — <code>module C</code></header>
-  <pre class="src">
-  <span class="keyword">module</span> <span class="scope">C</span><a href="b.proof.html#C" title="Valid (no goals)" class="icon remark icofont-check"></a>
-    <span class="keyword">use</span> a.<a title="a.B" href="a.B.html">B</a>
-    <span class="keyword">use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
-    <span class="keyword">let</span> <a id="single">single</a> (x : int) : int = <a title="a.B.assoc" href="a.B.html#assoc">assoc</a> (<a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x <a title="list.List.Nil" href="https://www.why3.org/stdlib/list.html#Nil_8">Nil</a>)
-  <span class="keyword">end</span>
+  <header><a href="index.html" title="Index">Clone.t</a> — <code>library <a href="b.index.html">b</a></code> — <code>module C</code></header>
+  <pre class=src>
+  <span class=keyword>module</span> <span class=scope>C</span><a href="b.proof.html#C" title="Valid (no goals)" class="icon remark icofont-check"></a>
+    <span class=keyword>use</span> a.<a title="a.B" href="a.B.html">B</a>
+    <span class=keyword>use</span> list.<a title="list.List" href="https://www.why3.org/stdlib/list.html#List_">List</a>
+    <span class=keyword>let</span> <a><div class=anchor id="single"></div>single</a> (x : int) : int = <a title="a.B.assoc" href="a.B.html#assoc">assoc</a> (<a title="list.List.Cons" href="https://www.why3.org/stdlib/list.html#Cons_8">Cons</a> x <a title="list.List.Nil" href="https://www.why3.org/stdlib/list.html#Nil_8">Nil</a>)
+  <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
   </body>

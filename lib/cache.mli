@@ -13,8 +13,11 @@ val digest : ?prover:Prover.prover -> Why3.Task.task -> string
 (** Cache data structure *)
 type t
 
-(** [~cdir] is the directory where the cache lives. *)
-val create : cdir:string -> ?usecache:bool -> unit -> t
+(** [~root] is the project root directory. *)
+val create : root:string -> ?usecache:bool -> unit -> t
 
 val get : t -> Why3.Task.task -> Prover.prover -> Result.t
 val set : t -> Why3.Task.task -> Prover.prover -> Result.t -> unit
+
+val update : t -> path:string -> file:string -> proof:string -> unit
+val outdated : t -> path:string -> file:string -> proof:string -> bool

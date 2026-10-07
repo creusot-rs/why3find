@@ -10,6 +10,7 @@
 --- Generated Files
 --------------------------------------------------------------------------
   $ cat html/unsound.*.html
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -18,31 +19,32 @@
   <title>Module unsound.Dummy</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>module Dummy</code></header>
-  <pre class="src">
-  <span class="keyword">module</span> <span class="scope">Dummy</span><a href="unsound.proof.html#Dummy" title="2 unsafe definitions" class="icon small failed icofont-warning"></a><a href="unsound.proof.html#Dummy" title="Failed (no proof)" class="icon failed icofont-error"></a>
-    <span class="keyword">use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
+  <header><a href="index.html" title="Index">Unsound.t</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>module Dummy</code></header>
+  <pre class=src>
+  <span class=keyword>module</span> <span class=scope>Dummy</span><a href="unsound.proof.html#Dummy" title="2 unsafe definitions" class="icon small failed icofont-warning"></a><a href="unsound.proof.html#Dummy" title="Failed (no proof)" class="icon failed icofont-error"></a>
+    <span class=keyword>use</span> int.<a title="int.Int" href="https://www.why3.org/stdlib/int.html#Int_">Int</a>
   
-    <span class="keyword">let</span> <a id="admit1">admit1</a><span title="Unsound Definition" class="icon small failed icofont-warning"></span><a href="unsound.proof.html#Dummy.admit1" title="Failed (no proof)" class="icon failed icofont-error"></a> () : unit
-      <span class="keyword">ensures</span> { <span class="keyword">false</span> } = <span class="admitted">assume</span> { <span class="keyword">false</span> }
+    <span class=keyword>let</span> <a><div class=anchor id="admit1"></div>admit1</a><span title="Unsound Definition" class="icon small failed icofont-warning"></span><a href="unsound.proof.html#Dummy.admit1" title="Failed (no proof)" class="icon failed icofont-error"></a> () : unit
+      <span class=keyword>ensures</span> { <span class=keyword>false</span> } = <span class=admitted>assume</span> { <span class=keyword>false</span> }
   
-    <span class="keyword">let</span> <a id="admit2">admit2</a><span title="Unsound Definition" class="icon small failed icofont-warning"></span><a href="unsound.proof.html#Dummy.admit2" title="Failed (no proof)" class="icon failed icofont-error"></a> () : unit
-      <span class="keyword">ensures</span> { <span class="keyword">false</span> } = <span class="keyword">val</span> foo () : unit <span class="keyword">ensures</span> { <span class="keyword">false</span> } <span class="keyword">in</span> foo ()
+    <span class=keyword>let</span> <a><div class=anchor id="admit2"></div>admit2</a><span title="Unsound Definition" class="icon small failed icofont-warning"></span><a href="unsound.proof.html#Dummy.admit2" title="Failed (no proof)" class="icon failed icofont-error"></a> () : unit
+      <span class=keyword>ensures</span> { <span class=keyword>false</span> } = <span class=keyword>val</span> foo () : unit <span class=keyword>ensures</span> { <span class=keyword>false</span> } <span class=keyword>in</span> foo ()
   
-    <span class="keyword">let</span> <a id="ok_any">ok_any</a><a href="unsound.proof.html#Dummy.ok_any" title="Failed (no proof)" class="icon failed icofont-error"></a> () : unit
-      <span class="keyword">ensures</span> { <span class="keyword">true</span> } = <span class="keyword">any</span> unit <span class="keyword">ensures</span> { <span class="keyword">true</span> }
+    <span class=keyword>let</span> <a><div class=anchor id="ok_any"></div>ok_any</a><a href="unsound.proof.html#Dummy.ok_any" title="Failed (no proof)" class="icon failed icofont-error"></a> () : unit
+      <span class=keyword>ensures</span> { <span class=keyword>true</span> } = <span class=keyword>any</span> unit <span class=keyword>ensures</span> { <span class=keyword>true</span> }
   
-    <span class="keyword">let</span> <a id="ok_unit">ok_unit</a><a href="unsound.proof.html#Dummy.ok_unit" title="Failed (no proof)" class="icon failed icofont-error"></a> () : unit
-      <span class="keyword">ensures</span> { <span class="keyword">true</span> } = <span class="keyword">let</span> foo = <span class="keyword">any</span> unit <span class="keyword">ensures</span> { <span class="keyword">true</span> } <span class="keyword">in</span> ()
+    <span class=keyword>let</span> <a><div class=anchor id="ok_unit"></div>ok_unit</a><a href="unsound.proof.html#Dummy.ok_unit" title="Failed (no proof)" class="icon failed icofont-error"></a> () : unit
+      <span class=keyword>ensures</span> { <span class=keyword>true</span> } = <span class=keyword>let</span> foo = <span class=keyword>any</span> unit <span class=keyword>ensures</span> { <span class=keyword>true</span> } <span class=keyword>in</span> ()
   
-    <span class="keyword">let</span> <a id="ok_some">ok_some</a><a href="unsound.proof.html#Dummy.ok_some" title="Failed (no proof)" class="icon failed icofont-error"></a> () : int
-      <span class="keyword">ensures</span> { result <a title="int.Int.(>=)" href="https://www.why3.org/stdlib/int.html#infix%20%3E=_26">&gt;=</a> 0 } = <span class="keyword">let</span> foo = <span class="keyword">any</span> int <span class="keyword">ensures</span> { result <a title="int.Int.(>=)" href="https://www.why3.org/stdlib/int.html#infix%20%3E=_26">&gt;=</a> 0 } <span class="keyword">in</span> foo
+    <span class=keyword>let</span> <a><div class=anchor id="ok_some"></div>ok_some</a><a href="unsound.proof.html#Dummy.ok_some" title="Failed (no proof)" class="icon failed icofont-error"></a> () : int
+      <span class=keyword>ensures</span> { result <a title="int.Int.(>=)" href="https://www.why3.org/stdlib/int.html#infix%20%3E=_26">&gt;=</a> 0 } = <span class=keyword>let</span> foo = <span class=keyword>any</span> int <span class=keyword>ensures</span> { result <a title="int.Int.(>=)" href="https://www.why3.org/stdlib/int.html#infix%20%3E=_26">&gt;=</a> 0 } <span class=keyword>in</span> foo
   
-  <span class="keyword">end</span>
+  <span class=keyword>end</span>
   </pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -51,11 +53,12 @@
   <title>Library unsound</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library unsound</code></header>
-  <pre class="src"><span class="keyword">module</span> <a title="unsound.Dummy" href="unsound.Dummy.html">Dummy</a><a href="unsound.proof.html#Dummy" title="2 unsafe definitions" class="icon small failed icofont-warning"></a><a href="unsound.proof.html#Dummy" title="Failed (no proof)" class="icon failed icofont-error"></a></pre>
+  <header><a href="index.html" title="Index">Unsound.t</a> — <code>library unsound</code></header>
+  <pre class=src><span class=keyword>module</span> <a title="unsound.Dummy" href="unsound.Dummy.html">Dummy</a><a href="unsound.proof.html#Dummy" title="2 unsafe definitions" class="icon small failed icofont-warning"></a><a href="unsound.proof.html#Dummy" title="Failed (no proof)" class="icon failed icofont-error"></a></pre>
   <script type="text/javascript" src="script.js"></script>
   </body>
   </html>
+  <!DOCTYPE html>
   <html>
   <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -64,22 +67,19 @@
   <title>Library unsound</title>
   </head>
   <body>
-  <header><a href="index.html">index</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>proofs</code></header>
-  <h1>Provers</h1>
-  <pre class="src">
+  <header><a href="index.html" title="Index">Unsound.t</a> — <code>library <a href="unsound.index.html">unsound</a></code> — <code>proofs</code></header>
+  <div class=doc><h1>Proofs</h1></div>
+  <pre class="src crc"><span class=keyword>module</span> <a href="unsound.Dummy.html"><div class=anchor id="Dummy"></div>unsound.Dummy</a><span title="2 unsafe definitions" class="icon small failed icofont-warning"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
+  <pre class="src crc">
+    <span class=keyword>unsound</span> <a href="unsound.Dummy.html#admit1"><div class=anchor id="Dummy.admit1"></div>admit1</a><span title="unsafe definition" class="icon small failed icofont-warning"></span>
+    <span class=keyword>unsound</span> <a href="unsound.Dummy.html#admit2"><div class=anchor id="Dummy.admit2"></div>admit2</a><span title="unsafe definition" class="icon small failed icofont-warning"></span>
   </pre>
-  <h1>Proofs</h1>
-  <pre class="src"><span class="keyword">module</span> <a id="Dummy" href="unsound.Dummy.html">unsound.Dummy</a><span title="2 unsafe definitions" class="icon small failed icofont-warning"></span><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre>
-  <pre class="src">
-    <span class="keyword">unsound</span> <a id="Dummy.admit1" href="unsound.Dummy.html#admit1">admit1</a><span title="unsafe definition" class="icon small failed icofont-warning"></span>
-    <span class="keyword">unsound</span> <a id="Dummy.admit2" href="unsound.Dummy.html#admit2">admit2</a><span title="unsafe definition" class="icon small failed icofont-warning"></span>
-  </pre>
-  <pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.admit1" href="unsound.Dummy.html#admit1">admit1</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.admit2" href="unsound.Dummy.html#admit2">admit2</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.ok_any" href="unsound.Dummy.html#ok_any">ok_any</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.ok_unit" href="unsound.Dummy.html#ok_unit">ok_unit</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src">
-    <span class="keyword">goal</span> <a id="Dummy.ok_some" href="unsound.Dummy.html#ok_some">ok_some</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
+  <pre class="src crc">
+    <span class=keyword>goal</span> <a href="unsound.Dummy.html#admit1"><div class=anchor id="Dummy.admit1"></div>admit1</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
+    <span class=keyword>goal</span> <a href="unsound.Dummy.html#admit2"><div class=anchor id="Dummy.admit2"></div>admit2</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
+    <span class=keyword>goal</span> <a href="unsound.Dummy.html#ok_any"><div class=anchor id="Dummy.ok_any"></div>ok_any</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
+    <span class=keyword>goal</span> <a href="unsound.Dummy.html#ok_unit"><div class=anchor id="Dummy.ok_unit"></div>ok_unit</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><pre class="src crc">
+    <span class=keyword>goal</span> <a href="unsound.Dummy.html#ok_some"><div class=anchor id="Dummy.ok_some"></div>ok_some</a><span title="Failed (no proof)" class="icon failed icofont-error"></span></pre><script type="text/javascript" src="script.js"></script>
   </body>
   </html>
 --------------------------------------------------------------------------

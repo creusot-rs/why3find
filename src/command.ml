@@ -394,7 +394,6 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       let velocity = ref false in
       let reset = ref false in
       let default = ref false in
-      let detect = ref false in
       let strict = ref false in
       let relax = ref false in
       let check = ref false in
@@ -404,14 +403,13 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       let update () = strict := true; relax := true in
       parse argv
         begin
-          Wenv.options () @
+          Wenv.options ~download:true () @
           [
             "--master", Arg.Set calibrate, "calibrate provers (master)";
             "--velocity", Arg.Set velocity, "evaluate prover velocity (local)";
             "--quiet", Arg.Clear list, "do not list final configuration";
             "--reset", Arg.Set reset, "configure from scratch";
             "--default", Arg.Set default, "import available provers";
-            "--detect", Arg.Set detect, "detect and import available provers";
             "--list-provers", Arg.Set list_provers, "list available provers";
             "--list-tactics", Arg.Set list_tactics, "list available tactics";
             "--strict", Arg.Set strict, "commit prover versions";
@@ -430,26 +428,28 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
          \n\n\
          OPTIONS:\n" ;
       (* --- Why3 Config --- *)
-      if !detect then ignore @@ Sys.command "why3 config detect" ;
-      let rawconfig = Wenv.load_raw_config () in
+      let rawconfig = Wenv.load_raw_config ~back:true () in
       let config =
         if !reset
         then Config.default
         else Config.config_of_json rawconfig in
       let config = Wenv.add_options config in
-      let env = Wenv.init config in
       (* --- List Provers -------------- *)
       if !list_provers || !list_tactics then
         begin
           if !list_provers then
             begin
               Format.printf "Available Provers:@." ;
-              let allprovers = Prover.all env.why3 in
-              if Prover.Mdesc.is_empty allprovers then
-                Format.printf "  (none, use --detect)@." ;
-              Prover.Mdesc.iter (fun dp _ ->
-                  Format.printf " - %a@." Prover.pp_desc dp
-                ) allprovers ;
+              let autodetect = Wenv.autodetect () in
+              let downloaded = Wenv.downloaded () in
+              let whyconf = Prover.config ~autodetect ~downloaded () in
+              let provers = Prover.available whyconf in
+              if Prover.is_empty provers then
+                Format.printf "  (none)@."
+              else
+                Prover.iter (fun dp _ ->
+                    Format.printf " - %a@." Prover.pp_desc dp
+                  ) provers ;
             end ;
           if !list_tactics then
             begin
@@ -462,6 +462,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
             end ;
           exit 0
         end;
+      let project = Wenv.init config in
       (* --- Packages ---- *)
       let pkgs = config.packages in
       if !list && pkgs <> [] then
@@ -478,8 +479,8 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
            This may lead to performance loss."
           Utils.pp_time fast Utils.pp_time time ;
       let patterns, provers =
-        if !default || !detect then
-          let provers = Prover.default env.why3 in
+        if !default then
+          let provers = Project.select_default project in
           if !relax
           then List.map Prover.name provers, List.map Prover.relaxed provers
           else List.map Prover.fullname provers, provers
@@ -488,7 +489,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
           let patterns =
             if !relax then
               List.map Prover.pattern_name pconfig else pconfig in
-          let provers = Prover.select env.why3 ~patterns in
+          let provers = Project.select_provers ~patterns project in
           let patterns =
             if !strict then List.map Prover.fullname provers else
             if !relax then List.map Prover.name provers else pconfig
@@ -498,12 +499,12 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       let profile =
         if !calibrate then
           Fibers.await @@ begin
-            let+ p = Calibration.calibrate_provers ~saved:true env provers in
+            let+ p = Calibration.calibrate_provers ~saved:true project provers in
             Some (Calibration.to_json p)
           end
         else None in
       if not !calibrate && !velocity then
-        Calibration.velocity_provers env provers ;
+        Calibration.velocity_provers project provers ;
       (* --- Transformations ----- *)
       let depth = config.depth in
       let tactics = config.tactics in
@@ -512,22 +513,44 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       let drivers = config.drivers in
       (* --- Disabled warnings ----- *)
       let warnoff = config.warnoff in
-      (* --- Check ----- *)
+      (* --- Checks ----- *)
       if !check then
         begin
+          let missing = Hashtbl.create 0 in
           let rec check_crc = function
             | Crc.Stuck -> ()
             | Tactic { children; _ } -> List.iter check_crc children
             | Prover(name,version,_) ->
-              if Prover.find provers ~name ?version () = None then retval := 1 ;
+              let id = Printf.sprintf "%s@%s" name version in
+              if not (Hashtbl.mem missing id) then
+                let status =
+                  if List.exists (Prover.fits ~name ~version) provers then `Ok
+                  else
+                    match List.find_opt (Prover.fits ~name ?version:None) provers with
+                    | None -> `Discarded
+                    | Some p -> `Relaxed (Prover.version p)
+                in Hashtbl.add missing id status ;
           in
-          let check f =
+          let check file =
             let iter = Why3.Wstdlib.Mstr.iter in
-            iter (fun _ -> iter (fun _ -> check_crc)) @@ snd @@ Proofs.load f
-          in
-          Wenv.allfiles check "."
+            let root = "." in
+            let path,_ = Wutil.filepath ~root ~file in
+            iter (fun _ -> iter (fun _ -> check_crc))
+            @@ (Proofs.load ~root ~path ~file ()).strategy
+          in Wenv.allfiles check "." ;
+          Hashtbl.iter
+            (fun p s ->
+               match s with
+               | `Ok -> ()
+               | `Discarded ->
+                 Log.warning "[proofs] %s will be @{<red>discarded@}" p ;
+                 retval := 1 ;
+               | `Relaxed v ->
+                 Log.warning "[proofs] %s will be @{<orange>relaxed to %s@}" p v ;
+                 retval := 1 ;
+            ) missing ;
         end ;
-      let wmain = Why3.Whyconf.get_main env.why3.config in
+      let wmain = Why3.Whyconf.get_main project.whyconf in
       List.iter (check_custom_drivers wmain) provers ;
       (* --- New Configuration --------- *)
       let newprofile = match profile with None -> config.profile | _ -> profile in
@@ -545,7 +568,7 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
       (* --- Printing Final Config -------------- *)
       if !list then
         begin
-          let jobs = Runner.get_jobs wmain in
+          let jobs = Runner.get_jobs () in
           Format.printf "Configuration:@." ;
           Format.printf " - runner: %d jobs" jobs ;
           if fast <> 0.2 then Format.printf ", %a" Utils.pp_time fast ;
@@ -563,8 +586,65 @@ let () = register ~name:"config" ~args:"[OPTIONS] PROVERS"
         Format.printf " - @[<hov 2>drivers: %a@]@." pp_list drivers ;
       (* --- Updating -------------- *)
       if !reset || modified then Wenv.save newconfig;
-      Wenv.update_why3_config env.why3.config ;
+      Wenv.save_jobs () ;
       exit (!retval)
+    end
+
+(* -------------------------------------------------------------------------- *)
+(* --- DOWNLOAD PROVER                                                    --- *)
+(* -------------------------------------------------------------------------- *)
+
+let () = register ~name:"download" ~args:"[OPTIONS] PROVER"
+    begin fun argv ->
+      let prv = ref "" in
+      let url = ref "" in
+      let list = ref false in
+      parse argv
+        [ "--list" , Arg.Set list , "List available versions for NAME" ]
+        begin fun a ->
+          if  !prv = "" then prv := a else
+          if !url = "" then url := a else
+            Utils.failwith "Unexpected argument (%S)" a
+        end
+        "USAGE:\n\
+         \n  why3find download [--list] [NAME[@VERSION] [URL[#PART]]]]\n\n\
+         DESCRIPTION:\n\
+         \n  Download or list available provers from the given parameters.\
+         \n  If VERSION is missing, download the most recent version.\
+         \n  Download from URL and extract PART if specified.\
+         \n" ;
+      let name,version = Prover.pattern_of_string !prv in
+      if name = ""  then
+        begin
+          let open Version in
+          Format.printf "Available provers for %s (%s):@." system architecture ;
+          List.iter
+            (fun name ->
+               List.iter
+                 (fun (version,_) -> Format.printf " - %s@%s@." name version)
+                 (try Prover.shared ~name with _ -> [])
+            ) [ "alt-ergo"; "cvc5"; "z3"]
+        end
+      else
+        let data = lazy (Prover.shared ~name) in
+        if !list then
+          List.iter
+            (fun (version,_) -> Format.printf " - %s@%s@." name version)
+            (Lazy.force data)
+        else
+          let spec = !url in
+          if version = None && spec <> "" then
+            Utils.failwith "Unspecified prover version for URL spec" ;
+          let version =
+            match version with Some v -> v | None ->
+              let provers = Lazy.force data in
+              try fst @@ List.hd provers with _ ->
+                Utils.failwith "No specification for prover %s" name in
+          let spec =
+            if spec <> "" then spec else
+              try List.assoc version (Lazy.force data) with Not_found ->
+                Utils.failwith "Specification not found for %s@%s" name version
+          in Prover.download ~name ~version ~spec ;
     end
 
 (* -------------------------------------------------------------------------- *)
@@ -588,7 +668,7 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
       let failed () = context 2 in
       parse argv
         begin
-          Wenv.options () @
+          Wenv.options ~download:true ~missing:true () @
           [
             "-g", Arg.String (add goals), "<name> goals selection";
             "-f", Arg.Unit (set mode `Force), "force rebuild proofs";
@@ -625,12 +705,12 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
       let level = !hammer in
       let session = !session || !ide in
       let config = Wenv.load_config () in
-      let env = Wenv.init config in
+      let project = Wenv.init config in
       let files = if !files = [] then ["."] else !files in
       let files = Wenv.argfiles @@ List.rev files in
       let gnames = List.rev !goals in
       let result = Prove.prove_files
-          ~env ~mode ~level ~session
+          ~project ~mode ~level ~session
           ~results:!results ~axioms:!axioms ~details:!details
           ~files ~gnames in
       let n = List.length result.unfixed in
@@ -639,12 +719,12 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
           Log.error "%d unproved file%a" n Utils.pp_s n ;
           if not !ide then exit 1 ;
           let file = List.hd result.unfixed in
-          let pkgs = env.config.packages in
-          let why3_warn_off = env.config.warnoff in
+          let pkgs = project.config.packages in
+          let why3_warn_off = project.config.warnoff in
           let Prove.{ provers ; time ; mem ; tactics } = result in
           let whyconf = ".why3find/why3.conf" in
           let cfg = ".why3find/hammer.cfg" in
-          Why3.(Rc.to_file whyconf @@ Whyconf.rc_of_config env.why3.config);
+          Why3.(Rc.to_file whyconf @@ Whyconf.rc_of_config project.whyconf);
           Hammer.why3_ide_config ~tactics ~provers ~time ~mem cfg ;
           Format.printf "Fixing %s@." file ;
           exec ~prefix:["ide"] ~pkgs ~why3_warn_off [|
@@ -658,6 +738,33 @@ let () = register ~name:"prove" ~args:"[OPTIONS] PATH..."
         | 0 -> Log.warning "No files to prove"
         | 1 -> Log.message "Proved (%s) %t" (List.hd files) Utils.pp_ok
         | n -> Log.message "Proved (%d files) %t" n Utils.pp_ok
+    end
+
+(* -------------------------------------------------------------------------- *)
+(* --- STATS                                                              --- *)
+(* -------------------------------------------------------------------------- *)
+
+let () = register ~name:"stats" ~args:"[OPTIONS] PATH..."
+    begin fun argv ->
+      let files = ref [] in
+      let out = ref ".why3find/stats.json" in
+      let add r p = r := p :: !r in
+      parse argv
+        begin
+          Wenv.options () @
+          [ "-o", Arg.Set_string out, "output file (default is .why3find/stats.json)" ]
+        end (add files) "generate JSON statistics" ;
+      let config = Wenv.load_config () in
+      let env = (Wenv.init config).env in
+      let root = "." in
+      let files = if !files = [] then ["."] else !files in
+      let files = Wenv.argfiles @@ List.rev files in
+      let jstats = Proofstats.statistics ~root ~env ~files in
+      Json.to_file ~pretty_floats:true !out jstats.json ;
+      Log.message "Proofs %d/%d %a"
+        jstats.proved (jstats.proved + jstats.stuck)
+        Utils.pp_time jstats.time ;
+      Log.message "Saved to %s" !out ;
     end
 
 (* -------------------------------------------------------------------------- *)
@@ -697,8 +804,8 @@ let () = register ~name:"doc" ~args:"[OPTIONS] PATH..."
       let files = Wenv.argfiles ~exts:[".md";".mlw"] @@ List.rev files in
       let out = if !out = "" then "html" else Wenv.arg1 !out in
       let config = Wenv.load_config () in
-      let env = Wenv.init config in
-      Docgen.generate ~env ~out ~title ~files ~url:!url ~package_url:!package_url
+      let project = Wenv.init config in
+      Docgen.generate ~project ~out ~title ~files ~url:!url ~package_url:!package_url
     end
 
 (* -------------------------------------------------------------------------- *)
@@ -708,23 +815,29 @@ let () = register ~name:"doc" ~args:"[OPTIONS] PATH..."
 let () = register ~name:"print" ~args:"[OPTIONS] PATH..."
     begin fun argv ->
       let files = ref [] in
+      let modules = ref true in
       parse argv
-        (Wenv.options ~packages:true ())
+        begin
+          Wenv.options ~packages:true () @
+          [ "-t" , Arg.Clear modules , "print theories" ;
+            "-m" , Arg.Set modules , "print modules" ]
+        end
         (fun f -> files := f :: !files)
         "USAGE:\n\
          \n  why3find print [OPTIONS] PATH...\n\n\
          DESCRIPTION:\n\
          \n  Print Why3 theories and modules internal representation.\
-         \n\
+         \n\n\
          OPTIONS:\n" ;
       let files = if !files = [] then ["."] else !files in
       let files = Wenv.argfiles ~exts:[".md";".mlw"] @@ List.rev files in
       let config = Wenv.load_config () in
-      let env = Wenv.init config in
+      let project = Wenv.init config in
       List.iter
         begin fun file ->
-          let lib = snd @@ Wutil.filepath file in
-          Wutil.load_theories env.why3.env file |> fst |>
+          let root = project.root in
+          let _,lib = Wutil.filepath ~root ~file in
+          Wutil.load_theories project.env file |> fst |>
           List.iter
             begin fun (thy : Why3.Theory.theory) ->
               let fullpath = lib @ [thy.th_name.id_string] in
@@ -734,9 +847,9 @@ let () = register ~name:"print" ~args:"[OPTIONS] PATH..."
                  (* -------------------------------------------- *)@\n@."
                 (String.concat "." fullpath) ;
               match Why3.Pmodule.restore_module thy with
-              | pm ->
+              | pm when !modules ->
                 Format.printf "%a@\n@." Wutil.pp_module pm
-              | exception Not_found ->
+              | _ | exception Not_found ->
                 Format.printf "%a@\n@." Wutil.pp_theory thy
             end
         end files
@@ -924,12 +1037,12 @@ let () = register ~name:"install" ~args:"PKG PATH..."
       if not dune then Utils.mkdirs path ;
       let dunefiles = ref [] in
       let log ~kind src = Format.printf "install %-10s %s@." kind src in
-      let install ~kind ?tgt src =
-        let tgt = match tgt with Some p -> p | None -> src in
+      let install ~kind ?tgt source =
+        let tgt = match tgt with Some p -> p | None -> source in
         log ~kind tgt ;
         if dune
-        then dunefiles := (src,tgt) :: !dunefiles
-        else Utils.copy ~src ~tgt:(Filename.concat path tgt)
+        then dunefiles := (source,tgt) :: !dunefiles
+        else Utils.copy ~source ~target:(Filename.concat path tgt)
       in
       let allsrc = ref true in
       let pkg_prefix = String.starts_with ~prefix:(Filename.concat pkg "") in
@@ -940,9 +1053,6 @@ let () = register ~name:"install" ~args:"PKG PATH..."
               src pkg ;
           allsrc := false ;
           Wenv.allfiles (install ~kind:"(source)") src ;
-          let proofs = Proofs.filename src in
-          if Sys.file_exists proofs then
-            install ~kind:"(proof)" proofs ;
         end in
       let config = Wenv.load_config () in
       ignore (Wenv.init config); (* So that all extensions get loaded *)

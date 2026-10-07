@@ -6,16 +6,18 @@
 Why3find provides a collection of utilities to ease the development
 of Why3 projects and the distribution of Why3 libraries and
 packages. It can be used in place of the traditional `why3` command for most
-development tasks, eg. configuring provers, proving files or interactively
+development tasks such as configuring provers, proving files or interactively
 debugging proofs. In additional, it can be used to build enhanced documentation,
-package and install libraries or setup a distributed solver cloud.
+package and install libraries or deploy a solver cloud.
 
 - [Quick Setup](#quick-setup)
 - [IDE Support](#ide-support)
-- [Why3 Packages](#packages)
+- [Packages](#packages)
 - [Package Development](#package-development)
 - [Package Configuration](#package-configuration)
+- [Provers Installation](#provers-installation)
 - [Package Proving](#package-proving)
+- [Package Statistics](#package-statistics)
 - [Package Documentation](#package-documentation)
 - [Package Soundness](#package-soundness)
 - [OCaml Code Extraction](#ocaml-code-extraction)
@@ -75,7 +77,7 @@ This will compile and install both the `why3find` command and the VSCode plugin.
 ### Emacs
 
 The LSP can be used on Emacs with `lsp-mode` (Emacs' internal LSP client Eglot
-might also work, but will offer less functionalities).
+might also work, but offers fewer functionalities).
 
 Add this to your `.emacs` file :
 
@@ -143,24 +145,22 @@ created. The package directory shall be structured as follows:
     DIR
     ├── .why3find             # Why3find local cache     (*not* versioned)
     ├── why3find.json         # Why3find configuration      (versioned)
+    ├── why3find.proofs       # Why3find proof hints        (versioned)
     ├── dune-project          # Dune project configuration  (versioned)
     ├── lib/**                # OCaml extracted files       (versioned)
     └── PKG                   # Package source directory
-        ├── **/*.mlw          # Why3 source files           (versioned)
-        ├── **/*/proof.json   # Why3find proof witness      (versioned)
-        ├── **/*/why3session.xml  # Why3 internal files   (*not* versioned)
-        └── **/*/why3shapes.gz    # Why3 internal files   (*not* versioned)
+        └── **/*.mlw          # Why3 source files           (versioned)
 
-You shall put your Why3 source files in this sub-directory in order
+You shall put your Why3 source files in this subdirectory in order
 to be compliant with Why3 global naming policy. Consider for instance
 a package `foo` with a source file `foo/bar.mlw` declaring a module `Jazz`,
 this module will be named `foo.bar.Jazz` in every place, either from
 the package `foo` or from another package depending on `foo`.
 
 Strictly speaking, if your package is _not_ intended to be used as a package
-dependency of another Why3 project, you might omit the `PKG` sub-directory and
+dependency of another Why3 project, you might omit the `PKG` subdirectory and
 put your source files directly at the root directory. However, the `why3find
-install` command will not work as expected and you will have to manage
+install` command will not work as expected. You will have to manage
 installation by your own means. Other `why3find` commands will work as expected,
 typically for proving, extracted OCaml code and generating documentation.
 
@@ -210,23 +210,91 @@ following options can be used:
 The command `why3find config` can be used to manage the package configuration.
 Typical examples are:
 
-    why3find config               # Show current config
-    why3find config […]           # Update packages, provers, etc.
-    why3find config --reset   […] # Configure from scratch (ignore current config)
-    why3find config --default […] # Use all available "default" provers
-    why3find config --detect  […] # Run `why3 config detect` before using all "default" provers
-    why3find config --check       # Check consistency between proof certificates and configuration
+    why3find config                # Show current config
+    why3find config […]            # Update packages, provers, etc.
+    why3find config --reset    […] # Configure from scratch (ignore current config)
+    why3find config --default  […] # Use all available "default" provers (see below)
+    why3find config --autoload […] # Download missing provers (see below)
 
-When using `--default` or `--detect` why3find will select the highest available
-versions of provers `alt-ergo`, `z3`, `cvc4` and `cvc5`, provided they are
-accessible from `PATH` or listed in the global why3 configuration. Additionally,
-`--detect` will update the global why3 configuration by running
-`why3 config detect`.
+When using `--default` why3find will select the highest available
+versions of provers `alt-ergo`, `z3`, and `cvc5` or `cvc4`, provided they are
+accessible from `PATH` or listed in the global why3 configuration.
 
-You can also gets the list of available provers and tactics:
+You can also get the list of available provers and tactics:
 
+    why3find download --list
     why3find config --list-provers
     why3find config --list-tactics
+
+Available provers are searched from global Why3 user's configuration and from
+the current `PATH` environment variable. The global Why3 user's configuration is
+taken from `~/.why3.conf` (if any) or `WHY3CONFIG` environment variable (if
+defined). It is also to automatically download other or missing provers with
+why3find config, prove and download commands.
+
+## Provers Installation
+
+By default, `why3find` uses all available and detected provers from `PATH`.
+It also uses globally configured provers for `Why3` as specified in `~/.why3.conf`
+or `WHY3CONFIG` environment variable.
+
+Additionally, `why3find config` and `why3find prove` can also download missing
+provers, either on-demand or automatically. The command `why3find download` can
+also be used to download and install provers manually.
+
+Provers downloaded by `why3find` are installed in the `why3find/provers`
+sub-directory of standard
+[XDG](https://specifications.freedesktop.org/basedir/latest/) cache directory.
+You can also add binaries on your side into this directory. Alternatively, the
+environment variable `WHY3FIND_DOWNLOADED` can be used to specify another
+directory.
+
+Here are some recipes for controlling prover download:
+
+    # why3find config                 ;; installed & missing provers
+    # why3find prove                  ;; in TTY, ask for missing provers
+    # why3find <cmd> --autoload       ;; automatically download missing provers
+    # why3find <cmd> --no-autoload    ;; disable prover download
+    # why3find <cmd> --no-downloaded  ;; do not use downloaded provers
+    # why3find <cmd> --no-autodetect  ;; do not detect provers from PATH
+
+You can also control the behavior of why3find with environment variables
+(which have precedence on command line arguments):
+
+    WHY3FIND_AUTODETECT=no   ;; same as --no-autodetect
+    WHY3FIND_DOWNLOADED=no   ;; same as --no-downloaded
+    WHY3FIND_AUTOLOAD=no     ;; same as --no-autoload
+    WHY3FIND_AUTOLOAD=yes    ;; same as --autoload
+
+For manually download provers, use the `why3find download` command:
+
+    # why3find download --list        ;; list known versions for prover
+    # why3find download --list NAME   ;; list known versions for prover
+    # why3find download NAME          ;; download the last version
+    # why3find download NAME@VERSION  ;; download a specific version
+
+Available prover versions depend on the local system (Linux/macOS) and
+architecture (x86/ARM). If a prover version is not (yet) known by why3find, you
+can still download and install it automatically with the following command:
+
+    # why3find download NAME@VERSION URL[#PATH]
+
+When downloading a URL prover specification, why3find will perform the following
+steps:
+  - download the `URL` resource with UNIX command `wget` (without `#PATH`);
+  - if necessary, decompress the archive with UNIX command `unzip` or `tar zxf`
+    according to `<file>` extension;
+  - if specified, only the `#PATH` component of the archive is extracted;
+  - the resulting file is moved to the why3find provers directory under name
+   `NAME@VERSION`;
+  - the binary is assigned execution rights with UNIX command `chmod a+x`;
+  - under macOS, the binary is locally signed using `xcode` command.
+
+A catalog of known provers is distributed in the `why3find shared` directory.
+Feel free to inspect the `provers/<NAME>.<OS>.<ARCH>.json` files and submit
+additional prover specifications through the public why3find GitLab.
+Currently, the catalog contains decent versions of `alt-ergo`, `z3` and `cvc5`
+for `linux.amd64`, `macosx.amd64` and `macosx.arm64` architectures.
 
 ## Package Proving
 
@@ -297,11 +365,11 @@ and all its parent goals are marked incomplete.
 
 *Remark:* incomplete proof certificates are also stored in order to be used as
 hints for further proof lookup. However, a tactic-node with all its sub-goals
-marked « stuck » would be removed.
+marked «stuck» would be removed.
 
 The reference time is set to one second by default and can be modified with
 `-t TIME` or configured using `why3find config -t TIME`. A fraction of seconds or
-suffix time units (`h`,`min`,`s`,`ms`) can be given, eg. `0.5`, `200ms`, `3min`.
+suffix time units (`h`,`min`,`s`,`ms`) can be given, for instance `0.5`, `200ms`, `3min`.
 The reference time is specified relatively to the *master* machine, Cf. prover
 calibration below.
 
@@ -320,27 +388,26 @@ and 4. However, known proof hints from previous run will still be played.
 When using `why3find prove -i` mode, the Why3 IDE is loaded with custom proof
 strategies that mimics the why3find proof strategy:
  - strategy `hammer` (keyboard shortcut `H`) repeatedly applies the provers,
-   then try the tactics, then finally retries the provers with a longer time.
+   then try the tactics, then finally retries the provers with a longer time;
  - strategy `provers` (keyboard shortcut `P`) only applies the provers;
  - strategy `unfold` (keyboard shortcut `U`) applies the tactics, then go into
    strategy `hammer`.
 
 *Prover Cache* is used to speed proof process. The hidden directory `.why3find`
-at the root of the package directory stores a hash of each proof tasks send to
+at the root of the package directory stores a hash of each proof task sent to
 provers. You can bypass access to the cache with option `--no-cache`. However,
 it will still be updated for further usage. You may also safely remove the cache
 by _entirely_ suppressing the `.why3find` directory.
 
-*Parallel Proving* is used to run different provers parallel on the different
+*Parallel Proving* is used to run different provers parallel on the available
 cores of your machine. You can specify the number of parallel provers with
-option `-j N`.  Alternatively, you can also use `why3find config -j N` to
-configure it locally, in which case your _personal_ Why3 configuration
-`~/.why3.conf` is updated accordingly. Parallel proving is also performed among
-the different goals and proof obligations to be proved. However, priority is put
-on goals that were incomplete with respect to the previously known proof
-certificates. This strategy makes detection of stuck goals faster when debugging
-proofs. During execution in a terminal, `why3find prove` displays a progression
-status with the following format:
+option `-j N`. Alternatively, you can also use `why3find config -j N` to
+configure it locally, or use environment variable `WHY3FIND_JOBS`. Parallel
+proving is also performed among the different goals and proof obligations to be
+proved. However, priority is put on goals that were incomplete with respect to
+the previously known proof certificates. This strategy makes detection of stuck
+goals faster when debugging proofs. During execution in a terminal, `why3find
+prove` displays a progression status with the following format:
 
     $ why3find prove […]
     !P/?Q/S/R goal goal …
@@ -358,8 +425,8 @@ sessions, but with much less information details: they contain only prover
 results with time information, tactics, and contain at most one proving strategy
 for each goal. Proof certificates are also used when generating documentation.
 
-Proof certificates are stored in `proof.json` files located just after the usual
-Why3 sessions files. The management of proof certificates is controlled by the
+Proof certificates are stored in `why3find.proofs` directory at the project root.
+The management of proof certificates is controlled by the
 following options:
 
     why3find prove -f    # Force proof reconstruction from scratch (no hints)
@@ -398,16 +465,67 @@ number of `why3find client` can dynamically connect to the server to offer their
 locally available provers for proving tasks, from the same machine or from the
 cloud. Any user can then connect to the server to obtain proof results, by using
 `why3find prove --server` options. Hence, proof results can be shared among
-different users during development. By launching a large number of clients, you
+different users during development. By launching many clients, you
 can build large proof clusters. Prover calibration of each contributing client
 is used by the server to ensure the consistency of the distributed proof
 results.
+
+## Package Statistics
+
+The `why3find stats` command can be used to generate a JSON file collecting
+all proofs paired with theories inside the package. This JSON file is suitable
+for further visualization, for instance via `d3` hierarchies.
+
+Typical usage is:
+
+    $ why3find stats -o FILE.JSON PATH...
+
+The JSON output is an array of nodes, each node having the following (optional)
+properties:
+
+- `library : <string>` library name of the Why3 file
+- `theory : <string>` name of the Why3 theory
+- `goal : <string>` name of the Why3 goal
+- `file : <string>` related filename
+- `location : <location>` precise location (see bellow)
+- `status : <string>` synthetic proof status
+- `prover : <string>` name of the prover that solves the goal
+- `time : <number>` prover time
+- `tactic : <string>` tactic applied to the goal
+- `children : NODE[]` associated sub-nodes
+
+For instance, here is typical output of a JSON stats:
+
+```json
+  [{
+    "file": "lib.mlw", "library": "lib",
+    "children": [{
+        "theory": "CompatibleOrder", "line": 14,
+        "children": [{
+            "goal": "ordered_inv",
+            "status": "Valid (35ms) (alt-ergo)",
+            "location": { "line": 163, "end_line": 165, "column": 21, "end_column": 46 },
+            "tactic": "split_vc",
+            "children": [
+              {
+                "location": { "line": 163, "column": 25, "end_column": 51 },
+                "prover": "alt-ergo", "time": 0.035
+              },
+              {
+                "location": { "line": 164, "column": 65, "end_column": 79 },
+                "prover": "alt-ergo", "time": 0.05
+              }
+            ]
+          }]
+      }]
+  }, …]
+```
 
 ## Package Documentation
 
 The `why3find doc` command is used to build HTML documentation for the package.
 It can be used for the entire package or only a selection of source files or
-directories. Unless specified, generated files go to the `html` sub-directory
+directories. Unless specified, generated files go to the `html` subdirectory
 of the root package directory:
 
     $ why3find doc PATH...
@@ -458,6 +576,9 @@ documentation comments. The following documentation snippets show examples:
     Text with *emphasis* or **bold**.
     Can also use _emphasis_ or __bold__.
     Source `code`.
+    Maths $e=mc^2$ (via online KaTeX).
+    Equations:
+    $$ \int_a^b f$$
 
     Itemized lists:
       - item A
@@ -489,12 +610,12 @@ Section delimiters can have various format:
 
 Actually, `(*proof*)…(*qed*)` is a shortcut for `(*[Proof]-*)…(*/[Qed]*)`.
 Nested sections are allowed. Notice also that sections are authorized to overlap
-code's nested parentheses, although it is not recommended to do so for readability
+code's nested parentheses, although it is not recommended doing so for readability
 reason. For instance `(*proof*) begin (*qed*) end` is valid,
 but makes the generated documentation difficult to read.
 
 *Cloned Modules and Theories* sections are automatically inserted for clones, with
-a copy of the cloned symbols signature, and links to their original definitions.
+the signature of the cloned symbols and links to their original definitions.
 
 *Proof Results* based on proof certificates generated by `why3find prove`
 are also inserted after each goal identifier. Proof summaries are also inserted
@@ -565,7 +686,7 @@ options corresponding to the project configuration and from the `why3find
 extract` command line. Moreover, the `why3find extract` command also generates a
 `dune` file for compiling and installing the library of extracted OCaml code.
 
-You shall specify the the list of Why3 modules (`MODULE`) to be extracted on the
+You shall specify the list of Why3 modules (`MODULE`) to be extracted on the
 command line, as follows:
 
     why3find extract MODULE...
@@ -582,20 +703,20 @@ extracted one, as a separated `dune` library.
 
 ## Why3 Development Utilities
 
-For Why3 and Why3 plug-ins developers, Why3find also provides an utility
+For Why3 and Why3 plug-ins developers, Why3find also provides a utility
 to print the internal representations of theories and modules:
 
     why3find print [FILES...]  # pretty print modules and theories
 
-The printer provide the following information:
+The printer provides the following information:
  - structure of declarations and scopes
  - identifiers with their unique hash-consing tags
  - cloning instance tables
 
 ## References
 
-« [Packaging proofs with Why3find](https://cea.hal.science/hal-04407129v1) »
+[Packaging proofs with Why3find](https://cea.hal.science/hal-04407129v1)
 L. Correnson, CEA-LIST, JFLA 2024
 
-« [Why3 — Where Programs Meet Provers](https://inria.hal.science/hal-00789533) »
+[Why3 — Where Programs Meet Provers](https://inria.hal.science/hal-00789533)
 J-C. Filliâtre, A. Paskevich, INRIA, ESOP 2021

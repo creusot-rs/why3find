@@ -1,0 +1,6 @@
+{
+  "5.0.0": "https://github.com/Z3Prover/z3/releases/download/z3-5.0.0/z3-5.0.0-arm64-glibc-2.38.zip#z3-5.0.0-arm64-glibc-2.38/bin/z3",
+  "4.16.0": "https://github.com/Z3Prover/z3/releases/download/z3-4.16.0/z3-4.16.0-arm64-glibc-2.38.zip#z3-4.16.0-arm64-glibc-2.38/bin/z3",
+  "4.15.8": "https://github.com/Z3Prover/z3/releases/download/z3-4.15.8/z3-4.15.8-arm64-glibc-2.38.zip#z3-4.15.8-arm64-glibc-2.38/bin/z3",
+  "4.13.4": "https://github.com/Z3Prover/z3/releases/download/z3-4.13.4/z3-4.13.4-arm64-glibc-2.34.zip#z3-4.13.4-arm64-glibc-2.34/bin/z3"
+}

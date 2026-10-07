@@ -58,10 +58,30 @@ let progress msg =
            String.sub msg 0 (max 0 (width - 3))
     ) (Format.formatter_of_buffer buffer) msg
 
+let killline () =
+  Format.pp_print_flush Format.std_formatter () ;
+  Format.pp_print_flush Format.err_formatter () ;
+  if escape_codes Unix.stdout then Printf.printf "\r\027[F\027[K%!"
+
 let flush () =
   Format.pp_print_flush Format.std_formatter () ;
   Format.pp_print_flush Format.err_formatter () ;
   if escape_codes Unix.stdout then Printf.printf "\r\027[K%!"
+
+let hline () =
+  let width = Option.value (Terminal_size.get_columns ()) ~default:80 in
+  Format.printf "%s@." (String.make width '-')
+
+let ask ?(default="") msg =
+  flush () ;
+  Format.print_string "> " ;
+  Format.kfprintf
+    (fun fmt ->
+       Format.pp_print_char fmt ' ' ;
+       Format.pp_print_flush fmt () ;
+       let resp = read_line () in
+       if resp = "" then default else resp
+    ) Format.std_formatter msg
 
 let nop _ = ()
 
@@ -141,7 +161,7 @@ let rec iterpath ?(enter=ignore) ?(file=ignore) ?(leave=ignore)
 let rmpath p = iterpath ~file:Sys.remove ~leave:Sys.rmdir p
 
 let rec mkdirs = function
-  | "/" | "." -> ()
+  | "" | "." | ".." | "/" -> ()
   | path ->
     if not (Sys.file_exists path) then
       begin
@@ -149,11 +169,23 @@ let rec mkdirs = function
         Sys.mkdir path 0o755 ;
       end
 
-let copy ~src ~tgt =
-  mkdirs (F.dirname tgt) ;
+let rec rmdirs = function
+  | "" | "." | ".." | "/" -> ()
+  | path ->
+    if Sys.file_exists path
+    && Sys.is_directory path
+    && Array.length (Sys.readdir path) = 0
+    then
+      begin
+        Sys.rmdir path ;
+        rmdirs @@ Filename.dirname path ;
+      end
+
+let copy ~source ~target =
+  mkdirs (F.dirname target) ;
   let buffer = Bytes.create 2048 in
-  let inc = open_in src in
-  let out = open_out tgt in
+  let inc = open_in source in
+  let out = open_out target in
   let rec walk () =
     let n = Stdlib.input inc buffer 0 (Bytes.length buffer) in
     if n > 0 then
@@ -162,7 +194,7 @@ let copy ~src ~tgt =
 
 let rec lookup ~dir ~file ~path =
   match dir with
-  | "/" | "." -> None
+  | "" | "." | ".." | "/" -> None
   | _ ->
     if Sys.file_exists (F.concat dir file)
     then Some (dir,path)
@@ -246,6 +278,14 @@ let output ~file fn =
   with exn -> close_out out ; raise exn
 
 (* -------------------------------------------------------------------------- *)
+(* --- File Access Time Utilities                                         --- *)
+(* -------------------------------------------------------------------------- *)
+
+let outdated ~source ~target =
+  try (Unix.stat source).st_mtime > (Unix.stat target).st_mtime
+  with _ -> true
+
+(* -------------------------------------------------------------------------- *)
 (* --- Time Utilities                                                     --- *)
 (* -------------------------------------------------------------------------- *)
 
@@ -268,16 +308,14 @@ let round t =
 let pp_rtime fmt t =
   if t < 1e-3 then Format.fprintf fmt "%3dns" (int_of_float @@ t *. 1e6) else
   if t < 1.0 then Format.fprintf fmt "%3dms" (int_of_float @@ t *. 1e3) else
-  if t < 20.0 then Format.fprintf fmt "%4.1fs" t else
-  if t < 60.0 then Format.fprintf fmt "%4ds" (int_of_float t) else
+  if t < 60.0 then Format.fprintf fmt "%4.1fs" t else
   if t < 3600.0 then Format.fprintf fmt "%2dmin" (int_of_float @@ t /. 60.0) else
     Format.fprintf fmt "%3dh" (int_of_float @@ t /. 3600.0)
 
 let pp_atime fmt t =
   if t < 1e-3 then Format.fprintf fmt "%dns" (int_of_float @@ t *. 1e6) else
   if t < 1.0 then Format.fprintf fmt "%dms" (int_of_float @@ t *. 1e3) else
-  if t < 20.0 then Format.fprintf fmt "%.1fs" t else
-  if t < 60.0 then Format.fprintf fmt "%ds" (int_of_float t) else
+  if t < 60.0 then Format.fprintf fmt "%.1fs" t else
   if t < 3600.0 then Format.fprintf fmt "%dmin" (int_of_float @@ t /. 60.0) else
     Format.fprintf fmt "%dh" (int_of_float @@ t /. 3600.0)
 
@@ -292,20 +330,29 @@ let pp_delta fmt t =
 let pa_time s =
   let n = String.length s in
   if String.ends_with ~suffix:"min" s then
-    60.0 *. (float @@ int_of_string @@ String.sub s 0 (n-3))
+    60.0 *. (float_of_string @@ String.sub s 0 (n-3))
   else
   if n > 1 then
     match s.[n-1] with
-    | 'h' -> 3600.0 *. (float @@ int_of_string @@ String.sub s 0 (n-1))
+    | 'h' -> 3600.0 *. (float_of_string @@ String.sub s 0 (n-1))
     | 's' ->
       begin
         match s.[n-2] with
-        | 'm' -> 1.e-3 *. (float @@ int_of_string @@ String.sub s 0 (n-2))
-        | 'n' -> 1.e-6 *. (float @@ int_of_string @@ String.sub s 0 (n-2))
-        | _ -> float @@ int_of_string @@ String.sub s 0 (n-1)
+        | 'm' -> 1.e-3 *. (float_of_string @@ String.sub s 0 (n-2))
+        | 'n' -> 1.e-6 *. (float_of_string @@ String.sub s 0 (n-2))
+        | _ -> float_of_string @@ String.sub s 0 (n-1)
       end
     | _ -> float_of_string s
   else float_of_string s
+
+let pp_percent fmt q =
+  if q > 1.0 then Format.fprintf fmt "100%%" else
+  if q < 0.01 then
+    let n = Float.(to_int @@ round (1000.0 *. q)) in
+    Format.fprintf fmt "0.%d%%" n
+  else
+    let c = Float.(to_int @@ round (100.0 *. q)) in
+    Format.fprintf fmt "%d%%" c
 
 (* -------------------------------------------------------------------------- *)
 (* --- Pretty Printing                                                    --- *)

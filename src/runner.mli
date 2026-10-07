@@ -51,7 +51,7 @@ val notify : Why3.Whyconf.main -> Prover.prover -> Result.t -> callback -> unit
 val memlimit : Why3.Whyconf.main -> int
 
 val set_jobs : int -> unit
-val get_jobs : Why3.Whyconf.main -> int
+val get_jobs : unit -> int
 
 val pending : unit -> int
 val running : unit -> int
