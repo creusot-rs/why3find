@@ -106,12 +106,17 @@ div.dashboard {
   display: flex;
   flex-flow: wrap;
   width: 100%;
+  margin-bottom: 1cm;
 }
 
 div.tab {
   margin-left: 2cm;
   margin-right: 2cm;
-  margin-bottom: 1cm;
+}
+
+div.tab.treemap {
+  margin-left: 1.4cm;
+  margin-right: 0cm;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -119,8 +124,9 @@ div.tab {
 /* -------------------------------------------------------------------------- */
 
 pre.stats {
-  color: gray;
   width: auto;
+  color: gray;
+  cursor: default;
   font-size: smaller;
   margin-left: 0.5cm;
   margin-right: 0px;

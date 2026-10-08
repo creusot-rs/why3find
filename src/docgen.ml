@@ -1279,55 +1279,105 @@ let process_markdown ~wenv ~henv ~senv ~out:dir ~title ~package_url file =
 (* --- Printing Stats Utilities                                           --- *)
 (* -------------------------------------------------------------------------- *)
 
-let pp_occurs fmt n = if n > 1 then Format.fprintf fmt " %d" n
 let pp_count fmt n = Format.fprintf fmt "%4d" n
 let pp_partial fmt (p,n) = Format.fprintf fmt "%d/%d" p n
 let pp_title title pp fmt x =
   Format.fprintf fmt "<span title=\"%s\">%a</span>" title pp x
 
 (* -------------------------------------------------------------------------- *)
+(* --- Computing Statistics                                               --- *)
+(* -------------------------------------------------------------------------- *)
+
+let total_stats sources =
+  let ps = Proofstats.create () in
+  List.iter
+    (fun (_,s) ->
+       match s with
+       | None -> ()
+       | Some (src : Docref.source) -> Proofstats.add_strategy ps src.strategy
+    ) sources ; ps
+
+let process_statistics out ?complete ps =
+  let total = Proofstats.total ps in
+  if total > 0 then
+    begin
+      Pdoc.printf out
+        "<h1>Statistics</h1>@\n\
+         <pre class=stats>@\n" ;
+      let w = ref 0 in
+      let wsize a _ = w := max !w (String.length a) in
+      let proved = Proofstats.proved ps in
+      let depth = Proofstats.depth ps in
+      let time = Proofstats.time ps in
+      let timeout = Proofstats.timeout ps in
+      if proved = total then wsize "Proved" ()
+      else if proved = 0 then wsize "No Proofs" ()
+      else wsize "Partial xxxx/" () ;
+      Proofstats.iter_provers wsize ps ;
+      Proofstats.iter_tactics wsize ps ;
+      if proved = total then
+        Pdoc.printf out "<b>%a</b>   (%a)" (Utils.pp_left !w) "Proved"
+          (pp_title "Total goals (all proved)" pp_count) proved
+      else if proved > 0 then
+        Pdoc.printf out "<b class=warning>%a</b>   (%a)"
+          (Utils.pp_left (!w - 5)) "Partial"
+          (pp_title "Proved/Total goals" pp_partial) (proved,total)
+      else
+        Pdoc.printf out "<b class=error>No Proofs</b>   (%a)"
+          (pp_title "Total goals (none proved)" Format.pp_print_int) total ;
+      if time > 1e-3 then Pdoc.printf out " (%a)"
+          (pp_title "Cumulated time" Utils.pp_rtime) time ;
+      if timeout > 1e-3 then Pdoc.printf out " (%a)"
+          (pp_title "Maximal prover time" Utils.pp_time) timeout ;
+      if depth > 0 then Pdoc.printf out " (depth %a)"
+          (pp_title "Maximal depth" Format.pp_print_int) depth ;
+      Option.iter
+        (fun qs ->
+           let ctime = Proofstats.time qs in
+           if 1e-3 < time && time <= ctime then
+             Pdoc.printf out " (%a)"
+               (pp_title "Part of project" Utils.pp_percent)
+               (time /. ctime)
+        ) complete ;
+      Pdoc.printf out "@\n@\n" ;
+      Proofstats.iter_provers
+        (fun prv s ->
+           Pdoc.printf out "- <b>%a</b> (%a) (%a) (%a — %a — %a)@\n"
+             (Utils.pp_left !w) prv (pp_title "Proved goals" pp_count) (Stats.count s)
+             (pp_title "Cumulated time" Utils.pp_rtime) (Stats.sum s)
+             (pp_title "Minimum time" Utils.pp_rtime) (Stats.min s)
+             (pp_title "Average time" Utils.pp_rtime) (Stats.average s)
+             (pp_title "Maximal time" Utils.pp_rtime) (Stats.max s)
+        ) ps ;
+      Proofstats.iter_tactics
+        (fun tac n ->
+           Pdoc.printf out "- <b>%a</b> (%a)@\n"
+             (Utils.pp_left !w) tac (pp_title "Tactic occurrences" pp_count) n
+        ) ps ;
+      Pdoc.printf out "</pre>@." ;
+    end
+
+(* -------------------------------------------------------------------------- *)
 (* --- Generating Global Treemaps                                         --- *)
 (* -------------------------------------------------------------------------- *)
 
-let process_source_treemap out (src : Docref.source) ps =
+let process_source_treemap out ~complete (src : Docref.source) =
   let stats = src.local in
   if not @@ Proofstats.is_empty stats then
     begin
-      let qs = Proofstats.create () in
-      Proofstats.add_strategy qs src.strategy ;
-      let total = Proofstats.total qs in
-      let proved = Proofstats.proved qs in
-      let time = Proofstats.time qs in
-      let percent = time /. Proofstats.time ps in
+      let ps = Proofstats.create () in
+      Proofstats.add_strategy ps src.strategy ;
+      Pdoc.printf out "<div class=doc>" ;
+      process_statistics out ~complete ps ;
+      Pdoc.printf out "</div>@\n" ;
+      let id = Printf.sprintf "treemap-%d" (Pdoc.treemap out) in
       Pdoc.printf out
-        "<div class=doc><h1 id=\"proof-stats\">Statistics</h1>@\n<pre class=stats>" ;
-      if proved = total then
-        Pdoc.printf out "<b>Proved</b> (%a)"
-          (pp_title "Total goals (all proved)" Format.pp_print_int) proved
-      else if proved > 0 then
-        Pdoc.printf out "<b class=warning>Partial</b> (%a)"
-          (pp_title "Proved/Total goals" pp_partial) (proved,total) ;
-      Proofstats.iter_provers
-        (fun prv s ->
-           Pdoc.printf out
-             " <span title=\"Total %a | Range %a - %a - %a\">(%s%a)</span>"
-               Utils.pp_rtime (Stats.sum s)
-               Utils.pp_rtime (Stats.min s)
-               Utils.pp_rtime (Stats.average s)
-               Utils.pp_rtime (Stats.max s)
-               prv pp_occurs (Stats.count s)
-        ) qs ;
-      Pdoc.printf out " (%a)" (pp_title "Cumulated time" Utils.pp_time) time ;
-      Pdoc.printf out " (%a)" (pp_title "Of total time" Utils.pp_percent) percent ;
-      Pdoc.printf out "</pre>@\n</div>@\n" ;
-      let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
-      Pdoc.printf out
-        "<div class=dashboard>@\n<div class=tab>@\n\
-         <div class=treemap id=\"%s\"></div>@\n\
+        "<div class=dashboard>@\n@\n\
+         <div class=\"tab treemap\" id=\"%s\"></div>@\n\
          <script type=\"text/javascript\" defer>\
          Why3findTreemap('#%s',800,400, %a );\
          </script>@\n\
-         </div>@\n</div>@."
+         </div>@."
         id id Json.pretty stats.json ;
     end
 
@@ -1341,14 +1391,12 @@ let process_global_treemap out sources =
       ) sources in
   if not @@ Proofstats.is_empty stats then
     begin
-      let id = Printf.sprintf "stats-%d" (Pdoc.treemap out) in
+      let id = Printf.sprintf "treemap-%d" (Pdoc.treemap out) in
       Pdoc.printf out
-        "<div class=tab>@\n\
-         <div class=treemap id=\"%s\"></div>@\n\
+        "<div class=\"tab treemap\" id=\"%s\"></div>@\n\
          <script type=\"text/javascript\" defer>\
          Why3findTreemap('#%s',800,400,{ children: %a });\
-         </script>@\n\
-         </div>@."
+         </script>@\n"
         id id Json.pretty stats.json ;
     end
 
@@ -1395,72 +1443,10 @@ let process_source ~wenv ~henv ~senv ~out:dir ~package_url ~title file
     Pdoc.printf crc "<div class=doc><h1>Proofs</h1></div>@\n" ;
     Pdoc.flush crc ;
     parse env ;
-    if treemaps then process_source_treemap out env.src ps ;
+    if treemaps then process_source_treemap out ~complete:ps env.src ;
     Pdoc.close_all out ;
     Pdoc.close_all crc ;
   end
-
-(* -------------------------------------------------------------------------- *)
-(* --- Computing Statistics                                               --- *)
-(* -------------------------------------------------------------------------- *)
-
-let total_stats sources =
-  let ps = Proofstats.create () in
-  List.iter
-    (fun (_,s) ->
-       match s with
-       | None -> ()
-       | Some (src : Docref.source) -> Proofstats.add_strategy ps src.strategy
-    ) sources ; ps
-
-let process_statistics out ps =
-  let total = Proofstats.total ps in
-  if total > 0 then
-    begin
-      Pdoc.printf out
-        "<h1>Statistics</h1>@\n\
-         <pre class=stats>@\n" ;
-      let w = ref 0 in
-      let wsize a _ = w := max !w (String.length a) in
-      let proved = Proofstats.proved ps in
-      let depth = Proofstats.depth ps in
-      let time = Proofstats.time ps in
-      if proved = total then wsize "Proved" ()
-      else if proved = 0 then wsize "No Proofs" ()
-      else wsize "Partial xxxx/" () ;
-      Proofstats.iter_provers wsize ps ;
-      Proofstats.iter_tactics wsize ps ;
-      if proved = total then
-        Pdoc.printf out "<b>%a</b>   (%a)" (Utils.pp_left !w) "Proved"
-          (pp_title "Total goals (all proved)" pp_count) proved
-      else if proved > 0 then
-        Pdoc.printf out "<b class=warning>%a</b>   (%a)"
-          (Utils.pp_left (!w - 5)) "Partial"
-          (pp_title "Proved/Total goals" pp_partial) (proved,total)
-      else
-        Pdoc.printf out "<b class=error>No Proofs</b>   (%a)"
-          (pp_title "Total goals (none proved)" Format.pp_print_int) total ;
-      if time > 1e-3 then Pdoc.printf out " (%a)"
-          (pp_title "Cumulated time" Utils.pp_rtime) time ;
-      if depth > 0 then Pdoc.printf out " (depth %a)"
-          (pp_title "Maximal depth" Format.pp_print_int) depth ;
-      Pdoc.printf out "@\n@\n" ;
-      Proofstats.iter_provers
-        (fun prv s ->
-           Pdoc.printf out "- <b>%a</b> (%a) (%a) (%a — %a — %a)@\n"
-             (Utils.pp_left !w) prv (pp_title "Proved goals" pp_count) (Stats.count s)
-             (pp_title "Cumulated time" Utils.pp_rtime) (Stats.sum s)
-             (pp_title "Minimum time" Utils.pp_rtime) (Stats.min s)
-             (pp_title "Average time" Utils.pp_rtime) (Stats.average s)
-             (pp_title "Maximal time" Utils.pp_rtime) (Stats.max s)
-        ) ps ;
-      Proofstats.iter_tactics
-        (fun tac n ->
-           Pdoc.printf out "- <b>%a</b> (%a)@\n"
-             (Utils.pp_left !w) tac (pp_title "Tactic occurrences" pp_count) n
-        ) ps ;
-      Pdoc.printf out "</pre>@." ;
-    end
 
 (* -------------------------------------------------------------------------- *)
 (* --- Generating Index                                                   --- *)

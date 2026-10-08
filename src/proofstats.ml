@@ -14,6 +14,7 @@ type pstats = {
   mutable failed : int ;
   mutable proved : int ;
   mutable time : float ;
+  mutable timeout : float ;
   mutable depth : int ;
   tactics : (string,int) Hashtbl.t ;
   provers : (string,Stats.stats) Hashtbl.t ;
@@ -23,6 +24,7 @@ let create () = {
   failed = 0 ;
   proved = 0 ;
   time = 0.0 ;
+  timeout = 0.0 ;
   depth = 0 ;
   tactics = Hashtbl.create 0 ;
   provers = Hashtbl.create 0 ;
@@ -33,6 +35,7 @@ let rec add_crc ps (crc : Crc.crc) =
   | Stuck -> ps.failed <- succ ps.failed
   | Prover (p,_,t) ->
     ps.time <- t +. ps.time;
+    ps.timeout <- max t ps.timeout;
     ps.proved <- succ ps.proved ;
     let s =
       try Hashtbl.find ps.provers p with Not_found ->
@@ -40,7 +43,7 @@ let rec add_crc ps (crc : Crc.crc) =
         Hashtbl.add ps.provers p s ; s
     in Stats.add s t
   | Tactic { id ; children ; depth } ->
-    ps.depth <- max ps.depth depth ;
+    ps.depth <- max ps.depth (succ depth) ;
     let n = try Hashtbl.find ps.tactics id with Not_found -> 0 in
     Hashtbl.replace ps.tactics id (succ n) ;
     List.iter (add_crc ps) children
@@ -53,6 +56,7 @@ let failed ps = ps.failed
 let proved ps = ps.proved
 let total ps = ps.failed + ps.proved
 let time ps = ps.time
+let timeout ps = ps.timeout
 let depth ps = ps.depth
 
 let iter f hs =

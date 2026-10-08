@@ -14,6 +14,7 @@ val failed : pstats -> int
 val proved : pstats -> int
 val total : pstats -> int
 val time : pstats -> float
+val timeout : pstats -> float
 val depth : pstats -> int
 val iter_tactics:  (string -> int -> unit) -> pstats -> unit
 val iter_provers : (string -> Stats.stats -> unit) -> pstats -> unit
