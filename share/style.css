@@ -124,7 +124,7 @@ div.tab.treemap {
 /* -------------------------------------------------------------------------- */
 
 pre.stats {
-  width: auto;
+  width: fit-content;
   color: gray;
   cursor: default;
   font-size: smaller;

@@ -1316,11 +1316,11 @@ let process_statistics out ?complete ps =
       Proofstats.iter_provers wsize ps ;
       Proofstats.iter_tactics wsize ps ;
       if proved = total then
-        Pdoc.printf out "<b>%a</b>   (%a)" (Utils.pp_left !w) "Proved"
+        Pdoc.printf out "<b>%a</b> (%a)" (Utils.pp_left !w) "Proved"
           (pp_title "Total goals (all proved)" pp_count) proved
       else if proved > 0 then
-        Pdoc.printf out "<b class=warning>%a</b>   (%a)"
-          (Utils.pp_left (!w - 5)) "Partial"
+        Pdoc.printf out "<b class=warning>%a</b> (%a)"
+          (Utils.pp_left (!w-3)) "Partial"
           (pp_title "Proved/Total goals" pp_partial) (proved,total)
       else
         Pdoc.printf out "<b class=error>No Proofs</b>   (%a)"
@@ -1339,10 +1339,10 @@ let process_statistics out ?complete ps =
                (pp_title "Part of project" Utils.pp_percent)
                (time /. ctime)
         ) complete ;
-      Pdoc.printf out "@\n@\n" ;
+      Pdoc.printf out "<hr/>" ;
       Proofstats.iter_provers
         (fun prv s ->
-           Pdoc.printf out "- <b>%a</b> (%a) (%a) (%a — %a — %a)@\n"
+           Pdoc.printf out "<b>%a</b> (%a) (%a) (%a — %a — %a)@\n"
              (Utils.pp_left !w) prv (pp_title "Proved goals" pp_count) (Stats.count s)
              (pp_title "Cumulated time" Utils.pp_rtime) (Stats.sum s)
              (pp_title "Minimum time" Utils.pp_rtime) (Stats.min s)
@@ -1351,7 +1351,7 @@ let process_statistics out ?complete ps =
         ) ps ;
       Proofstats.iter_tactics
         (fun tac n ->
-           Pdoc.printf out "- <b>%a</b> (%a)@\n"
+           Pdoc.printf out "<b>%a</b> (%a)@\n"
              (Utils.pp_left !w) tac (pp_title "Tactic occurrences" pp_count) n
         ) ps ;
       Pdoc.printf out "</pre>@." ;
