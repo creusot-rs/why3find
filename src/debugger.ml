@@ -597,9 +597,9 @@ let cc_file adapter project gnames file =
       (Session.theories session)
   with Why3.Loc.Located(loc,exn) ->
     let file,line,_,_,_ = Why3.Loc.get loc in
-    Dap.output adapter ~category:`important
-      "@{<red>Error:@} %s:%d:@\n%a@."
-      file line Why3.Exn_printer.exn_printer exn ;
+    Dap.output adapter ~category:`stderr "%s:%d:@." file line ;
+    Dap.output adapter ~category:`important "Why3 Error (%a)"
+      Why3.Exn_printer.exn_printer exn ;
     Fibers.return ()
 
 let files = ref []
