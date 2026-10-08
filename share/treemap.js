@@ -87,7 +87,8 @@ function Why3findTreemap(id, width, height, data) {
 
   // Append a color rectangle.
   leaf.append("rect")
-    .attr("fill", d => d.data.stuck ? 'red' : color(d.data.path))
+    .attr("fill", d => d.data.stuck ? 'red' :
+      color(d.data.cluster || d.data.path))
     .attr("fill-opacity", d => d.data.stuck ? 1 : 0.4)
     .attr("width", d => d.x1 - d.x0)
     .attr("height", d => d.y1 - d.y0);

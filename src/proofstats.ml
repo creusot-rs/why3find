@@ -126,12 +126,14 @@ let jmap f xs =
     json = Json.list js ;
   }
 
+let jfield fields name = name, try List.assoc name fields with Not_found -> `Null
+
 let jnode (fields : (string * Json.t) list) =
   match List.assoc "children" fields with
   | `List cs as children when cs <> [] ->
-    let goal = try List.assoc "goal" fields with Not_found -> `Null in
-    let path = try List.assoc "path" fields with Not_found -> `Null in
-    Json.assoc [ "goal", goal ; "path", path ; "children" , children ]
+    Json.assoc @@
+    List.map (jfield fields) ["goal" ; "path" ; "cluster"]
+    @ ["children",children]
   | _ | exception Not_found -> Json.assoc fields
 
 type lense = {
@@ -157,13 +159,14 @@ let bind env ?goal id children =
     | g::gs , c::cs -> (k,Some g,c) :: pairwise (succ k) gs cs
   in pairwise 0 goals children
 
-let rec stats_crc env ~file ~url ~path ~name ~onStuck (k,goal,crc) : Json.t =
+let rec stats_crc env ~file ~url ~cluster ~path ~name ~onStuck (k,goal,crc) : Json.t =
   let loc = Option.bind goal Session.target in
   let path = Printf.sprintf "%s.%d" path (succ k) in
   let status = Format.asprintf "%a" Crc.pp_hint crc in
   let base = [
     "url" , jurl_loc ~file ~url ~name loc ;
     "path" , `String path ;
+    "cluster", `String cluster ;
     "status" , `String status ;
     "location" , jsloc ~file loc ;
   ] in
@@ -186,7 +189,7 @@ let rec stats_crc env ~file ~url ~path ~name ~onStuck (k,goal,crc) : Json.t =
         "proved" , Json.optint proved ;
         "tactic" , `String id ;
         "children" , Json.list_map
-          (stats_crc env ~file ~url ~path ~name ~onStuck)
+          (stats_crc env ~file ~url ~path ~cluster ~name ~onStuck)
           (bind env ?goal id children) ;
       ]
   in jnode (base @ stats)
@@ -195,7 +198,9 @@ let stats_goal proofs ?subgoals ?lenses ?onStuck ~file ~path ~url (goal : Sessio
   let name = Session.name goal in
   let crc = Why3.Wstdlib.Mstr.find_def Crc.stuck name proofs in
   let infix = Id.of_infix @@ name in
+  let root = path in
   let path = Printf.sprintf "%s.%s" path infix in
+  let cluster = if subgoals = None then root else path in
   let status = Format.asprintf "%a" Crc.pp_hint crc in
   let loc = Session.target goal in
   begin
@@ -204,10 +209,11 @@ let stats_goal proofs ?subgoals ?lenses ?onStuck ~file ~path ~url (goal : Sessio
     | Some lenses , Some loc ->
       let f,line,_,_,_ = Why3.Loc.get loc in
       if f = file then Hashtbl.add lenses line { goal = path ; status }
-    end ;
+  end ;
   let base = [
     "goal" , `String name ;
     "path" , `String path ;
+    "cluster", `String cluster ;
     "url" , jurl_loc ~file ~url ~name loc ;
     "status", `String status ;
     "location", jsloc ~file loc ;
@@ -234,7 +240,7 @@ let stats_goal proofs ?subgoals ?lenses ?onStuck ~file ~path ~url (goal : Sessio
     let children =
       match subgoals with None -> `Null | Some env ->
         Json.list_map
-          (stats_crc env ~url ~file ~path ~name ~onStuck)
+          (stats_crc env ~url ~file ~cluster:path ~path ~name ~onStuck)
           (bind env ~goal id children)
     in {
       json = jnode @@ base @ [

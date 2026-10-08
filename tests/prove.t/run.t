@@ -48,6 +48,7 @@
               {
                 "goal": "Add.com",
                 "path": "foo.T.Add.com",
+                "cluster": "foo.T",
                 "url": "foo.T.html#_L3",
                 "status": "Valid (alt-ergo)",
                 "location": { "line": 3, "column": 14, "end_column": 41 },
@@ -57,6 +58,7 @@
               {
                 "goal": "Mul.com",
                 "path": "foo.T.Mul.com",
+                "cluster": "foo.T",
                 "url": "foo.T.html#_L3",
                 "status": "Valid (alt-ergo)",
                 "location": { "line": 3, "column": 14, "end_column": 41 },
