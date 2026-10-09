@@ -1,7 +1,7 @@
 function Why3findTreemap(id, width, height, data) {
 
   // Color scale.
-  const color = d3.scaleOrdinal(d3.schemeAccent);
+  const color = d3.scaleOrdinal(d3.schemeDark2);
 
   // Treemap layout.
   const root = d3.treemap()
