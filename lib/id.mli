@@ -70,16 +70,33 @@ val pp_ahref :
 val pp_proof_aname : Format.formatter -> id -> unit
 val pp_proof_ahref : Format.formatter -> id -> unit
 
+(* -------------------------------------------------------------------------- *)
+(* --- Declaration Resolution                                             --- *)
+(* -------------------------------------------------------------------------- *)
+
+type kind =
+  | KType (* abstract type *)
+  | KLogic (* constant, function of predicate *)
+  | KAxiom (* hypothesis *)
+  | KParam (* non-constrained val *)
+  | KValue (* constrained val *)
+  | KUnsafe
+
+val kind_of_expr : Why3.Expr.expr -> kind option
+val kind_of_cexp : Why3.Expr.cexp -> kind option
+
 type decl =
-  | Type of Why3.Ty.tysymbol * Why3.Decl.constructor list
-  | Logic of Why3.Term.lsymbol
-  | Var of Why3.Ity.pvsymbol
-  | Let of Why3.Expr.rsymbol
-  | Exn of Why3.Ity.xsymbol
-  | Axiom of Why3.Decl.prsymbol
-  | Lemma of Why3.Decl.prsymbol
-  | Goal of Why3.Decl.prsymbol
+| Type of Why3.Ty.tysymbol * Why3.Decl.constructor list
+| Logic of Why3.Term.lsymbol * bool
+| Inductive of Why3.Decl.ind_sign * Why3.Term.lsymbol
+| Letv of Why3.Ity.pvsymbol * Why3.Expr.expr
+| Letr of Why3.Expr.rsymbol * Why3.Expr.cexp
+| Exn of Why3.Ity.xsymbol
+| Axiom of Why3.Decl.prsymbol
+| Lemma of Why3.Decl.prsymbol
+| Goal of Why3.Decl.prsymbol
 
 val find : Why3.Theory.theory -> t -> decl
+val is_parameter : decl -> bool
 
 (* -------------------------------------------------------------------------- *)

@@ -127,9 +127,8 @@ let add_symbol doc id =
     let kind : Lspserver.kind =
       match Docref.find_decl doc.project.env doc.src id with
       | Type _ -> `TypeParameter
-      | Logic _ -> `Function
-      | Var _ -> `Variable
-      | Let _ -> `Method
+      | Logic _ | Inductive _ -> `Function
+      | Letv _ | Letr _ -> `Method
       | Exn _ -> `Event
       | Id.Axiom _ | Id.Lemma _ | Id.Goal _ -> `Property in
     frame doc (Id.name id) kind ;

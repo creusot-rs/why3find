@@ -249,18 +249,150 @@ let pp_proof_ahref fmt r =
   pp_proof_aname fmt r
 
 (* -------------------------------------------------------------------------- *)
+(* --- Declaration Kind                                                   --- *)
+(* -------------------------------------------------------------------------- *)
+
+type kind =
+  | KType (* abstract type *)
+  | KLogic (* constant, function of predicate *)
+  | KAxiom (* hypothesis *)
+  | KParam (* non-constrained val *)
+  | KValue (* constrained val *)
+  | KUnsafe
+
+
+(* -------------------------------------------------------------------------- *)
+(* --- Definition Kind                                                    --- *)
+(* -------------------------------------------------------------------------- *)
+
+type cany =
+  | Free (* no post *)
+  | Verified (* post with witness of existence *)
+  | Unverified (* post without witness of existence *)
+
+(* Checks that contract of Cany is provable, ie. its pre-condition contains a
+   proof witnessing the existence of a result value that satisfy all
+   post-conditions. This is the only way to distinguish "val" from "let"
+   definitions. *)
+
+let verified ~pre ~post =
+  let module Term = Why3.Term in
+  begin
+    (* compare pre and post *)
+    let instance vr (q : Term.term) p =
+      let q = (* return variable alpha-conversion *)
+        match q.t_node with
+        | Tlet( { t_node = Tvar r },q) when Term.vs_equal r vr -> Term.t_eps q
+        | _ -> Term.t_eps_close vr q
+      in Term.t_equal p q in
+    (* compare pre-condition conjunctions wrt list of post-conditions *)
+    let rec postcond vr (q : Term.term) (ps : Term.term list) =
+      match q.t_node, ps with
+      | _ , [p] -> instance vr q p
+      | Tbinop(Tand,q,qs) , p::ps -> instance vr q p && postcond vr qs ps
+      | _ , _::_ -> false
+      | _ , [] -> true in
+    (* witness proof is the last pre-condition *)
+    let rec witness = function
+      | [] -> Term.t_true
+      | [pre] -> pre
+      | _::ps -> witness ps in
+    let w = witness pre in
+    (* unfold the witness existential *)
+    match w.t_node with
+    | Tquant(Texists,tq) ->
+      let vs,_trigger,pre = Term.t_open_quant tq in
+      begin
+        match vs with
+        | [vret] -> postcond vret pre post
+        | _ -> false
+      end
+    | _ -> false
+  end
+
+let cany (cty: Why3.Ity.cty) : cany =
+  if cty.cty_post = [] && Why3.Ity.Mxs.is_empty cty.cty_xpost
+  then Free else
+  if verified ~pre:cty.cty_pre ~post:cty.cty_post
+  then Verified else Unverified
+
+(* -------------------------------------------------------------------------- *)
+(* --- Sound Expression Check                                             --- *)
+(* -------------------------------------------------------------------------- *)
+
+let rec safe_let_defn (def : Why3.Expr.let_defn) =
+  match def with
+  | LDvar(_,e) -> safe_expr e
+  | LDsym(_,ce) -> safe_cexpr ce
+  | LDrec lts -> List.for_all safe_rec_defn lts
+
+and safe_rec_defn (d : Why3.Expr.rec_defn) = safe_cexpr d.rec_fun
+
+and safe_expr (e : Why3.Expr.expr) =
+  match e.e_node with
+  | Evar _ | Econst _ | Eassign _  | Epure _ | Eabsurd -> true
+  | Eexec (ce, _) -> safe_cexpr ce
+  | Elet(def,e) -> safe_let_defn def && safe_expr e
+  | Eif (a, b, c) -> safe_expr a && safe_expr b && safe_expr c
+  | Ewhile(a,_,_,b) -> safe_expr a && safe_expr b
+  | Efor (_, _, _, _, b) -> safe_expr b
+  | Eraise (_, e) | Eexn (_, e) | Eghost e -> safe_expr e
+  | Eassert ((Assert | Check), _) -> true
+  | Eassert (Assume,_) -> false
+  | Ematch (a, ps, xs) ->
+    safe_expr a &&
+    List.for_all safe_branch ps &&
+    Why3.Ity.Mxs.for_all safe_handler xs
+
+and safe_branch (_,e) = safe_expr e
+and safe_handler _ (_,e) = safe_expr e
+
+and safe_cexpr (ce : Why3.Expr.cexp) =
+  match ce.c_node with
+  | Cfun e -> safe_expr e
+  | Capp _ | Cpur _ -> true
+  | Cany ->
+    match cany ce.c_cty with
+    | Free | Verified -> true | Unverified -> false
+
+let rec kind_of_expr (e : Why3.Expr.expr) =
+  (* looking for top-level Cany definition *)
+  match e.e_node with
+  | Eexec(ce,_) -> kind_of_cexp ce
+  | _ -> if safe_expr e then None else Some KUnsafe
+
+and kind_of_cexp (ce : Why3.Expr.cexp) =
+  match ce.c_node with
+  | Cpur _ | Capp _ -> None
+  | Cfun e -> kind_of_expr e
+  | Cany ->
+    match cany ce.c_cty with
+    | Free -> Some KParam
+    | Unverified -> Some KValue
+    | Verified -> None
+
+(* -------------------------------------------------------------------------- *)
 (* --- Declaration Resolution                                             --- *)
 (* -------------------------------------------------------------------------- *)
 
 type decl =
   | Type of Why3.Ty.tysymbol * Why3.Decl.constructor list
-  | Logic of Why3.Term.lsymbol
-  | Var of Why3.Ity.pvsymbol
-  | Let of Why3.Expr.rsymbol
+  | Logic of Why3.Term.lsymbol * bool
+  | Inductive of Why3.Decl.ind_sign * Why3.Term.lsymbol
+  | Letv of Why3.Ity.pvsymbol * Why3.Expr.expr
+  | Letr of Why3.Expr.rsymbol * Why3.Expr.cexp
   | Exn of Why3.Ity.xsymbol
   | Axiom of Why3.Decl.prsymbol
   | Lemma of Why3.Decl.prsymbol
   | Goal of Why3.Decl.prsymbol
+
+let is_parameter = function
+  | Type({ ts_def = NoDef },[]) -> true | Type _ -> false
+  | Logic(_,def) -> not def
+  | Inductive _ -> false
+  | Letv(_,e) -> kind_of_expr e <> None
+  | Letr(_,c) -> kind_of_cexp c <> None
+  | Exn _ | Axiom _ | Lemma _ | Goal _ -> false
 
 let eq = Why3.Ident.id_equal
 
@@ -272,16 +404,16 @@ let rec find_data id (ds : Why3.Decl.data_decl list) =
   | [] -> raise Not_found
   | (ts,cs) :: ds ->
     if eq id ts.ts_name then Type(ts,cs) else
-      try Logic (find_logic id cs)
+      try Logic (find_logic id cs,true)
       with Not_found -> find_data id ds
 
 let find_decl id (d: Why3.Decl.decl) =
   match d.d_node with
   | Dtype ts when eq id ts.ts_name -> Type(ts,[])
-  | Dparam ls when eq id ls.ls_name -> Logic ls
+  | Dparam ls when eq id ls.ls_name -> Logic(ls,false)
   | Ddata ds -> find_data id ds
-  | Dlogic ds -> Logic (find_logic id ds)
-  | Dind(_,ds) -> Logic (find_logic id ds)
+  | Dlogic ds -> Logic (find_logic id ds,true)
+  | Dind(s,ds) -> Inductive (s,find_logic id ds)
   | Dprop(Paxiom,p,_) -> Axiom p
   | Dprop(Plemma,p,_) -> Lemma p
   | Dprop(Pgoal,_,_) | Dtype _ | Dparam _ -> raise Not_found
@@ -290,7 +422,10 @@ let rec find_letdefs id = function
   | [] -> raise Not_found
   | (d : Why3.Expr.rec_defn) :: ds ->
     let rs = d.rec_sym in
-    if Why3.Ident.id_equal id rs.rs_name then rs else find_letdefs id ds
+    let rd = d.rec_fun in
+    if Why3.Ident.id_equal id rs.rs_name
+    then Letr(rs,rd)
+    else find_letdefs id ds
 
 let find_pdecl id (pd : Why3.Pdecl.pdecl) =
   match pd.pd_node with
@@ -302,9 +437,9 @@ let find_pdecl id (pd : Why3.Pdecl.pdecl) =
           pd.pd_pure
       with None -> raise Not_found | Some d -> d
     end
-  | PDlet (LDvar(x,_)) -> Var x
-  | PDlet (LDsym (s, _)) -> Let s
-  | PDlet (LDrec ds) -> Let (find_letdefs id ds)
+  | PDlet (LDvar(x,def)) -> Letv(x,def)
+  | PDlet (LDsym (s,def)) -> Letr(s,def)
+  | PDlet (LDrec ds) -> find_letdefs id ds
   | PDexn x -> Exn x
 
 let find thy id : decl =

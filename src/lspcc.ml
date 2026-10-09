@@ -202,11 +202,11 @@ let typeof_ty (ty : Why3.Ty.ty) =
 
 let typeof_decl = function
   | Id.Type(ts,_) -> ts
-  | Id.Logic { ls_value = Some result } -> typeof_ty result
-  | Id.Var pv -> typeof_ty pv.pv_vs.vs_ty
-  | Id.Let r -> typeof_ty @@ Why3.Ity.ty_of_ity r.rs_cty.cty_result
+  | Id.Logic({ ls_value = Some result },_) -> typeof_ty result
+  | Id.Letv(pv,_) -> typeof_ty pv.pv_vs.vs_ty
+  | Id.Letr(r,_) -> typeof_ty @@ Why3.Ity.ty_of_ity r.rs_cty.cty_result
   | Id.Exn x -> typeof_ty @@ Why3.Ity.ty_of_ity x.xs_ity
-  | Id.Logic { ls_value = None }
+  | Id.Logic({ ls_value = None },_) | Id.Inductive _
   | Id.Axiom _ | Id.Lemma _ | Id.Goal _ -> raise Not_found
 
 let typedef _channel ~uri (pos : Range.pos) =
@@ -365,7 +365,12 @@ let pp_decl fmt (d : Id.decl) =
     Format.fprintf fmt "@[<hv 2>type %a =" pp_tdecl t ;
     List.iter (pp_constr fmt) cs ;
     Format.fprintf fmt "@]"
-  | Id.Logic ls ->
+  | Id.Inductive(s,ls) ->
+    let kind = match s with Ind -> "inductive" | Coind -> "coinductive" in
+    Format.fprintf fmt "@[<hv 2>%s %a" kind pp_infix ls.ls_name ;
+    List.iter (Format.fprintf fmt "@ %a" pp_subtype) ls.ls_args ;
+    Format.fprintf fmt "@]"
+  | Id.Logic(ls,_) ->
     let kind = if ls.ls_value = None then "predicate" else "function" in
     Format.fprintf fmt "@[<hv 2>%s %a" kind pp_infix ls.ls_name ;
     List.iter (Format.fprintf fmt "@ %a" pp_subtype) ls.ls_args ;
@@ -373,9 +378,9 @@ let pp_decl fmt (d : Id.decl) =
     if ls.ls_proj then Format.fprintf fmt "@ (* field *)" ;
     if ls.ls_constr > 0 then Format.fprintf fmt "@ (* constructor *)" ;
     Format.fprintf fmt "@]"
-  | Id.Var x ->
+  | Id.Letv(x,_) ->
     Format.fprintf fmt "@[<hov 2>val %a@]" pp_vdecl x
-  | Id.Let r ->
+  | Id.Letr(r,_) ->
     begin
       Format.fprintf fmt "@[<hov 2>val " ;
       let kind = Why3.Expr.rs_kind r in
@@ -420,23 +425,30 @@ let code source id =
       with Not_found -> None
     end
 
-let clone source ids =
+let pp_declare source fmt (id,decl) =
+  begin
+    Option.iter
+      (Format.fprintf fmt "@\n  (* %a *)" Crc.pp_hint) (get_proof source id) ;
+    Format.fprintf fmt "@\n  %a" pp_decl decl ;
+  end
+
+let clone source ds =
   let ds =
     List.filter_map
-      (fun id -> try Some (id, find_decl source id) with Not_found -> None) ids in
+      (fun id -> try Some (id, find_decl source id) with Not_found -> None) ds in
   if ds = [] then None else
     context source ~scope:true
       begin fun () ->
         let tt =
           Format.asprintf "scope%t@\nend"
             begin fun fmt ->
-              List.iter
-                (fun (id,decl) ->
-                   Option.iter
-                     (Format.fprintf fmt "@\n  (* %a *)" Crc.pp_hint)
-                     (get_proof source id) ;
-                   Format.fprintf fmt "@\n  %a" pp_decl decl ;
-                ) ds
+              let ps,ds = List.partition (fun (_,d) -> Id.is_parameter d) ds in
+              if ps <> [] then
+                Format.fprintf fmt "@\n  (* Parameters *)" ;
+              List.iter (pp_declare source fmt) ps ;
+              if ds <> [] then
+                Format.fprintf fmt "@\n  (* Definitions *)" ;
+              List.iter (pp_declare source fmt) ds ;
             end
         in Some tt
       end

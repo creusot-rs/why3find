@@ -345,10 +345,10 @@ let process_axioms env (id : Id.id) =
         in
         let cla,title =
           match kind with
-          | Type | Logic | Param -> icon_parameter, "Parameter"
-          | Unsafe -> icon_unsafe, "Unsound Definition"
-          | Value -> cloned_param "Value Parameter"
-          | Axiom -> cloned_param "Hypothesis"
+          | KType | KLogic | KParam -> icon_parameter, "Parameter"
+          | KUnsafe -> icon_unsafe, "Unsound Definition"
+          | KValue -> cloned_param "Value Parameter"
+          | KAxiom -> cloned_param "Hypothesis"
         in
         Pdoc.ppt env.out (pp_mark ~cla ~title)
       | [], Some ext ->
@@ -366,12 +366,12 @@ let process_hypothesis env (s : Soundness.soundness) (p : Axioms.parameter) =
   try
     let id = Id.resolve ~lib:env.src.lib p.name in
     let key = match p.kind with
-      | Type -> "type"
-      | Logic -> "logic"
-      | Param -> "param"
-      | Value -> "value"
-      | Axiom -> "axiom"
-      | Unsafe -> "unsound"
+      | KType -> "type"
+      | KLogic -> "logic"
+      | KParam -> "param"
+      | KValue -> "value"
+      | KAxiom -> "axiom"
+      | KUnsafe -> "unsound"
     in
     let qualif fmt =
       if Axioms.is_unsafe p then
@@ -461,10 +461,10 @@ let unknown =  { free with sound = Soundness.unknown }
 
 let add_axiom hs (p : Axioms.parameter) =
   match p.kind with
-  | Axiom -> { hs with hyp = succ hs.hyp }
-  | Value -> { hs with pvs = succ hs.pvs }
-  | Unsafe -> { hs with unsafe = succ hs.unsafe }
-  | Type | Logic | Param -> { hs with prm = succ hs.prm }
+  | KAxiom -> { hs with hyp = succ hs.hyp }
+  | KValue -> { hs with pvs = succ hs.pvs }
+  | KUnsafe -> { hs with unsafe = succ hs.unsafe }
+  | KType | KLogic | KParam -> { hs with prm = succ hs.prm }
 
 let pp_axioms_link ?href fmt { prm ; hyp ; pvs ; unsafe ; sound } =
   if prm+hyp+pvs+unsafe > 0 then

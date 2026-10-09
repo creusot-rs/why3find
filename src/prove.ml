@@ -317,12 +317,12 @@ let report_parameter ~lib ~signature (prm : Axioms.parameter) =
       begin
         let pp, kind, param =
           match prm.kind with
-          | Type -> Format.pp_print_string,"type ", parameters
-          | Logic -> Format.pp_print_string,"logic", parameters
-          | Param -> Format.pp_print_string,"param", parameters
-          | Value -> Format.pp_print_string,"value", procedures
-          | Axiom -> Format.pp_print_string,"axiom", hypotheses
-          | Unsafe -> pp_print_red,"value", unsoundness
+          | KType -> Format.pp_print_string,"type ", parameters
+          | KLogic -> Format.pp_print_string,"logic", parameters
+          | KParam -> Format.pp_print_string,"param", parameters
+          | KValue -> Format.pp_print_string,"value", procedures
+          | KAxiom -> Format.pp_print_string,"axiom", hypotheses
+          | KUnsafe -> pp_print_red,"value", unsoundness
         in
         let action, count =
           if builtin || extern then externalized else

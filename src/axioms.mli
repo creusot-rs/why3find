@@ -18,16 +18,8 @@ open Why3
 type signature
 val signature : henv -> Theory.theory -> signature
 
-type kind =
-  | Type (* abstract type *)
-  | Logic (* constant, function of predicate *)
-  | Axiom (* hypothesis *)
-  | Param (* non-constrained val *)
-  | Value (* constrained val *)
-  | Unsafe
-
 type parameter = {
-  kind : kind ;
+  kind : Id.kind ;
   name : Ident.ident ;
   builtin : (Prover.prover * string) list ;
   extern : string option ;
