@@ -444,10 +444,10 @@ let clone source ds =
             begin fun fmt ->
               let ps,ds = List.partition (fun (_,d) -> Id.is_parameter d) ds in
               if ps <> [] then
-                Format.fprintf fmt "@\n  (* Parameters *)" ;
+                Format.fprintf fmt "@\n  (* --- Parameters --- *)" ;
               List.iter (pp_declare source fmt) ps ;
-              if ds <> [] then
-                Format.fprintf fmt "@\n  (* Definitions *)" ;
+              if ps <> [] && ds <> [] then
+                Format.fprintf fmt "@\n  (* --- Definitions --- *)" ;
               List.iter (pp_declare source fmt) ds ;
             end
         in Some tt
