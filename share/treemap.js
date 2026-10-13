@@ -12,7 +12,7 @@ function Why3findTreemap(id, width, height, data) {
     .round(true)
     (d3.hierarchy(data, d => d.children)
       .sum(d => d.children ? 0 : d.time)
-      .sort((a, b) => b.height - a.height || b.value - a.value));
+      .sort((a, b) => b.value - a.value));
 
   // Time format.
   function time(t) {
