@@ -148,6 +148,11 @@ let notify wmain prover (result: Result.t) (cb: callback) =
   | Unknown t -> fire cb prover (limits t) (pr ~s:1 ~t (Unknown "why3find"))
   | Failed -> fire cb prover (limits 1.0) (pr ~s:2 (Failure "why3find"))
 
+(* Last error message of each prover, to explain failures (e.g. calibration) *)
+let failures : (string, string) Hashtbl.t = Hashtbl.create 0
+
+let last_failure prover = Hashtbl.find_opt failures (Prover.fullname prover)
+
 let notify_pr prv limits pr cb =
   cb prv.Prover.config.prover limits pr
 
@@ -334,6 +339,11 @@ let call_prover (config : Why3.Whyconf.main)
         | Invalid | Unknown _ | OutOfMemory | StepLimitExceeded ->
           Result.Unknown pr.pr_time, false
         | Failure _ | HighFailure _ ->
+          if not (!canceled || !timedout) then
+            Hashtbl.replace failures (Prover.fullname prover)
+              (Format.asprintf "%a" Why3.Call_provers.(print_prover_answer) pr.pr_answer
+               ^ (match String.trim pr.pr_output with
+                   | "" -> "" | s -> "\n" ^ s)) ;
           let result =
             if !canceled then Result.NoResult
             else if !timedout then Result.Timeout timeout

@@ -34,6 +34,9 @@ val prepare : Prover.prover -> Why3.Task.task -> prooftask
 val prove_cached : Cache.t -> Prover.prover -> Why3.Task.task -> float -> Result.t option
 (** Query cache only *)
 
+(** Error reported by the last failing run of the prover (answer and output) *)
+val last_failure : Prover.prover -> string option
+
 val prove_prepared : Why3.Whyconf.main ->
   ?name:string ->
   ?idename:string ->
