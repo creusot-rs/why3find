@@ -19,20 +19,28 @@ type channel = {
   bsnd : Buffer.t ; (* SND data buffer, accumulated *)
 }
 
-let read_bytes { rd ; rcv ; brcv } =
+let read_bytes { rd ; rcv ; brcv ; bsnd } =
   (* rcv buffer is only used locally *)
   let s = Bytes.length rcv in
   let rec scan p =
     (* try to fill RCV buffer *)
     let n =
-      try Unix.read rd rcv p (s-p)
+      try
+        let n = Unix.read rd rcv p (s-p) in
+        if n = 0 && p = 0 then raise End_of_file ; n
       with Unix.Unix_error((EAGAIN|EWOULDBLOCK),_,_) -> 0
     in
     let p = p + n in
     if n > 0 && p < s then scan p else p
   in
-  let n = scan 0 in
-  if n > 0 then Buffer.add_subbytes brcv rcv 0 n
+  match scan 0 with
+  | n -> if n > 0 then Buffer.add_subbytes brcv rcv 0 n
+  | exception End_of_file ->
+    (* The peer closed the connection: leave once the pending messages are
+       processed and answered *)
+    if Buffer.length brcv = 0 && Buffer.length bsnd = 0 then begin
+      Log.message "Client disconnected." ; exit 0
+    end
 
 let send_bytes { wr ; snd ; bsnd } =
   (* snd buffer is only used locally *)
@@ -109,6 +117,8 @@ let establish_stdio () =
   let out = Unix.dup ~cloexec:true Unix.stdout in
   Unix.dup2 Unix.stderr Unix.stdout ;
   Unix.set_nonblock Unix.stdin ;
+  (* the description of stdin may be shared with other processes *)
+  at_exit (fun () -> try Unix.clear_nonblock Unix.stdin with _ -> ()) ;
   Unix.set_nonblock out ;
   let rcv = 65536 and snd = 65536 in {
     rd = Unix.stdin ; wr = out ;
