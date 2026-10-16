@@ -6,6 +6,7 @@ in this file.
 
 ## Unreleased
 
+- The language server is launched by the client on its standard input and output (`why3find lsp --stdio`), no more socket
 - Enhanced debugger with breakpoints and forward and backward steps
 - New "Open Generated Documentation" command to preview `./html/index.html`
 - Proof witnesses are now marked `(outdated)` when the source file is modified
