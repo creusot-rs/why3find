@@ -14,6 +14,7 @@ import {
   window,
   workspace,
   Disposable,
+  FileSystemWatcher,
   OutputChannel,
 } from 'vscode';
 
@@ -31,6 +32,7 @@ import {
 export default class Client implements Disposable {
   private readonly output: OutputChannel;
   private client: LanguageClient | undefined;
+  private watchers: FileSystemWatcher[] = [];
 
   constructor() {
     this.output = window.createOutputChannel('Why3 LSP');
@@ -54,15 +56,15 @@ export default class Client implements Disposable {
       args: ['lsp'],
       transport: TransportKind.stdio,
     };
+    // The client does not dispose the watchers that it is given
+    this.watchers = [
+      workspace.createFileSystemWatcher('**/*.mlw'),
+      workspace.createFileSystemWatcher('**/why3find.json'),
+    ];
     const clientOptions: LanguageClientOptions = {
       outputChannel: this.output,
       documentSelector: [{ scheme: 'file', language: 'why3' }],
-      synchronize: {
-        fileEvents: [
-          workspace.createFileSystemWatcher('**/*.mlw'),
-          workspace.createFileSystemWatcher('**/why3find.json'),
-        ]
-      }
+      synchronize: { fileEvents: this.watchers }
     };
     this.client = new LanguageClient(
       'why3lsp', 'Why3 Language Server',
@@ -74,6 +76,8 @@ export default class Client implements Disposable {
   }
 
   async stop(): Promise<void> {
+    this.watchers.forEach((watcher) => watcher.dispose());
+    this.watchers = [];
     const client = this.client;
     if (client) {
       this.log('stop client');
