@@ -941,9 +941,11 @@ let () = register ~name:"lsp" ~args:"[OPTIONS]"
         "--pipe", Arg.String set_pipe, "<SOCKFILE> unix linux socket" ;
         "--port", Arg.Int set_port, "<PORT> use socket port" ;
         "--socket", Arg.Int set_port, "<PORT> use socket port (same as --port)" ;
+        "--stdio", Arg.Unit (fun () -> transport := Some Rpc.STDIO),
+        " use standard input and output" ;
       ] (Utils.failwith "Unexpected argument %S")
         "USAGE:\n\
-         \n  why3find lsp [--pipe=<SOCKFILE>]\n\n\
+         \n  why3find lsp [--pipe=<SOCKFILE>|--stdio]\n\n\
          DESCRIPTION:\n\
          \n  Launch the Language Server Protocol on the specified socket.\
          \n\n\
