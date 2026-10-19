@@ -341,8 +341,9 @@ let call_prover (config : Why3.Whyconf.main)
         | Failure _ | HighFailure _ ->
           if not (!canceled || !timedout) then
             Hashtbl.replace failures (Prover.fullname prover)
-              (Format.asprintf "%a" Why3.Call_provers.(print_prover_answer) pr.pr_answer
-               ^ (match String.trim pr.pr_output with
+              (Format.asprintf "%a%s" 
+                 Why3.Call_provers.print_prover_answer pr.pr_answer
+                 (match String.trim pr.pr_output with
                    | "" -> "" | s -> "\n" ^ s)) ;
           let result =
             if !canceled then Result.NoResult
