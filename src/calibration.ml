@@ -267,6 +267,11 @@ let to_json (p : profile) : Json.t =
 (* --- Velocity                                                           --- *)
 (* -------------------------------------------------------------------------- *)
 
+let pp_failure fmt prv =
+  match Runner.last_failure prv with
+  | None -> ()
+  | Some msg -> Format.fprintf fmt "@\n%s" msg
+
 let gauge wmain cache profile prv : gauge Fibers.t =
   let p = prv.desc in
   try Hashtbl.find profile p
@@ -276,8 +281,8 @@ let gauge wmain cache profile prv : gauge Fibers.t =
       match r with
       | Some (size,time) -> { time ; size ; alpha = None }
       | None ->
-        Log.error "can not calibrate prover %a"
-          Prover.pp_desc p ;
+        Log.error "can not calibrate prover %a%a"
+          Prover.pp_desc p pp_failure prv ;
         exit 2
     in Hashtbl.replace profile p gv ; gv
 
@@ -292,8 +297,8 @@ let alpha wmain cache prv ~size ~time : float Fibers.t =
   match result with
   | Valid t -> t /. time
   | _ ->
-    Log.error "can not calibrate prover %a (N=%d, %a)"
-      Prover.pp_prover prv size Result.pp_result result ;
+    Log.error "can not calibrate prover %a (N=%d, %a)%a"
+      Prover.pp_prover prv size Result.pp_result result pp_failure prv ;
     exit 2
 
 let local = ref false
