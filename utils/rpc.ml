@@ -115,11 +115,12 @@ let set_socket_size socket opt s =
    output of the provers can not corrupt the protocol. *)
 let establish_stdio () =
   let out = Unix.dup ~cloexec:true Unix.stdout in
-  Unix.dup2 Unix.stderr Unix.stdout ;
+  Unix.set_nonblock out ;
   Unix.set_nonblock Unix.stdin ;
+  Unix.dup2 Unix.stderr Unix.stdout ;
   (* the description of stdin may be shared with other processes *)
   at_exit (fun () -> try Unix.clear_nonblock Unix.stdin with _ -> ()) ;
-  Unix.set_nonblock out ;
+
   let rcv = 65536 and snd = 65536 in {
     rd = Unix.stdin ; wr = out ;
     snd = Bytes.create snd ;

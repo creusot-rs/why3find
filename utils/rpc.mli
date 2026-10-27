@@ -12,8 +12,7 @@ type channel
 type transport =
   | PIPE of string
   | PORT of int
-  | STDIO (** standard input and output; the standard output is then
-              redirected to the standard error *)
+  | STDIO (** with all logs redirected to stderr *)
 
 (** Create connection *)
 val establish : transport -> channel
