@@ -11,29 +11,38 @@
 (* -------------------------------------------------------------------------- *)
 
 type channel = {
-  socket : Unix.file_descr ; (* Socket *)
+  rd : Unix.file_descr ; (* Input (socket or standard input) *)
+  wr : Unix.file_descr ; (* Output (socket or standard output) *)
   rcv : bytes ; (* RCV bytes buffer, re-used for transport *)
   snd : bytes ; (* SND bytes buffer, re-used for transport *)
   brcv : Buffer.t ; (* RCV data buffer, accumulated *)
   bsnd : Buffer.t ; (* SND data buffer, accumulated *)
 }
 
-let read_bytes { socket ; rcv ; brcv } =
+let read_bytes { rd ; rcv ; brcv ; bsnd } =
   (* rcv buffer is only used locally *)
   let s = Bytes.length rcv in
   let rec scan p =
     (* try to fill RCV buffer *)
     let n =
-      try Unix.read socket rcv p (s-p)
+      try
+        let n = Unix.read rd rcv p (s-p) in
+        if n = 0 && p = 0 then raise End_of_file ; n
       with Unix.Unix_error((EAGAIN|EWOULDBLOCK),_,_) -> 0
     in
     let p = p + n in
     if n > 0 && p < s then scan p else p
   in
-  let n = scan 0 in
-  if n > 0 then Buffer.add_subbytes brcv rcv 0 n
+  match scan 0 with
+  | n -> if n > 0 then Buffer.add_subbytes brcv rcv 0 n
+  | exception End_of_file ->
+    (* The peer closed the connection: leave once the pending messages are
+       processed and answered *)
+    if Buffer.length brcv = 0 && Buffer.length bsnd = 0 then begin
+      Log.message "Client disconnected." ; exit 0
+    end
 
-let send_bytes { socket ; snd ; bsnd } =
+let send_bytes { wr ; snd ; bsnd } =
   (* snd buffer is only used locally *)
   let n = Buffer.length bsnd in
   if n > 0 then
@@ -43,7 +52,7 @@ let send_bytes { socket ; snd ; bsnd } =
       let w = min (n-p) s in
       Buffer.blit bsnd p snd 0 w ;
       let r =
-        try Unix.single_write socket snd 0 w
+        try Unix.single_write wr snd 0 w
         with Unix.Unix_error((EAGAIN|EWOULDBLOCK),_,_) -> 0
       in
       let p = p + r in
@@ -73,6 +82,7 @@ let processing { brcv ; bsnd } =
 type transport =
   | PIPE of string
   | PORT of int
+  | STDIO (* the protocol uses the standard input and output *)
 
 let socket = function
   | PORT port ->
@@ -86,6 +96,7 @@ let socket = function
     if Sys.file_exists file then Unix.unlink file ;
     let fd = Unix.socket PF_UNIX SOCK_STREAM 0 in
     Unix.bind fd (ADDR_UNIX file) ; fd
+  | STDIO -> invalid_arg "Rpc.socket"
 
 let set_socket_size socket opt s =
   begin
@@ -99,7 +110,28 @@ let set_socket_size socket opt s =
     Unix.getsockopt_int socket opt
   end
 
-let establish transport =
+(* The standard output is kept for the protocol (not inherited by the
+   provers), the descriptor 1 is redirected to the standard error: logs and
+   output of the provers can not corrupt the protocol. *)
+let establish_stdio () =
+  let out = Unix.dup ~cloexec:true Unix.stdout in
+  Unix.set_nonblock out ;
+  Unix.set_nonblock Unix.stdin ;
+  Unix.dup2 Unix.stderr Unix.stdout ;
+  (* the description of stdin may be shared with other processes *)
+  at_exit (fun () -> try Unix.clear_nonblock Unix.stdin with _ -> ()) ;
+
+  let rcv = 65536 and snd = 65536 in {
+    rd = Unix.stdin ; wr = out ;
+    snd = Bytes.create snd ;
+    rcv = Bytes.create rcv ;
+    bsnd = Buffer.create snd ;
+    brcv = Buffer.create rcv ;
+  }
+
+let establish = function
+  | STDIO -> establish_stdio ()
+  | transport ->
   let exception Channel of channel in
   try
     let fd = try socket transport with exn ->
@@ -114,7 +146,7 @@ let establish transport =
         let rcv = set_socket_size socket SO_RCVBUF 256 in
         let snd = set_socket_size socket SO_SNDBUF 256 in
         let server = {
-          socket ;
+          rd = socket ; wr = socket ;
           snd = Bytes.create snd ;
           rcv = Bytes.create rcv ;
           bsnd = Buffer.create snd ;

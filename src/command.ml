@@ -937,13 +937,15 @@ let () = register ~name:"lsp" ~args:"[OPTIONS]"
       let transport = ref None in
       let set_port n = transport := Some (Rpc.PORT n) in
       let set_pipe s = transport := Some (Rpc.PIPE s) in
+      let set_stdio () = transport := Some Rpc.STDIO in
       Arg.parse_argv argv [
         "--pipe", Arg.String set_pipe, "<SOCKFILE> unix linux socket" ;
         "--port", Arg.Int set_port, "<PORT> use socket port" ;
         "--socket", Arg.Int set_port, "<PORT> use socket port (same as --port)" ;
+        "--stdio", Arg.Unit set_stdio, "use standard input and output" ;
       ] (Utils.failwith "Unexpected argument %S")
         "USAGE:\n\
-         \n  why3find lsp [--pipe=<SOCKFILE>]\n\n\
+         \n  why3find lsp [--pipe=<SOCKFILE>|--stdio]\n\n\
          DESCRIPTION:\n\
          \n  Launch the Language Server Protocol on the specified socket.\
          \n\n\

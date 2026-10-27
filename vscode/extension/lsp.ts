@@ -10,124 +10,80 @@
 /* --- Why3 LSP Client                                                    --- */
 /* -------------------------------------------------------------------------- */
 
-import { Socket, connect } from 'net';
-
 import {
+  window,
   workspace,
   Disposable,
+  FileSystemWatcher,
+  OutputChannel,
 } from 'vscode';
 
 import {
+  Executable,
   LanguageClient,
   LanguageClientOptions,
-  StreamInfo,
+  TransportKind,
 } from 'vscode-languageclient/node';
 
-import Server from './rpc';
-
 /* -------------------------------------------------------------------------- */
-/* --- Child Process Management                                           --- */
+/* --- Language Client (server on standard input/output)                  --- */
 /* -------------------------------------------------------------------------- */
 
-const RETRIES = 20;
-const TIMEOUT = 250;
-const SOCKADDR = '/tmp/why3find.lsp.io';
-
-export default class Client extends Server implements Disposable {
-  private socket: Socket | undefined;
-  private timer: NodeJS.Timeout | undefined;
-  private retries: number = 0;
+export default class Client implements Disposable {
+  private readonly output: OutputChannel;
   private client: LanguageClient | undefined;
+  private watchers: FileSystemWatcher[] = [];
 
   constructor() {
-    super(SOCKADDR, 'Why3 LSP');
+    this.output = window.createOutputChannel('Why3 LSP');
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
-    this.launchServer = this.launchServer.bind(this);
-    this.resolveConnection= this.resolveConnection.bind(this);
   }
+
+  log(msg: any) { this.output.appendLine(`[VSCode] ${msg.toString()}`); }
 
   async dispose(): Promise<void> {
-    await this.client?.stop();
-    this.disconnectFromServer();
-    await super.dispose();
-  }
-
-  private disconnectFromServer(): void {
-    if (this.socket) {
-      this.log('disconnect');
-      this.socket.destroy();
-      this.socket = undefined;
-    }
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = undefined;
-    }
-    this.retries = 0;
-  }
-
-  private resolveConnection(
-    resolve: (pipe: StreamInfo) => void,
-    reject: (err: Error) => void,
-  ): void {
-    this.retries++;
-    const socket = connect(this.sockaddr);
-    socket.once('connect', () => {
-      this.log('connected');
-      this.retries = 0;
-      resolve({ reader: socket, writer: socket });
-    });
-    socket.on('error', (err: Error) => {
-      if (this.retries < RETRIES) {
-        this.log(`reconnect #${this.retries}`);
-        this.socket = undefined;
-        this.timer = setTimeout(() => {
-          this.resolveConnection(resolve, reject);
-        }, TIMEOUT);
-      } else {
-        this.disconnectFromServer();
-        reject(err);
-      }
-    });
-    this.socket = socket;
-  }
-
-  private async launchServer(): Promise<StreamInfo> {
-    await this.spawn('why3find', 'lsp', '--pipe', SOCKADDR);
-    return new Promise(this.resolveConnection);
+    await this.stop();
+    this.output.dispose();
   }
 
   async start(): Promise<void> {
-    // Configure client
+    await this.stop();
+    // The client launches the server and talks to it on stdin/stdout
+    // (the client library adds the argument '--stdio')
+    const serverOptions: Executable = {
+      command: 'why3find',
+      args: ['lsp'],
+      transport: TransportKind.stdio,
+    };
+    // The client does not dispose the watchers that it is given
+    this.watchers = [
+      workspace.createFileSystemWatcher('**/*.mlw'),
+      workspace.createFileSystemWatcher('**/why3find.json'),
+    ];
     const clientOptions: LanguageClientOptions = {
       outputChannel: this.output,
       documentSelector: [{ scheme: 'file', language: 'why3' }],
-      synchronize: {
-        fileEvents: [
-          workspace.createFileSystemWatcher('**/*.mlw'),
-          workspace.createFileSystemWatcher('**/why3find.json'),
-        ]
-      }
+      synchronize: { fileEvents: this.watchers }
     };
-    // Create LSP
     this.client = new LanguageClient(
       'why3lsp', 'Why3 Language Server',
-      this.launchServer,
+      serverOptions,
       clientOptions
     );
-    // Start LSP
     this.log('start client');
     await this.client.start();
   }
 
   async stop(): Promise<void> {
-    if (this.client) {
+    this.watchers.forEach((watcher) => watcher.dispose());
+    this.watchers = [];
+    const client = this.client;
+    if (client) {
       this.log('stop client');
-      await this.client.stop();
       this.client = undefined;
+      await client.stop();
     }
-    this.disconnectFromServer();
-    await this.shutdown();
   }
 
   async send(method: string, params?: any) : Promise<any> {

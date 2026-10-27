@@ -4,6 +4,7 @@
 
 ### Notable New Features
 
+ - New option `why3find lsp --stdio` to serve the protocol on standard I/O (!233)
  - New command `why3find stats` to generate project JSON statistics (!209)
  - New command `why3find download` to download provers (!212)
  - Automatic or on-demand download of missing provers (Cf. README, !212)
