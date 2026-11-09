@@ -1,7 +1,17 @@
   $ why3find prove -r foo.mlw
+  Warning: Tactic compute_specified not found (skipped)
+  File "foo.mlw", line 3, characters 15-42: proof failed
+  Goal T.Add.com: ✘
+  File "foo.mlw", line 3, characters 15-42: proof failed
+  Goal T.Mul.com: ✘
   Theory foo.S: ✔ (-)
-  Theory foo.T: ✔ (2)
-  Proved (foo.mlw) ✔
+  Theory foo.T: ✘
+  Error: 1 unproved file
+  Summary:
+  Warning: Tactic compute_specified not found (skipped)
+  Error: 1 unproved file
+  Emitted 1 warning, 1 error
+  [1]
 
   $ cat foo/proof.json
   {

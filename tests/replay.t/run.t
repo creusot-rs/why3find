@@ -8,7 +8,9 @@
   Warning: Goal "merge": tactic 'split_vc' shadowed by 'compute_in_goal'
   File "mergesort.mlw", line 17, characters 11-16: proof failed
   Goal Mergesort.merge: ✘
-  Theory mergesort.Mergesort: ✘ (4/5)
+  File "mergesort.mlw", line 44, characters 11-20: proof failed
+  Goal Mergesort.mergesort: ✘
+  Theory mergesort.Mergesort: ✘ (3/5)
   Error: 1 unproved file
   Summary:
   Warning: Goal "merge": tactic 'split_vc' shadowed by 'compute_in_goal'

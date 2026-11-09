@@ -23,6 +23,4 @@
   why3find compile [-p PKG] FILE
   why3find ide [-p PKG] FILE
   why3find replay [-p PKG] FILE
-  why3find server OPTIONS
-  why3find worker OPTIONS
   why3find CMD [ARGS...]
