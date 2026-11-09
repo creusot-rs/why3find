@@ -100,7 +100,7 @@ let dump =
       let proof = b.crc.proof in
       Utils.mkdirs (Filename.dirname proof) ;
       Json.to_file ~pretty_floats:true proof @@ `Assoc [
-        "profile", b.profile ;
+        "profile", `List [] ;
         "proofs", jproofs b.proofs ;
       ]
     end
